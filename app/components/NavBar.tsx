@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
 
           {/* Sign Up Button */}
           <Link href="/signup">
-            <button className="border rounded-3xl px-4 py-1 text-sm font-medium text-white bg-black hover:bg-gray-800 transition">
+            <button className="border rounded-3xl px-4 py-1 text-sm font-medium text-white bg-orange-500 hover:bg-orange-400 transition">
               Sign Up
             </button>
           </Link>
