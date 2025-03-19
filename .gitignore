@@ -45,3 +45,6 @@ venv/
 myenv/
 env/
 
+#pycache
+__pycache__/
+*.pyc
