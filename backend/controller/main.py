@@ -1,8 +1,20 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from controller.database import init_db
+from controller.routes import events, auth  
 
 app = FastAPI()
 
-@app.get("/your-endpoint")
-async def get_endpoint():
-    return {"message": "OK"}
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
+
+init_db()
+
+app.include_router(events.router, prefix="/events", tags=["Events"])
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])

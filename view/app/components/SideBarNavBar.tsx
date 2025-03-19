@@ -1,65 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const SideBarNavBar: React.FC = () => {
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    if (storedRole) {
+      setRole(storedRole);
+    }
+  }, []);
+
   return (
-    <div className="w-60 h-screen bg-white text-white p-2 h-full">
+    <div className="w-60 h-screen bg-white p-2">
       <ul className="space-y-1.5">
         <li>
-          <Link
-            href="/"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-500 transition"
-          >
-            Home
-          </Link>
+          <Link href="/" className="p-2 block">Home</Link>
         </li>
-        <li>
-          {/* this is only displayed for Attendees */}
-          <Link
-            href="/events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-500 transition"
-          >
-            Your Events
-          </Link>
-        </li>
-        <li>
-          {/* this is only displayed for event organizers, planners, sponsors, and exhibitors */}
-          <Link
-            href="/events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-500 transition"
-          >
-            Create/Edit Events
-          </Link>
-        </li>
-        <li>
-          {/* this is only displayed for Technical administrator */}
-          <Link
-            href="/events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-500 transition"
-          >
-            Edit/Create User
-          </Link>
-        </li>
-        <li>
-          {/* this is only displayed for Executive administrator */}
-          <Link
-            href="/events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-500 transition"
-          >
-            Event Information and Managmenet
-          </Link>
-        </li>
-        <li>
-          {/* this is only displayed for Technical administrator */}
-          <Link
-            href="/events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-500 transition"
-          >
-            System Maintenance
-          </Link>
-        </li>
+        {role === "attendee" && (
+          <li>
+            <Link href="/events" className="p-2 block">Your Events</Link>
+          </li>
+        )}
+        {role === "organizer" && (
+          <li>
+            <Link href="/create-event" className="p-2 block">Create/Edit Events</Link>
+          </li>
+        )}
+        {role === "admin" && (
+          <li>
+            <Link href="/manage-users" className="p-2 block">Manage Users</Link>
+          </li>
+        )}
       </ul>
     </div>
   );
