@@ -1,6 +1,8 @@
 # Smart-Education-Events-System
 
 ## MongoDB Schema Alterations
+
+#### *Note: django only compatable with python<=3.12
 1. **Create virtual environment in project directory (if not done so already)**  
 
 ```python
