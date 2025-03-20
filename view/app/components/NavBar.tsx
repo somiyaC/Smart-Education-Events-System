@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const Navbar: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); //set this to true and cmment out chechAuthStatus to see what it looks like if user is logged in
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -31,14 +33,27 @@ const Navbar: React.FC = () => {
     checkAuthStatus();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setIsLoggedIn(false);
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   if (isLoggedIn == null) {
-    return null;
+    return null; // Prevent flashing when checking authentication
   }
+
   return (
     <div className="max-w-screen-xl w-full my-0 mx-auto">
       <nav className="flex justify-between items-center py-3 bg-white">
         {/* Logo */}
-        <Link href={"/"}>
+        <Link href="/">
           <div className="text-5xl font-semibold text-gray-800">
             Smart Education Events System
           </div>
@@ -46,29 +61,20 @@ const Navbar: React.FC = () => {
 
         {/* Right Side */}
         <div className="flex items-center gap-4">
-          {/* Log In Button */}
           {isLoggedIn ? (
             <button
-              onClick={async () => {
-                await fetch("/api/auth/logout", {
-                  method: "POST",
-                });
-                setIsLoggedIn(false);
-              }}
+              onClick={handleLogout}
               className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition"
             >
               Log Out
             </button>
           ) : (
             <>
-              {/* Log In Button */}
               <Link href="/login">
                 <button className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition">
                   Log in
                 </button>
               </Link>
-
-              {/* Sign Up Button */}
               <Link href="/signup">
                 <button className="border rounded-3xl px-4 py-1 text-sm font-medium text-white bg-orange-400 hover:bg-orange-500 transition">
                   Sign Up

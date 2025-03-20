@@ -1,13 +1,44 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import Link from "next/link";
 
 const Signup = () => {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("attendee");
+  const [error, setError] = useState("");
+
+  const handleSignup = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/auth/signup", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          role: "attendee", // Change role if needed
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert("Signup successful!");
+      } else {
+        alert(`Signup failed: ${data.detail}`);
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("Signup failed. Check console for details.");
+    }
+  };
+  
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-      {/* Left Section - Form */}
       <div className="flex flex-col justify-center px-8 lg:px-24 bg-white">
         <div className="mb-6">
           <Link href={"/"}>
@@ -17,42 +48,40 @@ const Signup = () => {
           </Link>
         </div>
         <h1 className="text-3xl mb-4 text-gray-900">Create an account</h1>
-        <form className="space-y-4">
+        {error && <p className="text-red-500">{error}</p>}
+        <form className="space-y-4" onSubmit={handleSignup}>
           <input
             type="email"
             placeholder="Email address"
             className="block w-full p-3 border border-gray-300 rounded-full"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <input
             type="password"
             placeholder="Password"
             className="block w-full p-3 border border-gray-300 rounded-full"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
           />
+          <select
+            className="block w-full p-3 border border-gray-300 rounded-full"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
+            <option value="attendee">Attendee</option>
+            <option value="organizer">Organizer</option>
+            <option value="admin">Admin</option>
+          </select>
           <button
             type="submit"
             className="w-full p-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-700"
           >
-            <Link href="/">Continue</Link>
+            Sign Up
           </button>
         </form>
-        <div className="my-4 text-center text-gray-500">or</div>
-        <button
-          type="button"
-          className="w-full p-3 mb-4 bg-white border border-gray-300 text-gray-800 rounded-full font-medium flex items-center justify-center gap-2 hover:bg-gray-50"
-        >
-          <FaGoogle className="text-lg" />
-          <Link href="/">Sign In with Google</Link>
-        </button>
-        <div className="text-center text-gray-500 mb-4">
-          Other sign up methods
-        </div>
-        <button
-          type="button"
-          className="w-full p-3 bg-blue-600 text-white rounded-full font-medium flex items-center justify-center gap-2 hover:bg-blue-700"
-        >
-          <FaFacebook className="text-lg" />
-          <Link href="/">Sign In with Facebook</Link>
-        </button>
         <p className="text-center mt-6 text-sm text-gray-500">
           Already have an account?{" "}
           <Link href="/login" className="text-black font-bold hover:underline">
@@ -60,8 +89,6 @@ const Signup = () => {
           </Link>
         </p>
       </div>
-
-      {/* Right Section - Image */}
       <div className="hidden lg:block">
         <img
           src="/signup.jpeg"
