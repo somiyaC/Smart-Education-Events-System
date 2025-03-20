@@ -1,25 +1,24 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from controller.database import events_collection
-from datetime import datetime
 
 router = APIRouter()
 
 class Event(BaseModel):
-    name: str
+    title: str
+    description: str
     date: str
     location: str
-    description: str
-    organizer: str
 
-@router.post("/create")
+@router.post("/")
 def create_event(event: Event):
-    if events_collection.find_one({"name": event.name}):
-        raise HTTPException(status_code=400, detail="Event already exists")
+    event_dict = event.dict()
+    event_id = events_collection.insert_one(event_dict).inserted_id
+    return {"message": "Event created", "id": str(event_id)}
 
-    events_collection.insert_one(event.dict())
-    return {"message": "Event created successfully"}
-
-@router.get("/list")
-def list_events():
-    return list(events_collection.find({}, {"_id": 0}))
+@router.get("/{event_id}")
+def get_event(event_id: str):
+    event = events_collection.find_one({"_id": event_id})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
