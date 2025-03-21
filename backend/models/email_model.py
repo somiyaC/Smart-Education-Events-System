@@ -1,6 +1,6 @@
 """
-Question model module for handling Q&A functionality.
-Based on the QuestionSchema.
+Email model module for handling emailfunctionality.
+Based on the Email Schema.
 """
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone, timedelta

@@ -1,6 +1,6 @@
 """
 Poll model module for handling polling functionality.
-Based on the PollSchema and PollOptionSchema.
+Based on the PollSchema.
 """
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone, timedelta
