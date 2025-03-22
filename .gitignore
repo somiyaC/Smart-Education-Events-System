@@ -15,6 +15,8 @@
 
 # next.js
 /.next/
+/view/.next/
+/view/node_modules/
 /out/
 
 # production
@@ -43,4 +45,6 @@ next-env.d.ts
 # Ignore Python cache files
 __pycache__/
 *.py[cod]
+
+
 
