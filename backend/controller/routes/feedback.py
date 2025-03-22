@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from controller.database import feedback_collection
+from database import feedback_collection
 
 router = APIRouter()
 

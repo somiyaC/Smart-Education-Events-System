@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controller.database import init_db
-from controller.routes import events, auth, venue, ticket, session, poll, feedback, chat
+from database import init_db
+from routes import events, auth, venue, ticket, session, poll, feedback, chat
 
 app = FastAPI()
 

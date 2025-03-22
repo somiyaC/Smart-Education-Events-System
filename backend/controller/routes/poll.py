@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from controller.database import polls_collection
+from database import polls_collection
 
 router = APIRouter()
 

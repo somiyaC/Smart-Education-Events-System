@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from controller.database import venues_collection
+from database import venues_collection
 
 router = APIRouter()
 
