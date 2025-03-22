@@ -54,7 +54,7 @@ const Navbar: React.FC = () => {
       <nav className="flex justify-between items-center py-3 bg-white">
         {/* Logo */}
         <Link href="/">
-          <div className="text-5xl font-semibold text-gray-800">
+          <div className="text-5xl font-semibold text-gray-800 p-5">
             Smart Education Events System
           </div>
         </Link>
@@ -76,7 +76,7 @@ const Navbar: React.FC = () => {
                 </button>
               </Link>
               <Link href="/signup">
-                <button className="border rounded-3xl px-4 py-1 text-sm font-medium text-white bg-orange-400 hover:bg-orange-500 transition">
+                <button className="border rounded-3xl px-4 py-1 text-sm font-medium text-white bg-orange-400 hover:bg-orange-300 transition">
                   Sign Up
                 </button>
               </Link>

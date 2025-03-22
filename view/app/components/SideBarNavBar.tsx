@@ -1,39 +1,65 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 const SideBarNavBar: React.FC = () => {
-  const [role, setRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedRole = localStorage.getItem("role");
-    if (storedRole) {
-      setRole(storedRole);
-    }
-  }, []);
-
   return (
-    <div className="w-60 h-screen bg-white p-2">
+    <div className="w-60 h-screen bg-white text-white p-2 h-full">
       <ul className="space-y-1.5">
         <li>
-          <Link href="/" className="p-2 block">Home</Link>
+          <Link
+            href="/"
+            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+          >
+            Home
+          </Link>
         </li>
-        {role === "attendee" && (
-          <li>
-            <Link href="/events" className="p-2 block">Your Events</Link>
-          </li>
-        )}
-        {role === "organizer" && (
-          <li>
-            <Link href="/create-event" className="p-2 block">Create/Edit Events</Link>
-          </li>
-        )}
-        {role === "admin" && (
-          <li>
-            <Link href="/manage-users" className="p-2 block">Manage Users</Link>
-          </li>
-        )}
+        <li>
+          {/* Only displayed for Attendees */}
+          <Link
+            href="/your-events"
+            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+          >
+            Your Events
+          </Link>
+        </li>
+        <li>
+          {/* Only for event organizers, planners, sponsors, and exhibitors */}
+          <Link
+            href="/create-edit-events"
+            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+          >
+            Create/Edit Events
+          </Link>
+        </li>
+        <li>
+          {/* Only for Technical administrator */}
+          <Link
+            href="/edit-create-user"
+            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+          >
+            Edit/Create User
+          </Link>
+        </li>
+        <li>
+          {/* Only for Executive administrator */}
+          <Link
+            href="/event-management"
+            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+          >
+            Event Information and Management
+          </Link>
+        </li>
+        <li>
+          {/* Only for Technical administrator */}
+          <Link
+            href="/system-maintenance"
+            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+          >
+            System Maintenance
+          </Link>
+        </li>
       </ul>
     </div>
   );
