@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from controller.database import users_collection
+from database import users_collection
 from passlib.hash import bcrypt
 import jwt
 import os
