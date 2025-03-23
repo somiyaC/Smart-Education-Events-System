@@ -14,3 +14,10 @@ npm run dev
 ```bash
 uvicorn controller.main:app --reload    
 ```
+
+## Install Python Requirements
+```bash
+pip install -r requirements.txt
+```
+
+
