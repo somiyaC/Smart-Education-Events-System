@@ -43,7 +43,7 @@ yarn-error.log*
 next-env.d.ts
 
 # Ignore Python cache files
-__pycache__/
+**/__pycache__/
 *.py[cod]
 
 
