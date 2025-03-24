@@ -1,33 +1,49 @@
 """
 Base model module providing common database operations for all models.
 """
-from typing import Dict, List, Any, Optional
+from typing import Dict, List
 from datetime import datetime, timezone
 from bson import ObjectId
 from pymongo import ReturnDocument
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from controller.database import MONGO_URI, DB_NAME
 
 
 class Database:
     """
-    Database connection manager.
+    Asynchronous Singleton Database connection manager.
     Handles connection to MongoDB using Motor async driver.
     """
-    client: AsyncIOMotorClient = None
-    db: AsyncIOMotorDatabase = None
-    
+    _instance = None
+    _client: AsyncIOMotorClient = None
+    _db: AsyncIOMotorDatabase = None
+
+    def __new__(cls):
+        """Singleton pattern to ensure only one database connection."""
+        if cls._instance is None:
+            cls._instance = super(Database, cls).__new__(cls)
+        return cls._instance
+
     @classmethod
-    async def connect_db(cls, mongo_uri: str, db_name: str):
+    async def connect_db(cls):
         """Initialize the database connection."""
-        cls.client = AsyncIOMotorClient(mongo_uri)
-        cls.db = cls.client[db_name]
-        print(f"Connected to MongoDB: {db_name}")
-    
+        if cls._client is None:
+            cls._client = AsyncIOMotorClient(MONGO_URI)
+            cls._db = cls._client[DB_NAME]
+            print(f"Connected to MongoDB: {DB_NAME}")
+
+    @classmethod
+    async def get_db(cls):
+        """Return the async database instance."""
+        if cls._db is None:
+            raise ConnectionError("Database connection not established.")
+        return cls._db
+
     @classmethod
     async def close_db(cls):
         """Close the database connection."""
-        if cls.client:
-            cls.client.close()
+        if cls._client:
+            cls._client.close()
             print("MongoDB connection closed")
 
 
@@ -41,11 +57,11 @@ class BaseModel:
     @classmethod
     async def get_collection(cls):
         """Get the MongoDB collection for this model."""
-        if not Database.db:
+        if not Database._db:
             raise ConnectionError("Database connection not established")
         if not cls.collection_name:
             raise ValueError(f"collection_name not set for {cls.__name__}")
-        return Database.db[cls.collection_name]
+        return Database._db[cls.collection_name]
     
     @classmethod
     async def find_one(cls, query: Dict):
