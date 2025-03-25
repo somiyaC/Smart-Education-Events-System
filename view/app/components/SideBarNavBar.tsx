@@ -60,6 +60,15 @@ const SideBarNavBar: React.FC = () => {
             System Maintenance
           </Link>
         </li>
+        <li>
+          {/* Only for Technical administrator */}
+          <Link
+            href="/profile"
+            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+          >
+            Profile
+          </Link>
+        </li>
       </ul>
     </div>
   );

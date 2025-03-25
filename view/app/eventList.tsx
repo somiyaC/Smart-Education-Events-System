@@ -143,6 +143,12 @@ const AllEvents: React.FC = () => {
                   ))}
                 </ul>
               </div>
+              <button
+                type="submit"
+                className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
+              >
+                Sign Up
+              </button>
             </div>
           ))}
         </div>
