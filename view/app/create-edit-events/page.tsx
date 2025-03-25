@@ -24,21 +24,20 @@ interface Event {
 
 const EventFormPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState<string>(""); // Store search query
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [event, setEvent] = useState<Event | null>(null);
 
-  // Handle creating a new event
   const handleCreateEvent = () => {
-    setIsEditing(false); // Ensure the form to create is shown
-    setEvent(null); // Clear event data when creating a new event
+    setIsEditing(false);
+    setEvent(null);
   };
 
   // Handle editing an event
   const handleEditEvent = () => {
-    setIsEditing(true); // Switch to edit form
-    setEvent(null); // Clear event data when starting an edit
+    setIsEditing(true);
+    setEvent(null);
   };
 
   // Handle search input change for event name
@@ -67,7 +66,7 @@ const EventFormPage: React.FC = () => {
         data.organizer &&
         data.venue
       ) {
-        setEvent(data); // Set the event data
+        setEvent(data);
       } else {
         setError("Event not found or incomplete data.");
       }
@@ -79,7 +78,6 @@ const EventFormPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      {/* Buttons to toggle between Create and Edit */}
       <div className="mb-4">
         <button
           onClick={handleCreateEvent}
@@ -99,7 +97,6 @@ const EventFormPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Show search form only when editing */}
       {isEditing && (
         <div className="mb-2">
           <form onSubmit={handleSearchSubmit} className="flex space-x-2">
@@ -120,18 +117,15 @@ const EventFormPage: React.FC = () => {
         </div>
       )}
 
-      {/* Show loading, error, or success messages */}
       {loading && <p>Loading event data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* Render the Edit Event Form only if the event was found */}
       {isEditing && event ? (
         <EditEventForm
           event={event}
           onUpdate={(updatedEvent) => setEvent(updatedEvent)}
         />
       ) : (
-        // Only show the Create Event form if we're not editing
         !isEditing && (
           <CreateEventForm
             onSubmit={(newEvent) => console.log("Created Event:", newEvent)}

@@ -79,7 +79,7 @@ const AllEvents: React.FC = () => {
 
   // Fetch all events from the backend
   useEffect(() => {
-    fetch("https://your-backend-api.com/events") // Replace with your actual backend API
+    fetch("https://your-backend-api.com/events")
       .then((res) => res.json())
       .then((data) => setEvents(data))
       .catch((error) => console.error("Error fetching events:", error));
