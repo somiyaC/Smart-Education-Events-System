@@ -60,7 +60,7 @@ class ChatFacade:
         if not chat_room:
             return None
         
-        # detailed participants with user details
+        # detailed participants list with user details
         detailed_participants_list = []
         for participant_id in chat_room.get('participants', []):
             user = await self.user_model.get_user_by_id(participant_id)
@@ -101,7 +101,7 @@ class ChatFacade:
         # Get full message details
         message = await self.chat_message_model.get_message_by_id(message_id)
         
-        # Enrich with sender details
+        # Detail with sender details
         sender = await self.user_model.get_user_by_id(sender_id)
         if sender:
             message['sender_name'] = f"{sender.get('first_name', '')} {sender.get('last_name', '')}"
