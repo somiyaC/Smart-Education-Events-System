@@ -20,6 +20,7 @@ interface Event {
   organizer: string;
   venue: string;
   sessions: Session[];
+  participants: []
 }
 
 const EventFormPage: React.FC = () => {
@@ -29,8 +30,16 @@ const EventFormPage: React.FC = () => {
   const [error, setError] = useState("");
   const [event, setEvent] = useState<Event | null>(null);
 
-  const handleCreateEvent = () => {
+  const handleCreateEvent = async () => {
     setIsEditing(false);
+    console.log(event)
+    const res = await fetch("http://localhost:8000/events/create_event", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json" // Set content-type to JSON
+      },
+      body: JSON.stringify({...event,...{participants:[],is_virtual:false,capacity:100}}) // Convert the data to JSON string
+    })
     setEvent(null);
   };
 
@@ -128,7 +137,10 @@ const EventFormPage: React.FC = () => {
       ) : (
         !isEditing && (
           <CreateEventForm
-            onSubmit={(newEvent) => console.log("Created Event:", newEvent)}
+            onSubmit={async (newEvent) => {
+              console.log(newEvent)
+              
+            }}
           />
         )
       )}

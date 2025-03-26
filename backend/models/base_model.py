@@ -57,7 +57,7 @@ class BaseModel:
     @classmethod
     async def get_collection(cls):
         """Get the MongoDB collection for this model."""
-        if not Database._db:
+        if Database._db is None:
             raise ConnectionError("Database connection not established")
         if not cls.collection_name:
             raise ValueError(f"collection_name not set for {cls.__name__}")
