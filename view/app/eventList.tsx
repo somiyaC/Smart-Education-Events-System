@@ -1,6 +1,6 @@
-// app/events/AllEvents.tsx
 "use client";
 import { useState, useEffect } from "react";
+import SearchBar from "./components/SearchBar";
 
 interface Session {
   title: string;
@@ -76,24 +76,38 @@ const AllEvents: React.FC = () => {
     //   ],
     // },
   ]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
 
-  // Fetch all events from the backend
+  //Fetch all events from the backend
   useEffect(() => {
     fetch("https://your-backend-api.com/events")
       .then((res) => res.json())
-      .then((data) => setEvents(data))
+      .then((data) => {
+        setEvents(data);
+        setFilteredEvents(data); // Initially set filtered events to all events
+      })
       .catch((error) => console.error("Error fetching events:", error));
   }, []);
 
-  //for testing with fake data
+  const handleSearch = (query: string) => {
+    if (query === "") {
+      setFilteredEvents(events); // Show all events if search query is empty
+    } else {
+      const filtered = events.filter((event) =>
+        event.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredEvents(filtered);
+    }
+  };
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      {events.length === 0 ? (
+      <SearchBar onSearch={handleSearch} />
+      {filteredEvents.length === 0 ? (
         <p className="text-center text-gray-600">No events available.</p>
       ) : (
         <div className="space-y-6">
-          {events.map((event, index) => (
+          {filteredEvents.map((event, index) => (
             <div
               key={index}
               className="border border-gray-300 p-6 rounded-lg shadow-lg bg-white"

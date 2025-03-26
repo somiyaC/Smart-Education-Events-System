@@ -1,13 +1,10 @@
-"use client";
-import AllEvents from "./eventList";
+import { Metadata } from "next";
 
-const EventsPage: React.FC = () => {
-  return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Events</h1>
-      <AllEvents />
-    </div>
-  );
+export const metadata: Metadata = {
+  title: "AroundU",
+  description: "Discover and explore events near you.",
 };
 
-export default EventsPage;
+export default function Page() {
+  return <div>{/* Your page content */}</div>;
+}

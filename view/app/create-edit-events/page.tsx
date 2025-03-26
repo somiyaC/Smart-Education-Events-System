@@ -3,12 +3,17 @@ import { useState } from "react";
 import CreateEventForm from "../forms/createEventForm";
 import EditEventForm from "../forms/editEventForm";
 
+interface Material {
+  link: string;
+}
+
 interface Session {
   title: string;
   description: string;
   speaker: string;
   startTime: string;
   endTime: string;
+  materials: Material[]; // Use plural 'materials' here for consistency
 }
 
 interface Event {
@@ -72,8 +77,9 @@ const EventFormPage: React.FC = () => {
       }
     } catch (err) {
       setError("Error fetching event data.");
+    } finally {
+      setLoading(false); // Set loading to false after async call completes
     }
-    setLoading(false);
   };
 
   return (
@@ -128,7 +134,11 @@ const EventFormPage: React.FC = () => {
       ) : (
         !isEditing && (
           <CreateEventForm
-            onSubmit={(newEvent) => console.log("Created Event:", newEvent)}
+            onSubmit={(newEvent) => {
+              // Handle the creation of the event (e.g., API call)
+              console.log("Created Event:", newEvent);
+              // You might want to reset the form or set event state here
+            }}
           />
         )
       )}
@@ -137,112 +147,3 @@ const EventFormPage: React.FC = () => {
 };
 
 export default EventFormPage;
-
-//for testing with fake data
-// "use client";
-// import { useState } from "react";
-// import CreateEventForm from "../forms/createEventForm";
-// import EditEventForm from "../forms/editEventForm";
-
-// interface Session {
-//   title: string;
-//   description: string;
-//   speaker: string;
-//   startTime: string;
-//   endTime: string;
-// }
-
-// interface Event {
-//   name: string;
-//   description: string;
-//   event_type: string;
-//   start_date: string;
-//   end_date: string;
-//   organizer: string;
-//   venue: string;
-//   sessions: Session[];
-// }
-
-// const EventFormPage: React.FC = () => {
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [event, setEvent] = useState<Event | null>(null);
-
-//   // Handle creating a new event
-//   const handleCreateEvent = () => {
-//     setIsEditing(false); // Ensure the form to create is shown
-//     setEvent(null); // Clear event data when creating a new event
-//   };
-
-//   // Handle editing an event
-//   const handleEditEvent = () => {
-//     setIsEditing(true); // Switch to edit form
-//     // Use mock data directly for editing, no fetch needed
-//     const mockEvent: Event = {
-//       name: "Tech Conference 2025",
-//       description: "A conference on the latest trends in technology.",
-//       event_type: "Conference",
-//       start_date: "2025-05-10",
-//       end_date: "2025-05-12",
-//       organizer: "Tech Org",
-//       venue: "Tech Convention Center",
-//       sessions: [
-//         {
-//           title: "AI in 2025",
-//           description: "Exploring the future of AI.",
-//           speaker: "John Doe",
-//           startTime: "2025-05-10T09:00:00",
-//           endTime: "2025-05-10T10:00:00",
-//         },
-//         {
-//           title: "Blockchain Innovations",
-//           description: "Discussing new developments in blockchain.",
-//           speaker: "Jane Smith",
-//           startTime: "2025-05-10T11:00:00",
-//           endTime: "2025-05-10T12:00:00",
-//         },
-//       ],
-//     };
-//     setEvent(mockEvent); // Set the mock event data
-//   };
-
-//   return (
-//     <div className="p-6 max-w-4xl mx-auto">
-//       {/* Buttons to toggle between Create and Edit */}
-//       <div className="mb-4">
-//         <button
-//           onClick={handleCreateEvent}
-//           className={`${
-//             !isEditing ? "bg-orange-400" : "bg-orange-300"
-//           } text-white p-2 rounded-3xl mr-4 transition-colors duration-300`}
-//         >
-//           Create Event
-//         </button>
-//         <button
-//           onClick={handleEditEvent}
-//           className={`${
-//             isEditing ? "bg-orange-400" : "bg-orange-300"
-//           } text-white p-2 rounded-3xl transition-colors duration-300`}
-//         >
-//           Edit Event
-//         </button>
-//       </div>
-
-//       {/* Show the Edit Form with mock data when editing */}
-//       {isEditing && event ? (
-//         <EditEventForm
-//           event={event}
-//           onUpdate={(updatedEvent) => setEvent(updatedEvent)}
-//         />
-//       ) : (
-//         // Only show the Create Event form if we're not editing
-//         !isEditing && (
-//           <CreateEventForm
-//             onSubmit={(newEvent) => console.log("Created Event:", newEvent)}
-//           />
-//         )
-//       )}
-//     </div>
-//   );
-// };
-
-// export default EventFormPage;

@@ -1,12 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
 
+interface Material {
+  link: string;
+}
+
 interface Session {
   title: string;
   description: string;
   speaker: string;
   startTime: string;
   endTime: string;
+  materials: Material[];
 }
 
 interface Event {
@@ -27,6 +32,7 @@ interface EditEventFormProps {
 
 const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
   const [editedEvent, setEditedEvent] = useState<Event | null>(event);
+  const [materialInput, setMaterialInput] = useState("");
 
   useEffect(() => {
     setEditedEvent(event); // Update form state when event prop changes
@@ -39,11 +45,10 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
     if (editedEvent) {
       const updatedEvent = { ...editedEvent, [field]: e.target.value };
       setEditedEvent(updatedEvent);
-      onUpdate(updatedEvent);
     }
   };
 
-  const handleSessionChange = (
+  const handleSessionInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     index: number,
     field: keyof Session
@@ -54,6 +59,28 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
         ...updatedSessions[index],
         [field]: e.target.value,
       };
+      setEditedEvent({ ...editedEvent, sessions: updatedSessions });
+    }
+  };
+
+  const handleAddMaterial = (sessionIndex: number) => {
+    if (materialInput && editedEvent) {
+      const updatedSessions = [...editedEvent.sessions];
+      updatedSessions[sessionIndex].materials.push({ link: materialInput });
+      setEditedEvent({ ...editedEvent, sessions: updatedSessions });
+      setMaterialInput("");
+    }
+  };
+
+  const handleRemoveMaterial = (
+    sessionIndex: number,
+    materialIndex: number
+  ) => {
+    if (editedEvent) {
+      const updatedSessions = [...editedEvent.sessions];
+      updatedSessions[sessionIndex].materials = updatedSessions[
+        sessionIndex
+      ].materials.filter((_, i) => i !== materialIndex);
       setEditedEvent({ ...editedEvent, sessions: updatedSessions });
     }
   };
@@ -160,7 +187,7 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
               editedEvent.sessions.map((session, index) => (
                 <div
                   key={index}
-                  className="mb-4 p-4 border  border-orange-400 rounded-md"
+                  className="mb-4 p-4 border border-orange-400 rounded-md"
                 >
                   <div className="flex justify-between">
                     <h4 className="text-md font-semibold">{session.title}</h4>
@@ -179,7 +206,9 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
                       type="text"
                       className="border border-orange-400 rounded p-2 w-full"
                       value={session.title}
-                      onChange={(e) => handleSessionChange(e, index, "title")}
+                      onChange={(e) =>
+                        handleSessionInputChange(e, index, "title")
+                      }
                     />
                   </div>
 
@@ -192,7 +221,7 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
                       rows={3}
                       value={session.description}
                       onChange={(e) =>
-                        handleSessionChange(e, index, "description")
+                        handleSessionInputChange(e, index, "description")
                       }
                     ></textarea>
                   </div>
@@ -203,7 +232,9 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
                       type="text"
                       className="border border-orange-400 rounded p-2 w-full"
                       value={session.speaker}
-                      onChange={(e) => handleSessionChange(e, index, "speaker")}
+                      onChange={(e) =>
+                        handleSessionInputChange(e, index, "speaker")
+                      }
                     />
                   </div>
 
@@ -216,7 +247,7 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
                       className="border border-orange-400 rounded p-2 w-full"
                       value={session.startTime}
                       onChange={(e) =>
-                        handleSessionChange(e, index, "startTime")
+                        handleSessionInputChange(e, index, "startTime")
                       }
                     />
                   </div>
@@ -229,9 +260,50 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
                       type="time"
                       className="border border-orange-400 rounded p-2 w-full"
                       value={session.endTime}
-                      onChange={(e) => handleSessionChange(e, index, "endTime")}
+                      onChange={(e) =>
+                        handleSessionInputChange(e, index, "endTime")
+                      }
                     />
                   </div>
+
+                  {/* Materials Section */}
+                  <h3 className="mt-4 font-semibold">Materials</h3>
+                  <input
+                    type="text"
+                    placeholder="Material Link"
+                    className="border border-orange-400 rounded p-2 w-full mt-2"
+                    value={materialInput}
+                    onChange={(e) => setMaterialInput(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="bg-orange-300 text-xs text-white p-2 my-2 rounded-3xl hover:bg-orange-200"
+                    onClick={() => handleAddMaterial(index)}
+                  >
+                    + Add Material
+                  </button>
+
+                  {session.materials.length > 0 && (
+                    <ul className="mt-2">
+                      {session.materials.map((material, materialIndex) => (
+                        <li
+                          key={materialIndex}
+                          className="flex justify-between text-sm text-gray-600"
+                        >
+                          {material.link}
+                          <button
+                            type="button"
+                            className="text-red-500 hover:text-red-700"
+                            onClick={() =>
+                              handleRemoveMaterial(index, materialIndex)
+                            }
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ))
             ) : (

@@ -1,12 +1,17 @@
 "use client";
 import { useState } from "react";
 
+interface Material {
+  link: string;
+}
+
 interface Session {
   title: string;
   description: string;
   speaker: string;
   startTime: string;
   endTime: string;
+  materials: Material[];
 }
 
 interface Event {
@@ -41,6 +46,17 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
   const [speaker, setSpeaker] = useState("");
   const [sessionStartTime, setSessionStartTime] = useState("");
   const [sessionEndTime, setSessionEndTime] = useState("");
+  const [sessionMaterials, setSessionMaterials] = useState<Material[]>([]);
+  const [sessionMaterialInput, setSessionMaterialInput] = useState<string>("");
+
+  // add materials
+  const addMaterial = () => {
+    if (sessionMaterialInput) {
+      const newMaterial: Material = { link: sessionMaterialInput };
+      setSessionMaterials((prevMaterials) => [...prevMaterials, newMaterial]); // Use a function to avoid stale state
+      setSessionMaterialInput(""); // Clear input after adding
+    }
+  };
 
   // Add a new session to the event
   const addSession = () => {
@@ -51,20 +67,25 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       sessionStartTime &&
       sessionEndTime
     ) {
-      const newSession = {
+      const newSession: Session = {
         title: sessionTitle,
         description: sessionDescription,
         speaker: speaker,
         startTime: sessionStartTime,
         endTime: sessionEndTime,
+        materials: sessionMaterials,
       };
-      setEvent({ ...event, sessions: [...event.sessions, newSession] });
+      setEvent((prevEvent) => ({
+        ...prevEvent,
+        sessions: [...prevEvent.sessions, newSession],
+      }));
       // Clear session form fields after adding
       setSessionTitle("");
       setSessionDescription("");
       setSpeaker("");
       setSessionStartTime("");
       setSessionEndTime("");
+      setSessionMaterials([]);
     } else {
       alert("Please fill out both session title and time.");
     }
@@ -195,6 +216,29 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
           value={sessionEndTime}
           onChange={(e) => setSessionEndTime(e.target.value)}
         />
+        <input
+          type="text"
+          placeholder="Material Link"
+          className="border border-orange-400 rounded p-2 w-full mt-2"
+          value={sessionMaterialInput}
+          onChange={(e) => setSessionMaterialInput(e.target.value)} // Track input value
+        />
+        <button
+          type="button"
+          className="bg-orange-300 text-xs text-white p-2 my-2 rounded-3xl hover:bg-orange-200"
+          onClick={addMaterial} // Add material when clicked
+        >
+          + Add Material
+        </button>
+        {sessionMaterials.length > 0 && (
+          <ul className="mt-2">
+            {sessionMaterials.map((material, index) => (
+              <li key={index} className="text-sm text-gray-600">
+                {material.link}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <button
         type="button"
