@@ -79,9 +79,11 @@ const AllEvents: React.FC = () => {
 
   // Fetch all events from the backend
   useEffect(() => {
-    fetch("https://your-backend-api.com/events")
+    fetch("http://localhost:8000/events")
       .then((res) => res.json())
-      .then((data) => setEvents(data))
+      .then((data) => {
+        console.log(data.events)
+        setEvents(data.events)})
       .catch((error) => console.error("Error fetching events:", error));
   }, []);
 
@@ -121,7 +123,7 @@ const AllEvents: React.FC = () => {
               </div>
 
               {/* Sessions */}
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <h3 className="text-lg font-semibold text-gray-800">
                   Sessions:
                 </h3>
@@ -141,8 +143,8 @@ const AllEvents: React.FC = () => {
                       </p>
                     </li>
                   ))}
-                </ul>
-              </div>
+                </ul> 
+               </div> */}
               <button
                 type="submit"
                 className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"

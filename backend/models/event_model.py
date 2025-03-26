@@ -5,6 +5,7 @@ Based on the EventSchema.
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 from bson import ObjectId
+import uuid
 
 from .base_model import BaseModel
 
@@ -44,6 +45,7 @@ class EventModel(BaseModel):
             participants = []
             
         event_data = {
+            "event_id": str(uuid.uuid4()),
             "name": name,
             "description": description,
             "event_type": event_type,
@@ -138,6 +140,7 @@ class EventModel(BaseModel):
             List[Dict]: List of upcoming event documents
         """
         now = datetime.now(timezone.utc)
+        print(now)
         return await cls.find_many(
             {"start_date": {"$gt": now}},
             limit=limit,

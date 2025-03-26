@@ -1,17 +1,25 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from controller.database import events_collection
-import datetime
-
+from datetime import datetime
+from models.event_model import EventModel
+from models.user_model import UserModel
+from models.venue_model import VenueModel
+from typing import Dict, List, Optional, Any
 router = APIRouter()
 
 class Event(BaseModel):
     name: str
     description: str
     start_date: str
+    event_type: str
     end_date: str
     organizer: str
-    venue_id: str
+    venue: str
+    is_virtual: bool
+    virtual_meeting_url: str
+    participants: List[str]
+    capacity: int
 
 class EventSignupData(BaseModel):
     user_id: str
@@ -22,20 +30,27 @@ class EventUserData(BaseModel):
     user_id: str
     event_id: str
 
-@router.post("/create_event")
-def create_event(event: Event):
+class EventSearch(BaseModel):
+    query: str
+
+def document_to_dict(doc):
+    doc['_id'] = str(doc['_id'])  # Convert ObjectId to string
+    return doc
+
+
+
+@router.get("/create_event")
+async def create_event(event: Event):
     """
     create an event users cans sign up to
     """
-    event_dict = event.dict()
-    event_id = events_collection.insert_one(event_dict).inserted_id
+    event = event.dict()
 
     created_at = datetime.now()
 
     status = False
-    # status = Events.create_event(...)
-
-    return {"status":status}
+    event_id = await EventModel.create_event(event['name'], event['description'], event['event_type'], datetime.strptime(event['start_date'], "%Y-%m-%d"),datetime.strptime(event['end_date'],"%Y-%m-%d"),event['is_virtual'],event['virtual_meeting_url'],event['organizer'],event['venue'],event['capacity'],event['participants'])
+    return {"event_id":event_id}
 
 @router.post("/event_signup")
 def create_event(event_signup_data: EventSignupData):
@@ -80,7 +95,7 @@ def get_upcoming_events(user_upcoming_event: EventUserData):
         if all_tickets.event_id == event_id and all_tickets.user_id == user_id:
             user_tickets.append(ticket)
 
-    return {"ticketS":user_tickets}
+    return {"tickets":user_tickets}
 
 @router.get("/{event_id}")
 def get_event(event_id: str):
@@ -89,3 +104,34 @@ def get_event(event_id: str):
         raise HTTPException(status_code=404, detail="Event not found")
     return event
 
+@router.post("/event_search")
+async def event_search(query: EventSearch):
+    query = query.dict()['query']
+    results = await EventModel.search_events(query=query)
+    return {"events":[document_to_dict(event) for event in results] }
+
+
+@router.get("/")
+async def get_all_events():
+    all_events = await EventModel.get_upcoming_events()
+
+    for event in all_events:
+        organizer_id = event['organizer_id']
+        try:
+            user = await UserModel.get_user_by_id(organizer_id)
+            if user is None:
+                event['organizer'] = 'John Doe'
+            else:
+                event['organizer'] = user.first_name
+        except:
+            event['organizer'] = "John Doe"
+
+        venue_id = event['venue_id']
+        try:
+            venue = await VenueModel.get_venue_by_id(venue_id)
+            event['venue'] = venue.name
+        except:
+            event['venue'] = 'Mezzanine'
+
+
+    return {"events":[document_to_dict(event) for event in all_events] }

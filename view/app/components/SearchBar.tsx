@@ -5,17 +5,38 @@ import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 const SearchBar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle the search query, e.g., log it or make an API call
+    fetch("http://localhost:8000/events/event_search", {
+      method: "POST",  // HTTP method set to POST
+      headers: {
+        "Content-Type": "application/json",  // Set content-type to JSON
+      },
+      body: JSON.stringify({ query: searchQuery }),  // Send the query as JSON
+    })
+      .then(response => response.json())  // Parse the response as JSON
+      .then(data => {
+        console.log("Search results:", data);  // Handle the response data
+      })
+      .catch(error => {
+        console.error("Error:", error);  // Handle any errors
+      });
+  };
+
   return (
     <div className="flex items-center justify-center mb-6 w-full max-w-2xl mx-auto mt-6">
       {/* Event Search Input */}
-      <div className="flex items-center bg-[#F5F5F5] border border-orange-400 rounded-full w-1/2 px-4 py-2 shadow-sm">
+      <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#F5F5F5] border border-orange-400 rounded-full w-1/2 px-4 py-2 shadow-sm">
         <FaSearch className="text-gray-500 mr-2" />
         <input
           type="text"
           placeholder="Search Events"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full bg-[#F5F5F5] outline-none text-gray-700"
         />
-      </div>
+      </form>
     </div>
   );
 };

@@ -39,8 +39,3 @@ app.include_router(poll.router, prefix="/polls", tags=["Polls"])
 app.include_router(feedback.router, prefix="/feedback", tags=["Feedback"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
 app.include_router(stakeholder_attendee.router)
-
-
-
-#app.include_router(stakeholder_attendee.router)
-#app.include_router(ticket.router)
