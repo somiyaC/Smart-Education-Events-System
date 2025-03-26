@@ -133,3 +133,4 @@ async def get_all_events():
             event['venue'] = 'Mezzanine'
 
     return {"events":[document_to_dict(event) for event in all_events] }
+

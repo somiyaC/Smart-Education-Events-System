@@ -18,22 +18,30 @@ class ChatRoomModel(BaseModel):
     collection_name = "chat_rooms"
     
     @classmethod
-    async def create_chat_room(cls, event_id: str, name: str, description: str = "", 
-                            is_private: bool = False, is_direct: bool = False, 
-                            participants: List[str] = None) -> str:
+    async def create_chat_room(
+        cls,
+        db,
+        event_id: str,
+        name: str,
+        description: str = "",
+        is_private: bool = False,
+        is_direct: bool = False,
+        participants: Optional[List[str]] = None
+    ) -> str:
         """
         Create a new chat room for an event.
         
         Args:
-            event_id: ID of the event this chat room belongs to
-            name: Name of the chat room
-            description: Description of the chat room
-            is_private: Whether this is a private chat room
-            is_direct: Whether this is a direct messaging chat room
-            participants: List of user IDs participating in the chat room
+            db: Database session or connection reference.
+            event_id: ID of the event this chat room belongs to.
+            name: Name of the chat room.
+            description: Description of the chat room.
+            is_private: Whether this is a private chat room.
+            is_direct: Whether this is a direct messaging chat room.
+            participants: List of user IDs participating in the chat room.
             
         Returns:
-            str: ID of the created chat room
+            str: ID of the created chat room.
         """
         if participants is None:
             participants = []
@@ -49,6 +57,7 @@ class ChatRoomModel(BaseModel):
             "created_at": datetime.now(timezone.utc)
         }
         
+        # Removed db keyword argument since BaseModel.insert_one() doesn't expect it.
         chat_room_id = await cls.insert_one(chat_room_data)
         return str(chat_room_id)
     
@@ -61,23 +70,27 @@ class ChatRoomModel(BaseModel):
             chat_room_id: Chat room ID
             
         Returns:
-            Dict: Chat room document or None if not found
+            Dict: Chat room document or None if not found.
         """
         return await cls.find_one({"_id": ObjectId(chat_room_id)})
-    
+
     @classmethod
-    async def get_event_chat_rooms(cls, event_id: str, is_private: bool = False, 
-                                  is_direct: bool = False) -> List[Dict]:
+    async def get_event_chat_rooms(
+        cls, 
+        event_id: str, 
+        is_private: bool = False, 
+        is_direct: bool = False
+    ) -> List[Dict]:
         """
         Get all chat rooms for a specific event.
         
         Args:
-            event_id: Event ID
-            is_private: Whether to return private chat rooms
-            is_direct: Whether to return direct message rooms
+            event_id: Event ID.
+            is_private: Whether to return private chat rooms.
+            is_direct: Whether to return direct message rooms.
             
         Returns:
-            List[Dict]: List of chat room documents
+            List[Dict]: List of chat room documents.
         """
         return await cls.find_many({
             "event_id": event_id,
@@ -86,17 +99,18 @@ class ChatRoomModel(BaseModel):
         })
     
     @classmethod
-    async def get_or_create_direct_chat(cls, event_id: str, user1_id: str, user2_id: str) -> Dict:
+    async def get_or_create_direct_chat(cls, db, event_id: str, user1_id: str, user2_id: str) -> Dict:
         """
         Get or create a direct chat room between two users.
         
         Args:
-            event_id: Event ID
-            user1_id: First user's ID
-            user2_id: Second user's ID
+            db: Database session or connection reference.
+            event_id: Event ID.
+            user1_id: First user's ID.
+            user2_id: Second user's ID.
             
         Returns:
-            Dict: Direct chat room document
+            Dict: Direct chat room document.
         """
         # Check if a direct chat already exists
         direct_chat = await cls.find_one({
@@ -111,8 +125,9 @@ class ChatRoomModel(BaseModel):
             
         # Create a new direct chat room
         chat_room_id = await cls.create_chat_room(
+            db,
             event_id=event_id,
-            name=f"Direct Chat",
+            name="Direct Chat",
             description="Private conversation",
             is_private=True,
             is_direct=True,
@@ -127,11 +142,11 @@ class ChatRoomModel(BaseModel):
         Get all chat rooms a user is participating in.
         
         Args:
-            user_id: User ID
-            event_id: Optional event ID filter
+            user_id: User ID.
+            event_id: Optional event ID filter.
             
         Returns:
-            List[Dict]: List of chat room documents
+            List[Dict]: List of chat room documents.
         """
         query = {"participants": user_id}
         if event_id:
@@ -145,17 +160,17 @@ class ChatRoomModel(BaseModel):
         Add a participant to a chat room.
         
         Args:
-            chat_room_id: Chat room ID
-            user_id: User ID to add
+            chat_room_id: Chat room ID.
+            user_id: User ID to add.
             
         Returns:
-            Dict: Updated chat room document or None if not found
+            Dict: Updated chat room document or None if not found.
         """
         chat_room = await cls.get_chat_room_by_id(chat_room_id)
         if not chat_room:
             return None
             
-        # Don't add if it's a direct chat and already has two participants
+        # Don't add if it's a direct chat and already has two participants.
         if chat_room.get("is_direct", False) and len(chat_room.get("participants", [])) >= 2:
             return None
             
@@ -170,11 +185,11 @@ class ChatRoomModel(BaseModel):
         Remove a participant from a chat room.
         
         Args:
-            chat_room_id: Chat room ID
-            user_id: User ID to remove
+            chat_room_id: Chat room ID.
+            user_id: User ID to remove.
             
         Returns:
-            Dict: Updated chat room document or None if not found
+            Dict: Updated chat room document or None if not found.
         """
         return await cls.update_one(
             {"_id": ObjectId(chat_room_id)},
@@ -187,13 +202,13 @@ class ChatRoomModel(BaseModel):
         Update chat room information.
         
         Args:
-            chat_room_id: Chat room ID
-            update_data: Dictionary containing fields to update
+            chat_room_id: Chat room ID.
+            update_data: Dictionary containing fields to update.
             
         Returns:
-            Dict: Updated chat room document or None if not found
+            Dict: Updated chat room document or None if not found.
         """
-        # Ensure we only update allowed fields
+        # Ensure we only update allowed fields.
         allowed_fields = ["name", "description", "is_private"]
         filtered_update = {k: v for k, v in update_data.items() if k in allowed_fields}
         
@@ -216,12 +231,12 @@ class ChatMessageModel(BaseModel):
         Create a new chat message.
         
         Args:
-            text: Message text
-            sender_id: ID of the user sending the message
-            chat_room_id: ID of the chat room
+            text: Message text.
+            sender_id: ID of the user sending the message.
+            chat_room_id: ID of the chat room.
             
         Returns:
-            str: ID of the created message
+            str: ID of the created message.
         """
         message_data = {
             "text": text,
@@ -233,7 +248,7 @@ class ChatMessageModel(BaseModel):
         message_id = await cls.insert_one(message_data)
         message_data["id"] = str(message_id)
         
-        # Also add message to the chat room's messages array
+        # Also add message to the chat room's messages array.
         await ChatRoomModel.update_one(
             {"_id": ObjectId(chat_room_id)},
             {"$push": {"messages": message_data}}
@@ -247,27 +262,32 @@ class ChatMessageModel(BaseModel):
         Get message details by ID.
         
         Args:
-            message_id: Message ID
+            message_id: Message ID.
             
         Returns:
-            Dict: Message document or None if not found
+            Dict: Message document or None if not found.
         """
         return await cls.find_one({"_id": ObjectId(message_id)})
     
     @classmethod
-    async def get_chat_room_messages(cls, chat_room_id: str, limit: int = 50, 
-                                   skip: int = 0, sort_direction: int = -1) -> List[Dict]:
+    async def get_chat_room_messages(
+        cls,
+        chat_room_id: str,
+        limit: int = 50,
+        skip: int = 0,
+        sort_direction: int = -1
+    ) -> List[Dict]:
         """
         Get messages for a specific chat room with pagination.
         
         Args:
-            chat_room_id: Chat room ID
-            limit: Maximum number of messages to return
-            skip: Number of messages to skip
-            sort_direction: Sort direction (-1 for newest first, 1 for oldest first)
+            chat_room_id: Chat room ID.
+            limit: Maximum number of messages to return.
+            skip: Number of messages to skip.
+            sort_direction: Sort direction (-1 for newest first, 1 for oldest first).
             
         Returns:
-            List[Dict]: List of message documents
+            List[Dict]: List of message documents.
         """
         return await cls.find_many(
             {"chat_room_id": chat_room_id},
@@ -282,19 +302,19 @@ class ChatMessageModel(BaseModel):
         Delete a chat message.
         
         Args:
-            message_id: Message ID
+            message_id: Message ID.
             
         Returns:
-            bool: True if deleted, False otherwise
+            bool: True if deleted, False otherwise.
         """
         message = await cls.get_message_by_id(message_id)
         if not message:
             return False
             
-        # Remove from messages collection
+        # Remove from messages collection.
         deleted_count = await cls.delete_one({"_id": ObjectId(message_id)})
         
-        # Also remove from chat room's messages array
+        # Also remove from chat room's messages array.
         await ChatRoomModel.update_one(
             {"_id": ObjectId(message["chat_room_id"])},
             {"$pull": {"messages": {"id": str(message_id)}}}
@@ -308,23 +328,23 @@ class ChatMessageModel(BaseModel):
         Update a message's text.
         
         Args:
-            message_id: Message ID
-            text: New message text
+            message_id: Message ID.
+            text: New message text.
             
         Returns:
-            Dict: Updated message document or None if not found
+            Dict: Updated message document or None if not found.
         """
         message = await cls.get_message_by_id(message_id)
         if not message:
             return None
             
-        # Update in the messages collection
+        # Update in the messages collection.
         updated_message = await cls.update_one(
             {"_id": ObjectId(message_id)},
             {"$set": {"text": text}}
         )
         
-        # Also update in the chat room's messages array
+        # Also update in the chat room's messages array.
         await ChatRoomModel.update_one(
             {"_id": ObjectId(message["chat_room_id"]), "messages.id": str(message_id)},
             {"$set": {"messages.$.text": text}}
@@ -334,32 +354,32 @@ class ChatMessageModel(BaseModel):
     
     @classmethod
     async def create_thread(cls, chat_room_id: str, parent_message_id: str, 
-                        text: str, sender_id: str) -> Dict:
+                            text: str, sender_id: str) -> Dict:
         """
         Create a threaded reply to a message.
         
         Args:
-            chat_room_id: ID of the chat room
-            parent_message_id: ID of the parent message
-            text: Message text
-            sender_id: ID of the user sending the message
+            chat_room_id: ID of the chat room.
+            parent_message_id: ID of the parent message.
+            text: Message text.
+            sender_id: ID of the user sending the message.
             
         Returns:
-            Dict: Created thread message document
+            Dict: Created thread message document.
         """
-        # Create the reply message
+        # Create the reply message.
         message_id = await cls.create_message(text, sender_id, chat_room_id)
         
-        # Get the created message
+        # Get the created message.
         message = await cls.get_message_by_id(message_id)
         
-        # Add a reference to the parent message
+        # Add a reference to the parent message.
         updated_message = await cls.update_one(
             {"_id": ObjectId(message_id)},
             {"$set": {"parent_message_id": parent_message_id}}
         )
         
-        # Add this message to the parent's thread list
+        # Add this message to the parent's thread list.
         await cls.update_one(
             {"_id": ObjectId(parent_message_id)},
             {"$push": {"thread_messages": message}}

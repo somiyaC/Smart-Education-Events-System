@@ -18,33 +18,33 @@ class FeedbackModel(BaseModel):
     
     @classmethod
     async def create_feedback(cls, user_id: str, event_id: str, rating: int,
-                           comment: Optional[str] = None, session_id: Optional[str] = None,
-                           content_quality: Optional[int] = None, 
-                           speaker_quality: Optional[int] = None,
-                           venue_quality: Optional[int] = None, 
-                           organization_quality: Optional[int] = None,
-                           would_recommend: bool = False, 
-                           improvement_suggestions: Optional[str] = None,
-                           is_anonymous: bool = False) -> str:
+                              comment: Optional[str] = None, session_id: Optional[str] = None,
+                              content_quality: Optional[int] = None, 
+                              speaker_quality: Optional[int] = None,
+                              venue_quality: Optional[int] = None, 
+                              organization_quality: Optional[int] = None,
+                              would_recommend: bool = False, 
+                              improvement_suggestions: Optional[str] = None,
+                              is_anonymous: bool = False) -> str:
         """
         Create a new feedback entry.
         
         Args:
-            user_id: ID of the user providing feedback
-            event_id: ID of the event
-            rating: Overall rating (1-5)
-            comment: Optional comment
-            session_id: Optional session ID if feedback is for a specific session
-            content_quality: Optional content quality rating (1-5)
-            speaker_quality: Optional speaker quality rating (1-5)
-            venue_quality: Optional venue quality rating (1-5)
-            organization_quality: Optional organization quality rating (1-5)
-            would_recommend: Whether the user would recommend the event
-            improvement_suggestions: Optional improvement suggestions
-            is_anonymous: Whether the feedback should be anonymous
+            user_id: ID of the user providing feedback.
+            event_id: ID of the event.
+            rating: Overall rating (1-5).
+            comment: Optional comment.
+            session_id: Optional session ID if feedback is for a specific session.
+            content_quality: Optional content quality rating (1-5).
+            speaker_quality: Optional speaker quality rating (1-5).
+            venue_quality: Optional venue quality rating (1-5).
+            organization_quality: Optional organization quality rating (1-5).
+            would_recommend: Whether the user would recommend the event.
+            improvement_suggestions: Optional improvement suggestions.
+            is_anonymous: Whether the feedback should be anonymous.
             
         Returns:
-            str: ID of the created feedback
+            str: ID of the created feedback.
         """
         feedback_data = {
             "user_id": user_id,
@@ -59,19 +59,14 @@ class FeedbackModel(BaseModel):
         # Add optional fields if provided
         if session_id:
             feedback_data["session_id"] = session_id
-            
         if content_quality is not None:
             feedback_data["content_quality"] = content_quality
-            
         if speaker_quality is not None:
             feedback_data["speaker_quality"] = speaker_quality
-            
         if venue_quality is not None:
             feedback_data["venue_quality"] = venue_quality
-            
         if organization_quality is not None:
             feedback_data["organization_quality"] = organization_quality
-            
         if improvement_suggestions:
             feedback_data["improvement_suggestions"] = improvement_suggestions
         
@@ -79,15 +74,73 @@ class FeedbackModel(BaseModel):
         return str(feedback_id)
     
     @classmethod
+    async def create_question(cls, db, user_id: str, session_id: str, question_text: str) -> str:
+        """
+        Create a new question entry.
+        
+        Args:
+            db: Database session/connection reference.
+            user_id: ID of the user asking the question.
+            session_id: Session ID (or event ID) associated with the question.
+            question_text: The text of the question.
+        
+        Returns:
+            str: ID of the created question.
+        """
+        question_data = {
+            "user_id": user_id,
+            "session_id": session_id,
+            "question": question_text,
+            "created_at": datetime.now(timezone.utc),
+            "answer": None  # Initially unanswered
+        }
+        question_id = await cls.insert_one(question_data)
+        return str(question_id)
+    
+    @classmethod
+    async def get_questions_for_session(cls, db, session_id: str) -> List[Dict]:
+        """
+        Retrieve all questions for a given session.
+        
+        Args:
+            db: Database session/connection reference.
+            session_id: Session ID.
+        
+        Returns:
+            List[Dict]: List of question documents.
+        """
+        questions = await cls.find_many({"session_id": session_id}, sort=[("created_at", -1)])
+        return questions
+    
+    @classmethod
+    async def answer_question(cls, db, question_id: str, answer_text: str) -> Optional[Dict]:
+        """
+        Answer a question by updating its answer field.
+        
+        Args:
+            db: Database session/connection reference.
+            question_id: The question's ID.
+            answer_text: The answer text.
+        
+        Returns:
+            Dict: The updated question document, or None if not found.
+        """
+        updated_question = await cls.update_one(
+            {"_id": ObjectId(question_id)},
+            {"$set": {"answer": answer_text, "answered_at": datetime.now(timezone.utc)}}
+        )
+        return updated_question
+
+    @classmethod
     async def get_feedback_by_id(cls, feedback_id: str) -> Dict:
         """
         Get feedback details by ID.
         
         Args:
-            feedback_id: Feedback ID
+            feedback_id: Feedback ID.
             
         Returns:
-            Dict: Feedback document or None if not found
+            Dict: Feedback document or None if not found.
         """
         return await cls.find_one({"_id": ObjectId(feedback_id)})
     
@@ -97,15 +150,13 @@ class FeedbackModel(BaseModel):
         Get all feedback for a specific event.
         
         Args:
-            event_id: Event ID
-            include_anonymous: Whether to include anonymous feedback
+            event_id: Event ID.
+            include_anonymous: Whether to include anonymous feedback.
             
         Returns:
-            List[Dict]: List of feedback documents
+            List[Dict]: List of feedback documents.
         """
         query = {"event_id": event_id}
-        
-        # If not including anonymous feedback, filter it out
         if not include_anonymous:
             query["is_anonymous"] = False
             
@@ -117,15 +168,13 @@ class FeedbackModel(BaseModel):
         Get all feedback for a specific session.
         
         Args:
-            session_id: Session ID
-            include_anonymous: Whether to include anonymous feedback
+            session_id: Session ID.
+            include_anonymous: Whether to include anonymous feedback.
             
         Returns:
-            List[Dict]: List of feedback documents
+            List[Dict]: List of feedback documents.
         """
         query = {"session_id": session_id}
-        
-        # If not including anonymous feedback, filter it out
         if not include_anonymous:
             query["is_anonymous"] = False
             
@@ -137,10 +186,10 @@ class FeedbackModel(BaseModel):
         Get all feedback submitted by a user.
         
         Args:
-            user_id: User ID
+            user_id: User ID.
             
         Returns:
-            List[Dict]: List of feedback documents
+            List[Dict]: List of feedback documents.
         """
         return await cls.find_many({"user_id": user_id}, sort=[("created_at", -1)])
     
@@ -150,13 +199,12 @@ class FeedbackModel(BaseModel):
         Update a feedback entry.
         
         Args:
-            feedback_id: Feedback ID
-            update_data: Dictionary containing fields to update
+            feedback_id: Feedback ID.
+            update_data: Dictionary containing fields to update.
             
         Returns:
-            Dict: Updated feedback document or None if not found
+            Dict: Updated feedback document or None if not found.
         """
-        # Ensure we only update allowed fields
         allowed_fields = [
             "rating", "comment", "content_quality", "speaker_quality",
             "venue_quality", "organization_quality", "would_recommend",
@@ -175,10 +223,10 @@ class FeedbackModel(BaseModel):
         Delete a feedback entry.
         
         Args:
-            feedback_id: Feedback ID
+            feedback_id: Feedback ID.
             
         Returns:
-            bool: True if deleted, False otherwise
+            bool: True if deleted, False otherwise.
         """
         deleted_count = await cls.delete_one({"_id": ObjectId(feedback_id)})
         return deleted_count > 0
@@ -189,10 +237,10 @@ class FeedbackModel(BaseModel):
         Get a summary of feedback for an event.
         
         Args:
-            event_id: Event ID
+            event_id: Event ID.
             
         Returns:
-            Dict: Feedback summary statistics
+            Dict: Feedback summary statistics.
         """
         pipeline = [
             {"$match": {"event_id": event_id}},
@@ -216,7 +264,6 @@ class FeedbackModel(BaseModel):
         results = await cls.aggregate(pipeline)
         
         if not results or len(results) == 0:
-            # Return empty summary if no feedback
             return {
                 "avg_rating": 0,
                 "count": 0,
@@ -235,8 +282,6 @@ class FeedbackModel(BaseModel):
             }
             
         summary = results[0]
-        
-        # Format rating distribution
         rating_distribution = {
             "1": summary.pop("rating_1", 0),
             "2": summary.pop("rating_2", 0),
@@ -245,16 +290,11 @@ class FeedbackModel(BaseModel):
             "5": summary.pop("rating_5", 0)
         }
         summary["rating_distribution"] = rating_distribution
-        
-        # Remove the MongoDB group _id
         if "_id" in summary:
             del summary["_id"]
-            
-        # Round averages to 2 decimal places
         for key in summary:
             if isinstance(summary[key], float):
                 summary[key] = round(summary[key], 2)
-                
         return summary
     
     @classmethod
@@ -263,10 +303,10 @@ class FeedbackModel(BaseModel):
         Get a summary of feedback for a session.
         
         Args:
-            session_id: Session ID
+            session_id: Session ID.
             
         Returns:
-            Dict: Feedback summary statistics
+            Dict: Feedback summary statistics.
         """
         pipeline = [
             {"$match": {"session_id": session_id}},
@@ -287,7 +327,6 @@ class FeedbackModel(BaseModel):
         results = await cls.aggregate(pipeline)
         
         if not results or len(results) == 0:
-            # Return empty summary if no feedback
             return {
                 "avg_rating": 0,
                 "count": 0,
@@ -303,8 +342,6 @@ class FeedbackModel(BaseModel):
             }
             
         summary = results[0]
-        
-        # Format rating distribution
         rating_distribution = {
             "1": summary.pop("rating_1", 0),
             "2": summary.pop("rating_2", 0),
@@ -313,14 +350,9 @@ class FeedbackModel(BaseModel):
             "5": summary.pop("rating_5", 0)
         }
         summary["rating_distribution"] = rating_distribution
-        
-        # Remove the MongoDB group _id
         if "_id" in summary:
             del summary["_id"]
-            
-        # Round averages to 2 decimal places
         for key in summary:
             if isinstance(summary[key], float):
                 summary[key] = round(summary[key], 2)
-                
         return summary
