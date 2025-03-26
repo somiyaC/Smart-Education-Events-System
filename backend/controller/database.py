@@ -52,3 +52,11 @@ def init_db():
     polls_collection.create_index("poll_id", unique=True)
     feedback_collection.create_index("feedback_id", unique=True)
     chat_collection.create_index("chat_id", unique=True)
+
+def get_db():
+    """
+    FastAPI dependency that provides the MongoDB database instance.
+    Since MongoDB connections don't need to be closed per request,
+    we simply yield the singleton instance.
+    """
+    yield db_instance
