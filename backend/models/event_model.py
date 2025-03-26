@@ -45,7 +45,6 @@ class EventModel(BaseModel):
             participants = []
             
         event_data = {
-            "event_id": str(uuid.uuid4()),
             "name": name,
             "description": description,
             "event_type": event_type,

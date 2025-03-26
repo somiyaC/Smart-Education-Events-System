@@ -83,7 +83,6 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       },
       body: JSON.stringify({...event,...{participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}}) // Convert the data to JSON string
     })
-
   };
 
   return (
