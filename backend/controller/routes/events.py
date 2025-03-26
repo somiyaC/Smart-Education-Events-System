@@ -6,7 +6,6 @@ from models.event_model import EventModel
 from models.user_model import UserModel
 from models.venue_model import VenueModel
 from typing import Dict, List, Optional, Any
-
 router = APIRouter()
 
 class Event(BaseModel):
@@ -35,70 +34,65 @@ class EventSearch(BaseModel):
     query: str
 
 def document_to_dict(doc):
-    if doc and '_id' in doc:
+    if doc and '_id' in doc.keys():
         doc['_id'] = str(doc['_id'])
     return doc
 
-@router.get("/create_event")
+
+@router.post("/create_event")
 async def create_event(event: Event):
     """
-    Create an event users can sign up to.
+    create an event users cans sign up to
     """
-    event_data = event.dict()
-    created_at = datetime.now()
-    status = False  # you might want to handle event status properly
-    event_id = await EventModel.create_event(
-        event_data['name'],
-        event_data['description'],
-        event_data['event_type'],
-        datetime.strptime(event_data['start_date'], "%Y-%m-%d"),
-        datetime.strptime(event_data['end_date'], "%Y-%m-%d"),
-        event_data['is_virtual'],
-        event_data['virtual_meeting_url'],
-        event_data['organizer'],
-        event_data['venue'],
-        event_data['capacity'],
-        event_data['participants']
-    )
-    return {"event_id": event_id}
+    event = event.dict()
+
+    event_id = await EventModel.create_event(event['name'], event['description'], event['event_type'], datetime.strptime(event['start_date'], "%Y-%m-%d"),datetime.strptime(event['end_date'],"%Y-%m-%d"),event['is_virtual'],event['virtual_meeting_url'],event['organizer'],event['venue'],event['capacity'],event['participants'])
+    return {"event_id":event_id}
 
 @router.post("/event_signup")
-def create_event_signup(event_signup_data: EventSignupData):
+def create_event(event_signup_data: EventSignupData):
     """
-    Sign up for an event. This will create a ticket tied between the user_id and the event_id.
+    signup for an event. This will create a ticket tied between the user_id and the event_id
     """
     user_id = event_signup_data.user_id
     event_id = event_signup_data.event_id
+
     purchase_date = datetime.now()
+
     status = False
-    # Example: Call ticket creation logic here
-    return {"status": status}
+    #status = Tickets.create_ticket()
+
+    return {"status":status}
 
 @router.post("/event_cancel")
 def event_cancel(event_cancel_data: EventUserData):
     """
-    Allows users to cancel tickets for event participation.
+    allows users to cancel tickets for event participation
     """
     user_id = event_cancel_data.user_id
     event_id = event_cancel_data.event_id
+
     status = False
-    # Example: Call ticket cancellation logic here
+    #status = Tickets.cancel_signup(user_id, event_id)
+
     return {"status": status}
 
 @router.get("/upcoming_events")
 def get_upcoming_events(user_upcoming_event: EventUserData):
     """
-    Fetch the user's tickets.
+    fetch the user's tickets
     """
     user_id = user_upcoming_event.user_id
     event_id = user_upcoming_event.event_id
-    all_tickets = None  # Example: Fetch tickets from your ticket logic
+
+    all_tickets = None
     user_tickets = []
-    if all_tickets:
-        for ticket in all_tickets:
-            if ticket.event_id == event_id and ticket.user_id == user_id:
-                user_tickets.append(ticket)
-    return {"tickets": user_tickets}
+    #all_tickets = Tickets.get_all()
+    for ticket in all_tickets:
+        if all_tickets.event_id == event_id and all_tickets.user_id == user_id:
+            user_tickets.append(ticket)
+
+    return {"tickets":user_tickets}
 
 @router.get("/{event_id}")
 def get_event(event_id: str):
@@ -109,13 +103,16 @@ def get_event(event_id: str):
 
 @router.post("/event_search")
 async def event_search(query: EventSearch):
-    query_str = query.dict()['query']
-    results = await EventModel.search_events(query=query_str)
-    return {"events": [document_to_dict(event) for event in results] }
+    query = query.dict()['query']
+    results = await EventModel.search_events(query=query)
+    return {"events":[document_to_dict(event) for event in results] }
+
 
 @router.get("/")
 async def get_all_events():
     all_events = await EventModel.get_upcoming_events()
+    print("aall")
+    print(all_events)
 
     for event in all_events:
         organizer_id = event['organizer_id']
@@ -125,14 +122,14 @@ async def get_all_events():
                 event['organizer'] = 'John Doe'
             else:
                 event['organizer'] = user.first_name
-        except Exception:
+        except:
             event['organizer'] = "John Doe"
 
         venue_id = event['venue_id']
         try:
             venue = await VenueModel.get_venue_by_id(venue_id)
             event['venue'] = venue.name
-        except Exception:
+        except:
             event['venue'] = 'Mezzanine'
 
-    return {"events": [document_to_dict(event) for event in all_events]}
+    return {"events":[document_to_dict(event) for event in all_events] }
