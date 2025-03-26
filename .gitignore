@@ -18,6 +18,7 @@ view/node_modules
 /view/.next/
 /view/node_modules/
 /out/
+node_modules/
 
 # production
 /build
