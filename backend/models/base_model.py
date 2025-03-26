@@ -9,6 +9,20 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from controller.database import MONGO_URI, DB_NAME
 
 
+def convert_objectids(obj):
+    """
+    Recursively convert ObjectId values in a dict or list to strings.
+    """
+    if isinstance(obj, dict):
+        return {k: convert_objectids(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_objectids(item) for item in obj]
+    elif isinstance(obj, ObjectId):
+        return str(obj)
+    else:
+        return obj
+
+
 class Database:
     """
     Asynchronous Singleton Database connection manager.
@@ -57,9 +71,9 @@ class BaseModel:
     @classmethod
     async def get_collection(cls):
         """Get the MongoDB collection for this model."""
-        if not Database._db:
+        if Database._db is None:
             raise ConnectionError("Database connection not established")
-        if not cls.collection_name:
+        if cls.collection_name is None or cls.collection_name == "":
             raise ValueError(f"collection_name not set for {cls.__name__}")
         return Database._db[cls.collection_name]
     
@@ -70,7 +84,9 @@ class BaseModel:
         result = await collection.find_one(query)
         if result and '_id' in result:
             result['id'] = str(result['_id'])
-        return result
+            # Optionally remove the original _id field:
+            del result['_id']
+        return convert_objectids(result)
     
     @classmethod
     async def find_many(cls, query: Dict, limit: int = 0, skip: int = 0, sort=None):
@@ -86,10 +102,13 @@ class BaseModel:
             cursor = cursor.sort(sort)
             
         results = await cursor.to_list(length=None)
+        new_results = []
         for result in results:
             if '_id' in result:
                 result['id'] = str(result['_id'])
-        return results
+                del result['_id']
+            new_results.append(convert_objectids(result))
+        return new_results
     
     @classmethod
     async def insert_one(cls, document: Dict):
@@ -115,7 +134,8 @@ class BaseModel:
         )
         if result and '_id' in result:
             result['id'] = str(result['_id'])
-        return result
+            del result['_id']
+        return convert_objectids(result)
     
     @classmethod
     async def delete_one(cls, query: Dict):
@@ -137,7 +157,8 @@ class BaseModel:
         """Perform an aggregation pipeline query."""
         collection = await cls.get_collection()
         cursor = collection.aggregate(pipeline)
-        return await cursor.to_list(length=None)
+        results = await cursor.to_list(length=None)
+        return convert_objectids(results)
     
     @staticmethod
     def prepare_document(document: Dict) -> Dict:

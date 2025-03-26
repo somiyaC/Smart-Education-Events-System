@@ -22,7 +22,7 @@ class TicketModel(BaseModel):
     
     @classmethod
     async def create_ticket(cls, user_id: str, event_id: str, 
-                         payment_reference: Optional[str] = None) -> str:
+                            payment_reference: Optional[str] = None) -> str:
         """
         Create a new ticket for an event.
         
@@ -39,11 +39,13 @@ class TicketModel(BaseModel):
         # Generate a unique ticket number
         ticket_number = cls._generate_ticket_number(event_id, user_id)
         
+        # Include ticket_number as ticket_id to satisfy the unique index constraint
         ticket_data = {
             "user_id": user_id,
             "event_id": event_id,
             "purchase_date": now,
             "ticket_number": ticket_number,
+            "ticket_id": ticket_number,  # Set a unique value here
             "status": "active",
             "checked_in": False,
             "check_in_time": None
@@ -420,3 +422,33 @@ class TicketModel(BaseModel):
             })
         
         return timeline
+        
+    @classmethod
+    async def update_ticket(cls, db, ticket_id: str, update_data: Dict) -> Optional[Dict]:
+        """
+        Update ticket fields for a given ticket.
+        
+        Args:
+            db: The database connection.
+            ticket_id: Ticket ID.
+            update_data: Dictionary of fields to update.
+        
+        Returns:
+            Dict: The updated ticket document, or None if not found.
+        """
+        return await cls.update_one({"_id": ObjectId(ticket_id)}, {"$set": update_data})
+
+    @classmethod
+    async def delete_ticket(cls, db, ticket_id: str) -> int:
+        """
+        Delete a ticket by ID.
+        
+        Args:
+            db: The database connection.
+            ticket_id: Ticket ID.
+            
+        Returns:
+            int: The number of documents deleted (should be 1 if successful).
+        """
+        from bson import ObjectId  # Ensure ObjectId is imported
+        return await cls.delete_one({"_id": ObjectId(ticket_id)})

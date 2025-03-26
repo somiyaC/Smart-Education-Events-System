@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from controller.database import init_db
-from controller.routes import events, auth, venue, ticket, session, poll, feedback, chat
+from controller.routes import events, auth, venue, ticket, session, poll, feedback, chat, stakeholder_attendee
 from models.base_model import Database
 
 
@@ -15,6 +15,8 @@ app.add_middleware(
     allow_headers=["*"],  
 )
 
+app.include_router(stakeholder_attendee.router)
+app.include_router(ticket.router)
 # Initialize database connection
 @app.on_event("startup")
 async def startup_event():
