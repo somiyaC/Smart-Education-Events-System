@@ -34,9 +34,9 @@ class EventSearch(BaseModel):
     query: str
 
 def document_to_dict(doc):
-    doc['_id'] = str(doc['_id'])  # Convert ObjectId to string
+    if doc and '_id' in doc.keys():
+        doc['_id'] = str(doc['_id'])
     return doc
-
 
 
 @router.get("/create_event")
@@ -114,6 +114,8 @@ async def event_search(query: EventSearch):
 @router.get("/")
 async def get_all_events():
     all_events = await EventModel.get_upcoming_events()
+    print("aall")
+    print(all_events)
 
     for event in all_events:
         organizer_id = event['organizer_id']
@@ -132,6 +134,5 @@ async def get_all_events():
             event['venue'] = venue.name
         except:
             event['venue'] = 'Mezzanine'
-
 
     return {"events":[document_to_dict(event) for event in all_events] }
