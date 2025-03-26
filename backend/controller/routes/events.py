@@ -34,21 +34,18 @@ class EventSearch(BaseModel):
     query: str
 
 def document_to_dict(doc):
-    doc['_id'] = str(doc['_id'])  # Convert ObjectId to string
+    if doc and '_id' in doc.keys():
+        doc['_id'] = str(doc['_id'])
     return doc
 
 
-
-@router.get("/create_event")
+@router.post("/create_event")
 async def create_event(event: Event):
     """
     create an event users cans sign up to
     """
     event = event.dict()
 
-    created_at = datetime.now()
-
-    status = False
     event_id = await EventModel.create_event(event['name'], event['description'], event['event_type'], datetime.strptime(event['start_date'], "%Y-%m-%d"),datetime.strptime(event['end_date'],"%Y-%m-%d"),event['is_virtual'],event['virtual_meeting_url'],event['organizer'],event['venue'],event['capacity'],event['participants'])
     return {"event_id":event_id}
 
@@ -114,6 +111,8 @@ async def event_search(query: EventSearch):
 @router.get("/")
 async def get_all_events():
     all_events = await EventModel.get_upcoming_events()
+    print("aall")
+    print(all_events)
 
     for event in all_events:
         organizer_id = event['organizer_id']
@@ -132,6 +131,5 @@ async def get_all_events():
             event['venue'] = venue.name
         except:
             event['venue'] = 'Mezzanine'
-
 
     return {"events":[document_to_dict(event) for event in all_events] }
