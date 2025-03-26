@@ -71,9 +71,19 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
   };
 
   // Handle form submission (create new event)
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    console.log("here", event)
     e.preventDefault();
     onSubmit(event); // Call the parent handler when submitted
+
+    const res = await fetch("http://localhost:8000/events/create_event", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json" // Set content-type to JSON
+      },
+      body: JSON.stringify({...event,...{participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}}) // Convert the data to JSON string
+    })
+
   };
 
   return (
