@@ -3,7 +3,6 @@ from typing import List, Optional
 from datetime import datetime,timezone
 
 class EventSchema(BaseModel):
-    id: Optional[str] = None
     name: str
     description: Optional[str] = None
     event_type: str 

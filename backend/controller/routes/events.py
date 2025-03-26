@@ -39,16 +39,13 @@ def document_to_dict(doc):
     return doc
 
 
-@router.get("/create_event")
+@router.post("/create_event")
 async def create_event(event: Event):
     """
     create an event users cans sign up to
     """
     event = event.dict()
 
-    created_at = datetime.now()
-
-    status = False
     event_id = await EventModel.create_event(event['name'], event['description'], event['event_type'], datetime.strptime(event['start_date'], "%Y-%m-%d"),datetime.strptime(event['end_date'],"%Y-%m-%d"),event['is_virtual'],event['virtual_meeting_url'],event['organizer'],event['venue'],event['capacity'],event['participants'])
     return {"event_id":event_id}
 
