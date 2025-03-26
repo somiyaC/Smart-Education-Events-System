@@ -16,7 +16,7 @@ class ChatRoomSchema(BaseModel):
     id: Optional[str] = None
     event_id: str  # Reference to Event
     name: str
-    description: Optional[str] = ""  # New field
+    description: Optional[str] = ""  
     is_private: bool = False
     is_direct: bool = False  # New field
     participants: List[str] = []  # List of User IDs
