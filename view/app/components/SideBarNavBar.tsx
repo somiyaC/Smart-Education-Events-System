@@ -44,17 +44,6 @@ const SideBarNavBar: React.FC = () => {
         )}
         {isOrganizer && (
           <li>
-            {/* Only for Technical administrator */}
-            <Link
-              href="/edit-create-user"
-              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-            >
-              Edit/Create User
-            </Link>
-          </li>
-        )}
-        {isOrganizer && (
-          <li>
             {/* Only for Executive administrator */}
             <Link
               href="/event-management"
