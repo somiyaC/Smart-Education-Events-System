@@ -39,4 +39,4 @@ async def login(user: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     print(db_user)
     token = jwt.encode({"email": user.email, "role": db_user["role"]}, SECRET_KEY, algorithm="HS256")
-    return {"token": token, "role": db_user["role"], "user_id": str(db_user['_id'])}
+    return {"token": token, "email":user.email, "role": db_user["role"], "user_id": str(db_user['_id'])}

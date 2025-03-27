@@ -9,6 +9,7 @@ interface Session {
   speaker: string;
   startTime: string;
   endTime: string;
+  materials: string[];
 }
 
 interface Event {

@@ -7,35 +7,22 @@ import React, { useEffect, useState } from "react";
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [email, setEmail] = useState<string | null>("");
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const response = await fetch("/api/auth/status", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+    if (localStorage.getItem("user_id") !== undefined) {
+      setEmail(localStorage.getItem("email"));
+      setIsLoggedIn(true);
+    }
 
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data.isAuthenticated);
-        } else {
-          setIsLoggedIn(false);
-        }
-      } catch (error) {
-        console.error("Error checking auth status:", error);
-        setIsLoggedIn(false);
-      }
-    };
-
-    checkAuthStatus();
   }, []);
+
+  useEffect(() => {
+
+  }, [isLoggedIn, email])
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
       setIsLoggedIn(false);
       localStorage.removeItem("token");
       localStorage.removeItem("role");
@@ -62,12 +49,18 @@ const Navbar: React.FC = () => {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition"
-            >
-              Log Out
-            </button>
+            <div className="flex flex-row justify-around items-center">
+              <p className="mr-2">
+                Welcome Back {email}!
+              </p>
+              <button
+                onClick={handleLogout}
+                className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition"
+              >
+                Log Out
+              </button>
+            </div>
+            
           ) : (
             <>
               <Link href="/login">

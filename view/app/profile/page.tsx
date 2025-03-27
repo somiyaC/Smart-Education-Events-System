@@ -1,16 +1,99 @@
 "use client";
 
+import { useAppContext } from "../StateContext"; // Adjust the import path as needed
+import { useState, useEffect } from "react";
+
 type User = {
   email: string;
   full_name: string;
   password: string;
 };
 
-interface ProfilePageProps {
-  user: User | null;
-}
+export default function ProfilePage() {
+  const { userId } = useAppContext();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState<Omit<User, "password">>({
+    email: "",
+    full_name: "",
+  });
 
-export default function ProfilePage({ user }: ProfilePageProps) {
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!userId) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/users/${userId}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const userData = await response.json();
+        setUser(userData);
+        setFormData({
+          email: userData.email,
+          full_name: userData.full_name,
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setUser(null);
+        setLoading(false);
+      }
+    }
+
+    fetchUserData();
+  }, [userId]);
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!userId) {
+      alert("You must be logged in to update profile");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Profile update error:", error);
+      alert("Failed to update profile");
+    }
+  };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
   if (!user) {
     return <p>Log In to edit your profile!</p>;
   }
