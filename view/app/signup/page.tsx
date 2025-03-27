@@ -14,7 +14,7 @@ const Signup = () => {
   const [error, setError] = useState("");
   const { userId, setUserId } = useAppContext();
 
-  const handleSignup = async (e) => {
+  const handleSignup = async (e:  React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/signup", {
@@ -33,6 +33,7 @@ const Signup = () => {
         setUserId(data.user_id);
         console.log("stored id", data.user_id);
         alert("Signup successful!");
+        router.push("/login");
       } else {
         alert(`Signup failed: ${data.detail}`);
       }
