@@ -30,13 +30,13 @@ def signup(user: SignupRequest):
     hashed_password = bcrypt.hash(user.password)
     print(hashed_password)
     _id = users_collection.insert_one({"email": user.email, "password": hashed_password, "role": user.role})
-    return {"status": True, "first_name":"john doe","user_id":_id}
+    return {"status": True, "first_name":"john doe","user_id":str(_id)}
 
 @router.post("/login")
 def login(user: LoginRequest):  # ✅ Now only expects email & password
     db_user = users_collection.find_one({"email": user.email})
     if not db_user or not bcrypt.verify(user.password, db_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-
+    print(db_user)
     token = jwt.encode({"email": user.email, "role": db_user["role"]}, SECRET_KEY, algorithm="HS256")
-    return {"token": token, "role": db_user["role"], "user_id": db_user._id, "first_name": db_user.first_name}
+    return {"token": token, "role": db_user["role"], "user_id": str(db_user['_id'])}
