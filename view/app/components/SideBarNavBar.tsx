@@ -75,6 +75,24 @@ const SideBarNavBar: React.FC = () => {
             </Link>
           </li>
         )}
+          <li>
+            {/* Only for Executive administrator */}
+            <Link
+              href="/Analytics"
+              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            >
+              Analytics
+            </Link>
+          </li>
+          <li>
+            {/* Only for Executive administrator */}
+            <Link
+              href="/PaymentDashboard"
+              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            >
+              Payment Dashboard
+            </Link>
+          </li>
         <li>
           <Link
             href="/networking"
