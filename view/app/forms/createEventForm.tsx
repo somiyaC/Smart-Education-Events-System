@@ -48,6 +48,23 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       setSessionMaterials([...sessionMaterials, material]);
     }
   };
+
+  // Convert 12-hour time to 24-hour format
+  const convertTo24HourFormat = (time12: string) => {
+    const [time, modifier] = time12.split(" ");
+    let [hours, minutes] = time.split(":");
+
+    if (hours === "12") {
+      hours = "00";
+    }
+
+    if (modifier === "PM") {
+      hours = String(parseInt(hours, 10) + 12);
+    }
+
+    return `${hours.padStart(2, "0")}:${minutes}`;
+  };
+
   // Add a new session to the event
   const addSession = () => {
     if (
@@ -74,7 +91,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       setSessionEndTime("");
       setSessionMaterials([]);
     } else {
-      alert("Please fill out both session title and time.");
+      alert("Please fill out all session details.");
     }
   };
 
@@ -93,25 +110,53 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     };
 
     try {
-      const res = await fetch("http://localhost:8000/events/create_event", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...finalEvent,
-          organizer: localStorage.getItem("user_id") || "",
-          participants: [],
-          is_virtual: false,
-          capacity: 100,
-          virtual_meeting_url: "",
-        }),
-      });
+      // First, create the event
+      const eventRes = await fetch(
+        "http://localhost:8000/events/create_event",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...finalEvent,
+            organizer: localStorage.getItem("user_id") || "",
+            participants: [],
+            is_virtual: false,
+            capacity: 100,
+            virtual_meeting_url: "",
+          }),
+        }
+      );
 
-      const data = await res.json();
+      const eventData = await eventRes.json();
 
-      if (data.event_id !== undefined) {
-        alert("Successfully created an event.");
+      if (eventData.event_id !== undefined) {
+        // If event creation is successful, create sessions
+        const sessionPromises = finalEvent.sessions.map((session) =>
+          fetch("http://localhost:8000/sessions/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              event_id: eventData.event_id,
+              title: session.title,
+              speaker: session.speaker,
+              startTime: convertTo24HourFormat(session.startTime),
+              endTime: convertTo24HourFormat(session.endTime),
+            }),
+          })
+        );
+
+        // Wait for all session creation requests to complete
+        const sessionResponses = await Promise.all(sessionPromises);
+        const sessionData = await Promise.all(
+          sessionResponses.map((res) => res.json())
+        );
+
+        alert("Successfully created an event and its sessions.");
+
         // Reset form
         setEvent({
           name: "",
@@ -130,7 +175,6 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       alert("An error occurred while creating the event");
     }
   };
-
   const router = useRouter();
 
   useEffect(() => {
@@ -237,23 +281,56 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         <label htmlFor="start-time" className="block text-sm font-semibold">
           Start Time
         </label>
-        <input
-          type="time"
+        <select
           className="border border-orange-400 rounded p-2 w-full mt-2"
           value={sessionStartTime}
           onChange={(e) => setSessionStartTime(e.target.value)}
-        />
+        >
+          <option value="">Select Start Time</option>
+          {[...Array(24)]
+            .map((_, hour) =>
+              [...Array(2)].map((_, half) => {
+                const minutes = half === 0 ? "00" : "30";
+                const time12 = `${hour % 12 || 12}:${minutes} ${
+                  hour < 12 ? "AM" : "PM"
+                }`;
+                const time24 = convertTo24HourFormat(time12);
+                return (
+                  <option key={`${hour}-${half}`} value={time12}>
+                    {time12}
+                  </option>
+                );
+              })
+            )
+            .flat()}
+        </select>
       </div>
       <div>
         <label htmlFor="end-time" className="block text-sm font-semibold">
           End Time
         </label>
-        <input
-          type="time"
+        <select
           className="border border-orange-400 rounded p-2 w-full mt-2"
           value={sessionEndTime}
           onChange={(e) => setSessionEndTime(e.target.value)}
-        />
+        >
+          <option value="">Select End Time</option>
+          {[...Array(24)]
+            .map((_, hour) =>
+              [...Array(2)].map((_, half) => {
+                const minutes = half === 0 ? "00" : "30";
+                const time12 = `${hour % 12 || 12}:${minutes} ${
+                  hour < 12 ? "AM" : "PM"
+                }`;
+                return (
+                  <option key={`${hour}-${half}`} value={time12}>
+                    {time12}
+                  </option>
+                );
+              })
+            )
+            .flat()}
+        </select>
       </div>
 
       <input
