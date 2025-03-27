@@ -65,24 +65,50 @@ const EventFormPage: React.FC = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8000/events/");
+      const res = await fetch("http://localhost:8000/events/event_search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: searchQuery }),
+      });
+
       const data = await res.json();
 
-      // Ensure that the event data contains all necessary fields
-      if (
-        data &&
-        data.event_type &&
-        data.start_date &&
-        data.end_date &&
-        data.organizer &&
-        data.venue
-      ) {
-        setEvent(data);
+      // Check if events array exists and is not empty
+      if (data.events && data.events.length > 0) {
+        // Take the first event from the search results
+        const foundEvent = data.events[0];
+
+        // Ensure that the event data contains all necessary fields
+        if (
+          foundEvent &&
+          foundEvent.event_type &&
+          foundEvent.start_date &&
+          foundEvent.end_date &&
+          foundEvent.organizer_id &&
+          foundEvent.venue_id
+        ) {
+          setEvent({
+            name: foundEvent.name,
+            description: foundEvent.description,
+            event_type: foundEvent.event_type,
+            start_date: foundEvent.start_date,
+            end_date: foundEvent.end_date,
+            organizer: foundEvent.organizer_id,
+            venue: foundEvent.venue_id,
+            sessions: [], // You might want to populate this if needed
+            participants: foundEvent.participants || [],
+          });
+        } else {
+          setError("Event found but data is incomplete.");
+        }
       } else {
-        setError("Event not found or incomplete data.");
+        setError("No events found matching the search query.");
       }
     } catch (err) {
       setError("Error fetching event data.");
+      console.error(err);
     }
     setLoading(false);
   };

@@ -12,7 +12,7 @@ interface Session {
 }
 
 interface Event {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   event_type: string;
@@ -153,7 +153,10 @@ const AllEvents: React.FC = () => {
                </div> */}
               <button
                 type="submit"
-                onSubmit={async () => {
+                onClick={async () => {
+                  console.log("trying to signup");
+                  console.log(event);
+                  console.log(userId);
                   const res = await fetch(
                     "http://localhost:8000/events/event_signup",
                     {
@@ -162,8 +165,8 @@ const AllEvents: React.FC = () => {
                         "Content-Type": "application/json", // Set content-type to JSON
                       },
                       body: JSON.stringify({
-                        user_id: userId,
-                        event_id: event._id,
+                        user_id: localStorage.getItem("user_id"),
+                        event_id: event.id,
                       }), // Convert the data to JSON string
                     }
                   )
@@ -178,10 +181,10 @@ const AllEvents: React.FC = () => {
                             "Content-Type": "application/json",
                           },
                           body: JSON.stringify({
-                            event_id: event._id,
+                            event_id: event.id,
                             price: 20.5,
                             status: "unpaind",
-                            attendee_id: userId,
+                            attendee_id: localStorage.getItem("user_id"),
                           }),
                         });
                       }

@@ -18,7 +18,6 @@ export default function ProfilePage() {
     full_name: "",
   });
 
-  // Fetch user data when component mounts or userId changes
   useEffect(() => {
     async function fetchUserData() {
       if (!userId) {
@@ -28,7 +27,6 @@ export default function ProfilePage() {
       }
 
       try {
-        // Replace with your actual API endpoint to fetch user data
         const response = await fetch(`/api/users/${userId}`);
 
         if (!response.ok) {

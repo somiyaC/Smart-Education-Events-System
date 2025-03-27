@@ -24,7 +24,6 @@ class Event(BaseModel):
 class EventSignupData(BaseModel):
     user_id: str
     event_id: str
-    ticket_type: str
 
 class EventUserData(BaseModel):
     user_id: str
@@ -48,7 +47,7 @@ async def user_events(user_data: UserData):
     all_events = await EventModel.get_upcoming_events()
     user_events = []
     for event in all_events:
-        if user_id in event.participants:
+        if user_id in event['participants']:
             user_events.append(event)
     
     return {"events":[document_to_dict(event) for event in user_events] }    
@@ -64,26 +63,28 @@ async def create_event(event: Event):
     event_id = await EventModel.create_event(event['name'], event['description'], event['event_type'], datetime.strptime(event['start_date'], "%Y-%m-%d"),datetime.strptime(event['end_date'],"%Y-%m-%d"),event['is_virtual'],event['virtual_meeting_url'],event['organizer'],event['venue'],event['capacity'],event['participants'])
     return {"event_id":event_id}
 
+
 @router.post("/event_signup")
-def create_event(event_signup_data: EventSignupData):
+async def create_event(event_signup_data: EventSignupData):
     """
     signup for an event. This will create a ticket tied between the user_id and the event_id
     """
     user_id = event_signup_data.user_id
     event_id = event_signup_data.event_id
 
-    event = EventModel.get_event_by_id(event_id)
+    event = await EventModel.get_event_by_id(event_id)
 
-    current_participants = len(event.particpants)
-    if current_participants >= event.capacity:
-        return {"status": False}
+    print("event", event)
 
-    EventModel.add_participant(event_id, user_id)
+    try:
+        await EventModel.add_participant(event_id, user_id)
+    except:
+        return {"status":False}
 
     return {"status":True}
 
 @router.post("/event_cancel")
-def event_cancel(event_cancel_data: EventUserData):
+async def event_cancel(event_cancel_data: EventUserData):
     """
     allows users to cancel tickets for event participation
     """
@@ -100,7 +101,7 @@ def event_cancel(event_cancel_data: EventUserData):
     return {"status": True}
 
 @router.get("/upcoming_events")
-def get_upcoming_events(user_upcoming_event: EventUserData):
+async def get_upcoming_events(user_upcoming_event: EventUserData):
     """
     fetch the user's tickets
     """

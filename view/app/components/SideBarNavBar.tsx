@@ -4,6 +4,9 @@ import Link from "next/link";
 import React from "react";
 
 const SideBarNavBar: React.FC = () => {
+  const is_organizer =
+    localStorage.getItem("role") === "organizer" ? true : false;
+
   return (
     <div className="w-60 h-screen bg-white text-white p-2 h-full">
       <ul className="space-y-1.5">
@@ -24,51 +27,50 @@ const SideBarNavBar: React.FC = () => {
             Your Events
           </Link>
         </li>
-        <li>
-          {/* Only displayed for Attendees */}
-          <Link
-            href="/calendar"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Calendar
-          </Link>
-        </li>
-        <li>
-          {/* Only for event organizers, planners, sponsors, and exhibitors */}
-          <Link
-            href="/create-edit-events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Create/Edit Events
-          </Link>
-        </li>
-        <li>
-          {/* Only for Technical administrator */}
-          <Link
-            href="/edit-create-user"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Edit/Create User
-          </Link>
-        </li>
-        <li>
-          {/* Only for Executive administrator */}
-          <Link
-            href="/event-management"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Event Information and Management
-          </Link>
-        </li>
-        <li>
-          {/* Only for Executive administrator */}
-          <Link
-            href="/event-promotion"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Event Promotion
-          </Link>
-        </li>
+        {is_organizer && (
+          <li>
+            {/* Only for event organizers, planners, sponsors, and exhibitors */}
+            <Link
+              href="/create-edit-events"
+              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            >
+              Create/Edit Events
+            </Link>
+          </li>
+        )}
+        {is_organizer && (
+          <li>
+            {/* Only for Technical administrator */}
+            <Link
+              href="/edit-create-user"
+              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            >
+              Edit/Create User
+            </Link>
+          </li>
+        )}
+        {is_organizer && (
+          <li>
+            {/* Only for Executive administrator */}
+            <Link
+              href="/event-management"
+              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            >
+              Event Information and Management
+            </Link>
+          </li>
+        )}
+        {is_organizer && (
+          <li>
+            {/* Only for Executive administrator */}
+            <Link
+              href="/event-promotion"
+              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            >
+              Event Promotion
+            </Link>
+          </li>
+        )}
         <li>
           {/* Only for Executive administrator */}
           <Link
@@ -78,15 +80,17 @@ const SideBarNavBar: React.FC = () => {
             Networking & Engagement
           </Link>
         </li>
-        <li>
-          {/* Only for Technical administrator */}
-          <Link
-            href="/system-maintenance"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            System Maintenance
-          </Link>
-        </li>
+        {is_organizer && (
+          <li>
+            {/* Only for Technical administrator */}
+            <Link
+              href="/system-maintenance"
+              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            >
+              System Maintenance
+            </Link>
+          </li>
+        )}
         <li>
           {/* Only for Technical administrator */}
           <Link

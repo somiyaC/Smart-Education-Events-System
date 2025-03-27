@@ -4,6 +4,8 @@ import { useAppContext } from "../StateContext";
 
 interface Material {
   title: string;
+  type: string; // e.g., "PDF", "Video", "Slides"
+  url: string;
 }
 
 interface Session {
@@ -116,7 +118,6 @@ const YourEvents: React.FC = () => {
             </div>
 
             {/* Sessions */}
-            {/* Sessions */}
             <div className="mt-6">
               <h3 className="text-lg font-semibold text-gray-800">Sessions:</h3>
               <ul className="mt-2 space-y-4">
@@ -143,7 +144,14 @@ const YourEvents: React.FC = () => {
                         <ul className="mt-2 space-y-2">
                           {session.materials.map((material, mIdx) => (
                             <li key={mIdx} className="text-sm">
-                              {material.title}
+                              <a
+                                href={material.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:underline"
+                              >
+                                {material.title} ({material.type})
+                              </a>
                             </li>
                           ))}
                         </ul>
