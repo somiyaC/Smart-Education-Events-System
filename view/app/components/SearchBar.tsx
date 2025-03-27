@@ -1,21 +1,24 @@
 "use client";
 import React, { useState } from "react";
-import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
-import { useRouter,useSearchParams } from "next/navigation";
+import { FaSearch } from "react-icons/fa";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const SearchBar: React.FC = () => {
-
   const search = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(search.get('q'));
+  const [searchQuery, setSearchQuery] = useState<string>(search.get("q") || "");
   const router = useRouter();
+
   const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     router.push("/?q=" + searchQuery);
   };
 
   return (
     <div className="flex items-center justify-center mb-6 w-full max-w-2xl mx-auto mt-6">
-      {/* Event Search Input */}
-      <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#F5F5F5] border border-orange-400 rounded-full w-1/2 px-4 py-2 shadow-sm">
+      <form
+        onSubmit={handleSearchSubmit}
+        className="flex items-center bg-[#F5F5F5] border border-orange-400 rounded-full w-1/2 px-4 py-2 shadow-sm"
+      >
         <FaSearch className="text-gray-500 mr-2" />
         <input
           type="text"
