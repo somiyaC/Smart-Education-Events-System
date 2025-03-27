@@ -140,7 +140,7 @@ class UserModel(BaseModel):
         """
         # Ensure we only update allowed fields
         allowed_fields = [
-            "first_name", "last_name", "bio", "company", "job_title",
+            "email","password","first_name", "last_name", "bio", "company", "job_title",
             "phone", "linkedin", "twitter", "facebook", "interests",
             "receive_notifications", "role"
         ]
