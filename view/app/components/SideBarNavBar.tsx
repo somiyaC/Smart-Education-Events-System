@@ -4,6 +4,9 @@ import Link from "next/link";
 import React from "react";
 
 const SideBarNavBar: React.FC = () => {
+
+  const is_organizer = localStorage.getItem("role") === "organizer" ? true : false;
+
   return (
     <div className="w-60 h-screen bg-white text-white p-2 h-full">
       <ul className="space-y-1.5">
@@ -24,7 +27,7 @@ const SideBarNavBar: React.FC = () => {
             Your Events
           </Link>
         </li>
-        <li>
+        {is_organizer && <li>
           {/* Only for event organizers, planners, sponsors, and exhibitors */}
           <Link
             href="/create-edit-events"
@@ -32,8 +35,8 @@ const SideBarNavBar: React.FC = () => {
           >
             Create/Edit Events
           </Link>
-        </li>
-        <li>
+        </li>}
+        {is_organizer && <li>
           {/* Only for Technical administrator */}
           <Link
             href="/edit-create-user"
@@ -41,8 +44,8 @@ const SideBarNavBar: React.FC = () => {
           >
             Edit/Create User
           </Link>
-        </li>
-        <li>
+        </li>}
+        {is_organizer && <li>
           {/* Only for Executive administrator */}
           <Link
             href="/event-management"
@@ -50,8 +53,8 @@ const SideBarNavBar: React.FC = () => {
           >
             Event Information and Management
           </Link>
-        </li>
-        <li>
+        </li>}
+        {is_organizer && <li>
           {/* Only for Executive administrator */}
           <Link
             href="/event-promotion"
@@ -59,7 +62,7 @@ const SideBarNavBar: React.FC = () => {
           >
             Event Promotion
           </Link>
-        </li>
+        </li>}
         <li>
           {/* Only for Executive administrator */}
           <Link
@@ -69,7 +72,7 @@ const SideBarNavBar: React.FC = () => {
             Networking & Engagement
           </Link>
         </li>
-        <li>
+        {is_organizer && <li>
           {/* Only for Technical administrator */}
           <Link
             href="/system-maintenance"
@@ -77,7 +80,7 @@ const SideBarNavBar: React.FC = () => {
           >
             System Maintenance
           </Link>
-        </li>
+        </li>}
         <li>
           {/* Only for Technical administrator */}
           <Link

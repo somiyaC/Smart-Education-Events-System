@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 interface Session {
   title: string;
@@ -84,6 +86,19 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       body: JSON.stringify({...event,...{participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}}) // Convert the data to JSON string
     })
   };
+  
+  const router = useRouter();
+
+  useEffect(() => {
+    let role = localStorage.getItem("role");
+    if (role !== "organizer") {
+      alert("Unauthorized");
+      router.push("/")
+      return;
+    }
+
+
+  },[])
 
   return (
     <form
