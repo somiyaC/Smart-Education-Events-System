@@ -18,9 +18,6 @@ class UserCreate(BaseModel):
     email: str
     first_name: str
     last_name: str
-    # Optionally, you can allow role to be specified,
-    # but the endpoints below force the role
-    # role: Optional[str] = "attendee"
 
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None

@@ -1,5 +1,5 @@
 """
-Email model module for handling emailfunctionality.
+Email model module for handling email functionality.
 Based on the Email Schema.
 """
 from typing import Dict, List, Optional, Any
@@ -9,33 +9,12 @@ from bson import ObjectId
 from .base_model import BaseModel
 
 class EmailCampaignModel(BaseModel):
-    """
-    Model for email marketing campaigns.
-    Handles email templates, sending, and tracking.
-    """
     collection_name = "email_campaigns"
     
     @classmethod
     async def create_campaign(cls, event_id: str, name: str, subject: str, 
-                           body_html: str, body_text: str, 
-                           audience: Dict, sender_name: str, 
-                           sender_email: str) -> str:
-        """
-        Create a new email campaign.
-        
-        Args:
-            event_id: Event ID
-            name: Campaign name (internal)
-            subject: Email subject line
-            body_html: HTML content of the email
-            body_text: Plain text content of the email
-            audience: Audience targeting criteria
-            sender_name: Sender's name
-            sender_email: Sender's email address
-            
-        Returns:
-            str: ID of the created campaign
-        """
+                              body_html: str, body_text: str, audience: Dict, 
+                              sender_name: str, sender_email: str) -> str:
         campaign_data = {
             "event_id": event_id,
             "name": name,
@@ -45,7 +24,7 @@ class EmailCampaignModel(BaseModel):
             "audience": audience,
             "sender_name": sender_name,
             "sender_email": sender_email,
-            "status": "draft",  # draft, scheduled, sent, cancelled
+            "status": "draft",
             "schedule_time": None,
             "sent_time": None,
             "created_at": datetime.now(timezone.utc),
@@ -56,24 +35,13 @@ class EmailCampaignModel(BaseModel):
                 "clicked": 0,
                 "bounced": 0
             },
-            "tracking": []  # Will store individual recipient tracking data
+            "tracking": []
         }
-        
         campaign_id = await cls.insert_one(campaign_data)
         return str(campaign_id)
     
     @classmethod
     async def schedule_campaign(cls, campaign_id: str, schedule_time: datetime) -> Optional[Dict]:
-        """
-        Schedule a campaign for sending.
-        
-        Args:
-            campaign_id: Campaign ID
-            schedule_time: Time to send the campaign
-            
-        Returns:
-            Dict: Updated campaign document or None if not found
-        """
         return await cls.update_one(
             {"_id": ObjectId(campaign_id), "status": "draft"},
             {
@@ -87,15 +55,6 @@ class EmailCampaignModel(BaseModel):
     
     @classmethod
     async def cancel_campaign(cls, campaign_id: str) -> Optional[Dict]:
-        """
-        Cancel a scheduled campaign.
-        
-        Args:
-            campaign_id: Campaign ID
-            
-        Returns:
-            Dict: Updated campaign document or None if not found
-        """
         return await cls.update_one(
             {"_id": ObjectId(campaign_id), "status": "scheduled"},
             {
@@ -108,16 +67,6 @@ class EmailCampaignModel(BaseModel):
     
     @classmethod
     async def record_send(cls, campaign_id: str, recipient_ids: List[str]) -> Optional[Dict]:
-        """
-        Record that a campaign has been sent.
-        
-        Args:
-            campaign_id: Campaign ID
-            recipient_ids: List of recipient user IDs
-            
-        Returns:
-            Dict: Updated campaign document or None if not found
-        """
         tracking_entries = []
         for user_id in recipient_ids:
             tracking_entries.append({
@@ -144,29 +93,15 @@ class EmailCampaignModel(BaseModel):
     
     @classmethod
     async def track_open(cls, campaign_id: str, user_id: str) -> Optional[Dict]:
-        """
-        Track an email open event.
-        
-        Args:
-            campaign_id: Campaign ID
-            user_id: User ID who opened the email
-            
-        Returns:
-            Dict: Updated campaign document or None if not found
-        """
         now = datetime.now(timezone.utc)
-        
-        # Find the campaign and check if this user already opened
         campaign = await cls.find_one({"_id": ObjectId(campaign_id)})
         if not campaign:
             return None
         
         for entry in campaign.get("tracking", []):
             if entry.get("user_id") == user_id and entry.get("opened", False):
-                # Already tracked open for this user
                 return campaign
         
-        # Update opened count and tracking data for this user
         return await cls.update_one(
             {
                 "_id": ObjectId(campaign_id),
@@ -184,30 +119,15 @@ class EmailCampaignModel(BaseModel):
     
     @classmethod
     async def track_click(cls, campaign_id: str, user_id: str, link_url: str) -> Optional[Dict]:
-        """
-        Track an email link click event.
-        
-        Args:
-            campaign_id: Campaign ID
-            user_id: User ID who clicked the link
-            link_url: URL that was clicked
-            
-        Returns:
-            Dict: Updated campaign document or None if not found
-        """
         now = datetime.now(timezone.utc)
-        
-        # Find the campaign and check if this user already clicked
         campaign = await cls.find_one({"_id": ObjectId(campaign_id)})
         if not campaign:
             return None
         
         for entry in campaign.get("tracking", []):
             if entry.get("user_id") == user_id and entry.get("clicked", False):
-                # Already tracked click for this user
                 return campaign
         
-        # Update clicked count and tracking data for this user
         return await cls.update_one(
             {
                 "_id": ObjectId(campaign_id),
@@ -231,22 +151,11 @@ class EmailCampaignModel(BaseModel):
     
     @classmethod
     async def get_campaign_metrics(cls, campaign_id: str) -> Optional[Dict]:
-        """
-        Get detailed metrics for a campaign.
-        
-        Args:
-            campaign_id: Campaign ID
-            
-        Returns:
-            Dict: Campaign metrics or None if not found
-        """
         campaign = await cls.find_one({"_id": ObjectId(campaign_id)})
         if not campaign:
             return None
         
         metrics = campaign.get("metrics", {})
-        
-        # Calculate rates
         total_sent = metrics.get("total_sent", 0)
         open_rate = (metrics.get("opened", 0) / total_sent * 100) if total_sent > 0 else 0
         click_rate = (metrics.get("clicked", 0) / total_sent * 100) if total_sent > 0 else 0
@@ -264,6 +173,21 @@ class EmailCampaignModel(BaseModel):
             "open_rate": round(open_rate, 2),
             "click_rate": round(click_rate, 2),
             "bounce_rate": round(bounce_rate, 2),
-            "click_to_open_rate": round((metrics.get("clicked", 0) / metrics.get("opened", 0) * 100), 2) 
-                                 if metrics.get("opened", 0) > 0 else 0
+            "click_to_open_rate": round(
+                (metrics.get("clicked", 0) / metrics.get("opened", 0) * 100),
+                2
+            ) if metrics.get("opened", 0) > 0 else 0
         }
+
+class EmailModel(BaseModel):
+    collection_name = "email_logs"
+
+    @classmethod
+    async def send_email(cls, to: str, subject: str, body: str, db):
+        log_data = {
+            "to": to,
+            "subject": subject,
+            "body": body,
+            "sent_at": datetime.now(timezone.utc)
+        }
+        await cls.insert_one(log_data)

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from controller.database import init_db
-from controller.routes import events, auth, venue, ticket, session, poll, feedback, chat, stakeholder_attendee
+from controller.routes import events, auth, venue, ticket, session, poll, feedback, chat, stakeholder_attendee, networking_engagement, promotion
 from models.base_model import Database
 
 
@@ -39,3 +39,5 @@ app.include_router(poll.router, prefix="/polls", tags=["Polls"])
 app.include_router(feedback.router, prefix="/feedback", tags=["Feedback"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
 app.include_router(stakeholder_attendee.router)
+app.include_router(networking_engagement.router)
+app.include_router(promotion.router)
