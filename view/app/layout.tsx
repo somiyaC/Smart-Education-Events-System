@@ -7,7 +7,7 @@ import Footer from "@/app/components/Footer";
 import { AppProvider } from './StateContext';
 
 export const metadata: Metadata = {
-  title: "AroundU",
+  title: "SEES",
   description: "Discover and explore events near you.",
 };
 
