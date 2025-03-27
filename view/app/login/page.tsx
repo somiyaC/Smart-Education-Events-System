@@ -30,6 +30,7 @@ const Login = () => {
         localStorage.setItem("token", data.token); 
         localStorage.setItem("role", data.role);
         localStorage.setItem("user_id", data.user_id)
+        localStorage.setItem("email",data.email)
         console.log("user_id", data.user_id)
         setUserId(data.user_id)
         console.log("user",data.user_id)
