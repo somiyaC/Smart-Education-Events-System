@@ -6,7 +6,8 @@ import { useRouter,useSearchParams } from "next/navigation";
 const SearchBar: React.FC = () => {
 
   const search = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(search.get('q'));
+  const search_query = search.get('q') || "";
+  const [searchQuery, setSearchQuery] = useState(search_query);
   const router = useRouter();
   const handleSearchSubmit = (e: React.FormEvent) => {
     router.push("/?q=" + searchQuery);
