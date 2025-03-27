@@ -124,10 +124,10 @@ async def get_all_events(search: SearchData):
     if query != "":
         matched_query = []
         query_events = await EventModel.search_events(query=query)
-        query_events_ids = [event.id for event in query_events]
+        query_events_ids = [event['id'] for event in query_events]
         
         for event in all_events:
-            if event.id in query_events_ids:
+            if event['id'] in query_events_ids:
                 matched_query.append(event)
     all_events = matched_query
     for event in all_events:

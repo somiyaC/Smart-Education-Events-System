@@ -32,6 +32,7 @@ const AllEvents: React.FC = () => {
   const { userId, setUserId } = useAppContext();
   const searchParams = useSearchParams();
   const search = searchParams.get('q');
+  console.log("param",search)
 
 
   // Fetch all events from the backend
