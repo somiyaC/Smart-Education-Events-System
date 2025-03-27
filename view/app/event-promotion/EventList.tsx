@@ -1,17 +1,15 @@
 "use client";
 
-const events = [
-  { id: 1, name: 'Neuroscience Workshop', date: 'April 12, 2025', time: '2:00 PM', location: 'Montreal' },
-  { id: 2, name: 'AI Conference 2025', date: 'May 3, 2025', time: '10:00 AM', location: 'New York' },
-  { id: 3, name: 'Student Leadership Seminar', date: 'June 15, 2025', time: '1:00 PM', location: 'Toronto' },
-];
+import { useEffect, useState } from "react";
 
 export interface Event {
-  id: number;
+  id: string;
   name: string;
-  date: string;
-  time: string;
-  location: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  venue_id: string;
+  organizer_id: string;
 }
 
 interface EventListProps {
@@ -19,14 +17,26 @@ interface EventListProps {
 }
 
 export default function EventList({ onSelectEvent }: EventListProps) {
+  const [events, setEvents] = useState<Event[]>([]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const res = await fetch("http://localhost:8000/events");
+      const data = await res.json();
+      setEvents(data);
+    };
+    fetchEvents();
+  }, []);
+
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 flex-wrap">
       {events.map((event) => (
         <div key={event.id} className="border p-4 rounded-xl shadow-md w-1/3">
           <h2 className="text-xl font-semibold mb-2">{event.name}</h2>
-          <p className="text-gray-600 mb-1">{event.location}</p>
-          <p className="text-gray-600 mb-1">{event.date}</p>
-          <p className="text-gray-500 mb-4">{event.time}</p>
+          <p className="text-gray-600 mb-1">{event.description}</p>
+          <p className="text-gray-600 mb-1">
+            {new Date(event.start_date).toLocaleDateString()}
+          </p>
           <button
             onClick={() => onSelectEvent(event)}
             className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 w-full"
