@@ -31,7 +31,7 @@ interface Event {
 
 const YourEvents: React.FC = () => {
   const { userId } = useAppContext();
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>([]); // Default to an empty array
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,12 +42,12 @@ const YourEvents: React.FC = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_id: userId }), // No change to backend request
+      body: JSON.stringify({ user_id: userId }),
     })
       .then((res) => res.json())
       .then((data) => {
         console.log("User's events:", data.events);
-        setEvents(data.events);
+        setEvents(data.events || []); // Ensure that it's always an array
       })
       .catch((error) => console.error("Error fetching user events:", error))
       .finally(() => setLoading(false));
@@ -60,7 +60,7 @@ const YourEvents: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user_id: userId, event_id: eventId }), // No change to backend request
+        body: JSON.stringify({ user_id: userId, event_id: eventId }),
       });
 
       const data = await response.json();
@@ -79,7 +79,9 @@ const YourEvents: React.FC = () => {
 
   if (loading)
     return <p className="text-center text-gray-600">Loading your events...</p>;
-  if (events.length === 0)
+
+  // Ensure events is an array before checking length
+  if (!Array.isArray(events) || events.length === 0)
     return (
       <p className="text-center text-gray-600">
         You are not signed up for any events.
