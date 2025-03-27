@@ -1,92 +1,68 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const SideBarNavBar: React.FC = () => {
+  const [isOrganizer, setIsOrganizer] = useState(false);
 
-  const is_organizer = localStorage.getItem("role") === "organizer" ? true : false;
+  useEffect(() => {
+    // This will run only on the client (browser)
+    const role = localStorage.getItem("role");
+    setIsOrganizer(role === "organizer");
+  }, []);
 
   return (
     <div className="w-60 h-screen bg-white text-white p-2 h-full">
       <ul className="space-y-1.5">
         <li>
-          <Link
-            href="/"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
+          <Link href="/" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
             Home
           </Link>
         </li>
         <li>
-          {/* Only displayed for Attendees */}
-          <Link
-            href="/your-events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
+          <Link href="/your-events" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
             Your Events
           </Link>
         </li>
-        {is_organizer && <li>
-          {/* Only for event organizers, planners, sponsors, and exhibitors */}
-          <Link
-            href="/create-edit-events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Create/Edit Events
-          </Link>
-        </li>}
-        {is_organizer && <li>
-          {/* Only for Technical administrator */}
-          <Link
-            href="/edit-create-user"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Edit/Create User
-          </Link>
-        </li>}
-        {is_organizer && <li>
-          {/* Only for Executive administrator */}
-          <Link
-            href="/event-management"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Event Information and Management
-          </Link>
-        </li>}
-        {is_organizer && <li>
-          {/* Only for Executive administrator */}
-          <Link
-            href="/event-promotion"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Event Promotion
-          </Link>
-        </li>}
+
+        {isOrganizer && (
+          <>
+            <li>
+              <Link href="/create-edit-events" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
+                Create/Edit Events
+              </Link>
+            </li>
+            <li>
+              <Link href="/edit-create-user" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
+                Edit/Create User
+              </Link>
+            </li>
+            <li>
+              <Link href="/event-management" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
+                Event Information and Management
+              </Link>
+            </li>
+            <li>
+              <Link href="/event-promotion" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
+                Event Promotion
+              </Link>
+            </li>
+            <li>
+              <Link href="/system-maintenance" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
+                System Maintenance
+              </Link>
+            </li>
+          </>
+        )}
+
         <li>
-          {/* Only for Executive administrator */}
-          <Link
-            href="/networking"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
+          <Link href="/networking" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
             Networking & Engagement
           </Link>
         </li>
-        {is_organizer && <li>
-          {/* Only for Technical administrator */}
-          <Link
-            href="/system-maintenance"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            System Maintenance
-          </Link>
-        </li>}
         <li>
-          {/* Only for Technical administrator */}
-          <Link
-            href="/profile"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
+          <Link href="/profile" className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition">
             Profile
           </Link>
         </li>
