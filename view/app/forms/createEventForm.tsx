@@ -17,7 +17,6 @@ interface Event {
   event_type: string;
   start_date: string;
   end_date: string;
-  organizer: string;
   venue: string;
   sessions: Session[];
 }
@@ -33,7 +32,6 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     event_type: "",
     start_date: "",
     end_date: "",
-    organizer: "",
     venue: "",
     sessions: [],
   });
@@ -74,7 +72,6 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
 
   // Handle form submission (create new event)
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log("here", event)
     e.preventDefault();
     onSubmit(event); // Call the parent handler when submitted
 
@@ -83,7 +80,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       headers: {
         "Content-Type": "application/json" // Set content-type to JSON
       },
-      body: JSON.stringify({...event,...{participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}}) // Convert the data to JSON string
+      body: JSON.stringify({...event,...{organizer: localStorage.getItem("user_id"),participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}}) // Convert the data to JSON string
     })
   };
   
@@ -152,13 +149,6 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
           onChange={(e) => setEvent({ ...event, end_date: e.target.value })}
         />
       </div>
-      <input
-        type="text"
-        placeholder="Organizer"
-        className="border border-orange-400 rounded p-2 w-full mt-2"
-        value={event.organizer}
-        onChange={(e) => setEvent({ ...event, organizer: e.target.value })}
-      />
       <input
         type="text"
         placeholder="Venue"

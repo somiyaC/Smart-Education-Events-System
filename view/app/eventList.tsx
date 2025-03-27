@@ -186,6 +186,10 @@ const AllEvents: React.FC = () => {
                           attendee_id: localStorage.getItem("user_id")
                         })
                       })
+                      .then((res) => res.json())
+                      .then((data) => {
+                        alert("You sucessfully registered for this event.")
+                      })
                     }
                   })
                 }}

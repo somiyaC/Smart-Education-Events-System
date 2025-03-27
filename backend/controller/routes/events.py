@@ -35,11 +35,36 @@ class UserData(BaseModel):
 class EventSearch(BaseModel):
     query: str
 
+class OrganizerData(BaseModel):
+    organizer_id: str
+
 def document_to_dict(doc):
     if doc and '_id' in doc.keys():
         doc['_id'] = str(doc['_id'])
     return doc
 
+@router.post("/organizer_event")
+async def organizer_event(org_data: OrganizerData):
+    organizer_id = org_data.organizer_id
+    all_events = await EventModel.get_upcoming_events()
+    organizer_events = []
+    for event in all_events:
+        if organizer_id == event['organizer_id']:
+            organizer_events.append(event)
+
+    idx = 0
+    for event in organizer_events:
+        for participant_id in event['participants']:
+            user = await UserModel.get_user_by_id(participant_id)
+            if idx == 0:
+                event['participants_email'] = [user['email']]
+                idx = 1
+                continue
+            event['participants_email'].append(user['email'])
+    
+    return organizer_events
+
+    
 
 @router.post("/user_events")
 async def user_events(user_data: UserData):
