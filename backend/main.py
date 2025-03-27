@@ -27,7 +27,7 @@ async def shutdown_event():
     await Database.close_db()
 
 # Initialize indexes for the collections (this is part of your init_db function)
-init_db()
+#init_db()
 
 # Register routes
 app.include_router(events.router, prefix="/events", tags=["Events"])
