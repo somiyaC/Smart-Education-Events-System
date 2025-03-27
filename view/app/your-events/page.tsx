@@ -1,6 +1,6 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { useAppContext } from "../StateContext";
 
 interface Material {
   title: string;
@@ -12,13 +12,13 @@ interface Session {
   title: string;
   description: string;
   speaker: string;
-  startTime: string;
-  endTime: string;
-  materials: Material[];
+  start_time: string;
+  end_time: string;
+  materials: string;
 }
 
 interface Event {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   event_type: string;
@@ -30,14 +30,14 @@ interface Event {
 }
 
 const YourEvents: React.FC = () => {
-  const { userId } = useAppContext();
   const [events, setEvents] = useState<Event[]>([]); // Default to an empty array
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let userId = localStorage.getItem("user_id");
     if (!userId) return;
 
-    fetch("http://localhost:8000/user_events", {
+    fetch("http://localhost:8000/events/user_events", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51,26 +51,27 @@ const YourEvents: React.FC = () => {
       })
       .catch((error) => console.error("Error fetching user events:", error))
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, []);
 
   const handleUnsignUp = async (eventId: string) => {
     try {
-      const response = await fetch("http://localhost:8000/event_cancel", {
+      const response = await fetch("http://localhost:8000/events/event_cancel", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user_id: userId, event_id: eventId }),
+        body: JSON.stringify({ user_id: localStorage.getItem("user_id"), event_id: eventId }),
       });
 
       const data = await response.json();
       if (data.status === false) {
+        alert("Unable to cancel registration")
         console.log("Unsignup failed");
       } else {
         setEvents((prevEvents) =>
-          prevEvents.filter((event) => event._id !== eventId)
+          prevEvents.filter((event) => event.id !== eventId)
         );
-        console.log("Successfully unsubscribed from event");
+        alert("Successfully canceled registration");
       }
     } catch (error) {
       console.error("Error unsubscribing:", error);
@@ -96,7 +97,7 @@ const YourEvents: React.FC = () => {
       <div className="space-y-6">
         {events.map((event) => (
           <div
-            key={event._id}
+            key={event.id}
             className="border border-gray-300 p-6 rounded-lg shadow-lg bg-white"
           >
             {/* Event Header */}
@@ -133,29 +134,25 @@ const YourEvents: React.FC = () => {
                       <strong>Speaker:</strong> {session.speaker}
                     </p>
                     <p className="text-gray-700">
-                      <strong>Time:</strong> {session.startTime} -{" "}
-                      {session.endTime}
+                      <strong>Time:</strong> {session.start_time} -{" "}
+                      {session.end_time}
                     </p>
 
                     {/* Materials */}
-                    {session.materials.length > 0 && (
+                    {session.materials && (
                       <div className="mt-4">
                         <h5 className="text-sm font-semibold text-gray-800">
                           Materials:
                         </h5>
                         <ul className="mt-2 space-y-2">
-                          {session.materials.map((material, mIdx) => (
-                            <li key={mIdx} className="text-sm">
-                              <a
-                                href={material.url}
-                                target="_blank"
+                            <li className="text-sm">
+                              <p
                                 rel="noopener noreferrer"
                                 className="text-blue-500 hover:underline"
                               >
-                                {material.title} ({material.type})
-                              </a>
+                                {session.materials}
+                              </p>
                             </li>
-                          ))}
                         </ul>
                       </div>
                     )}
@@ -166,10 +163,10 @@ const YourEvents: React.FC = () => {
 
             {/* Unsign Up Button */}
             <button
-              onClick={() => handleUnsignUp(event._id)}
+              onClick={() => handleUnsignUp(event.id)}
               className="bg-red-500 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-red-600 transition"
             >
-              Unsign Up
+              Cancel Registration
             </button>
           </div>
         ))}

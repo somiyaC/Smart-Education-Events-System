@@ -1,11 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState} from "react";
 
 const SideBarNavBar: React.FC = () => {
-  const is_organizer =
-    localStorage.getItem("role") === "organizer" ? true : false;
+  const [isOrganizer, setIsOrganizer] = useState<boolean | null>(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("role") === "organizer") {
+      setIsOrganizer(true);
+    }
+  })
+
+  useEffect(() => {
+
+  },[isOrganizer])
 
   return (
     <div className="w-60 h-screen bg-white text-white p-2 h-full">
@@ -27,7 +36,7 @@ const SideBarNavBar: React.FC = () => {
             Your Events
           </Link>
         </li>
-        {is_organizer && (
+        {isOrganizer && (
           <li>
             {/* Only for event organizers, planners, sponsors, and exhibitors */}
             <Link
@@ -38,7 +47,7 @@ const SideBarNavBar: React.FC = () => {
             </Link>
           </li>
         )}
-        {is_organizer && (
+        {isOrganizer && (
           <li>
             {/* Only for Technical administrator */}
             <Link
@@ -49,7 +58,7 @@ const SideBarNavBar: React.FC = () => {
             </Link>
           </li>
         )}
-        {is_organizer && (
+        {isOrganizer && (
           <li>
             {/* Only for Executive administrator */}
             <Link
@@ -60,7 +69,7 @@ const SideBarNavBar: React.FC = () => {
             </Link>
           </li>
         )}
-        {is_organizer && (
+        {isOrganizer && (
           <li>
             {/* Only for Executive administrator */}
             <Link
@@ -80,7 +89,7 @@ const SideBarNavBar: React.FC = () => {
             Networking & Engagement
           </Link>
         </li>
-        {is_organizer && (
+        {isOrganizer && (
           <li>
             {/* Only for Technical administrator */}
             <Link

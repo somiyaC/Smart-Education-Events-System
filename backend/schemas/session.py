@@ -3,7 +3,6 @@ from typing import Optional, List
 from datetime import datetime, timezone
 
 class SessionSchema(BaseModel):
-    id: Optional[str] = None
     event_id: str  # Reference to Event
     speaker_id: Optional[str] = None  # Reference to User
     title: str = Field(..., max_length=255)

@@ -5,8 +5,18 @@ from datetime import datetime
 from models.event_model import EventModel
 from models.user_model import UserModel
 from models.venue_model import VenueModel
+from models.session_model import SessionModel
 from typing import Dict, List, Optional, Any
 router = APIRouter()
+
+class Session(BaseModel):
+    title: str
+    description: str
+    speaker: str
+    startTime: str
+    endTime: str
+    materials: List[str]
+    
 
 class Event(BaseModel):
     name: str
@@ -20,6 +30,8 @@ class Event(BaseModel):
     virtual_meeting_url: str
     participants: List[str]
     capacity: int
+    sessions: List[Session]
+
 
 class EventSignupData(BaseModel):
     user_id: str
@@ -73,6 +85,10 @@ async def user_events(user_data: UserData):
     user_events = []
     for event in all_events:
         if user_id in event['participants']:
+            print(event)
+            sessions = await SessionModel.get_event_sessions(event['id'])            
+            cleaned_sessions = [document_to_dict(session) for session in sessions]
+            event['sessions'] = cleaned_sessions
             user_events.append(event)
     
     return {"events":[document_to_dict(event) for event in user_events] }    
@@ -83,9 +99,16 @@ async def create_event(event: Event):
     """
     create an event users cans sign up to
     """
+    sessions = event.sessions
     event = event.dict()
 
+
     event_id = await EventModel.create_event(event['name'], event['description'], event['event_type'], datetime.strptime(event['start_date'], "%Y-%m-%d"),datetime.strptime(event['end_date'],"%Y-%m-%d"),event['is_virtual'],event['virtual_meeting_url'],event['organizer'],event['venue'],event['capacity'],event['participants'])
+
+    for session in sessions:
+        session = session.dict()
+        await SessionModel.create_session(event_id, session['title'],session['startTime'],session['endTime'],"Conference",session['description'],None,"Mezzanine",event['capacity'],"Laptop",event['participants'])
+
     return {"event_id":event_id}
 
 
@@ -116,14 +139,14 @@ async def event_cancel(event_cancel_data: EventUserData):
     user_id = event_cancel_data.user_id
     event_id = event_cancel_data.event_id
 
-    event = EventModel.get_event_by_id(event_id)
+    event = await EventModel.get_event_by_id(event_id)
 
     if event is None:
         return {"status": False}
 
-    EventModel.remove_participant(event_id,user_id)
+    result = await EventModel.remove_participant(event_id,user_id)
     
-    return {"status": True}
+    return {"status": result}
 
 @router.get("/upcoming_events")
 async def get_upcoming_events(user_upcoming_event: EventUserData):
