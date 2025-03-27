@@ -1,20 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
 const SideBarNavBar: React.FC = () => {
-  const [isOrganizer, setIsOrganizer] = useState<boolean | null>(false);
+  const [isOrganizer, setIsOrganizer] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("role") === "organizer") {
-      setIsOrganizer(true);
-    }
-  })
-
-  useEffect(() => {
-
-  },[isOrganizer])
+    // This will run only on the client (browser)
+    const role = localStorage.getItem("role");
+    setIsOrganizer(role === "organizer");
+  }, []);
 
   return (
     <div className="w-60 h-screen bg-white text-white p-2 h-full">
@@ -28,7 +24,6 @@ const SideBarNavBar: React.FC = () => {
           </Link>
         </li>
         <li>
-          {/* Only displayed for Attendees */}
           <Link
             href="/your-events"
             className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
@@ -81,7 +76,6 @@ const SideBarNavBar: React.FC = () => {
           </li>
         )}
         <li>
-          {/* Only for Executive administrator */}
           <Link
             href="/networking"
             className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
@@ -101,7 +95,6 @@ const SideBarNavBar: React.FC = () => {
           </li>
         )}
         <li>
-          {/* Only for Technical administrator */}
           <Link
             href="/profile"
             className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
