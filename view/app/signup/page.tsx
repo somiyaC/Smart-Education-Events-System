@@ -12,12 +12,12 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("attendee");
   const [error, setError] = useState("");
-  const {userId, setUserId} = useAppContext();
+  const { userId, setUserId } = useAppContext();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/signup", { 
+      const response = await fetch("http://127.0.0.1:8000/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -26,12 +26,12 @@ const Signup = () => {
           role: role, // Change role if needed
         }),
       });
-  
+
       const data = await response.json();
       console.log(data);
       if (data.status === true) {
         setUserId(data.user_id);
-        console.log("stored id", data.user_id)
+        console.log("stored id", data.user_id);
         alert("Signup successful!");
       } else {
         alert(`Signup failed: ${data.detail}`);
@@ -41,7 +41,6 @@ const Signup = () => {
       alert("Signup failed. Check console for details.");
     }
   };
-  
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
@@ -97,9 +96,9 @@ const Signup = () => {
       </div>
       <div className="hidden lg:block">
         <img
-          src="/signup.jpeg"
+          src="/images/signup.png"
           alt="Signup Illustration"
-          className="w-full h-full object-cover"
+          className="w-full max-h-[800px] object-cover rounded-3xl"
         />
       </div>
     </div>

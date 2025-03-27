@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-
 interface Session {
   title: string;
   description: string;
@@ -82,40 +81,66 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
   // Handle form submission (create new event)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(event); // Call the parent handler when submitted
-    console.log("event", event)
-    const res = await fetch("http://localhost:8000/events/create_event", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // Set content-type to JSON
-      },
-      body: JSON.stringify({
-        ...event,
-        ...{organizer: localStorage.getItem("user_id"),participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}
-      })
-    })
-    .then(res => res.json())
-    .then((data) => {
+
+    // Get current date in YYYY-MM-DD format
+    const currentDate = new Date().toISOString().split("T")[0];
+
+    // Use current date if start_date or end_date are empty
+    const finalEvent = {
+      ...event,
+      start_date: event.start_date || currentDate,
+      end_date: event.end_date || currentDate,
+    };
+
+    try {
+      const res = await fetch("http://localhost:8000/events/create_event", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...finalEvent,
+          organizer: localStorage.getItem("user_id") || "",
+          participants: [],
+          is_virtual: false,
+          capacity: 100,
+          virtual_meeting_url: "",
+        }),
+      });
+
+      const data = await res.json();
+
       if (data.event_id !== undefined) {
-        alert("Successfully created an event.")
+        alert("Successfully created an event.");
+        // Reset form
+        setEvent({
+          name: "",
+          description: "",
+          event_type: "",
+          start_date: "",
+          end_date: "",
+          venue: "",
+          sessions: [],
+        });
       } else {
-        alert("Failed to create event. Please contact and administrator.")
+        alert("Failed to create event. Please contact an administrator.");
       }
-    })
+    } catch (error) {
+      console.error("Event creation error:", error);
+      alert("An error occurred while creating the event");
+    }
   };
-  
+
   const router = useRouter();
 
   useEffect(() => {
     let role = localStorage.getItem("role");
     if (role !== "organizer") {
       alert("Unauthorized");
-      router.push("/")
+      router.push("/");
       return;
     }
-
-
-  },[])
+  }, []);
 
   return (
     <form
