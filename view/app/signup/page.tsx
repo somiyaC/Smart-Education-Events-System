@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import Link from "next/link";
+import { useAppContext } from "../StateContext";
 
 const Signup = () => {
   const router = useRouter();
@@ -11,8 +12,10 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("attendee");
   const [error, setError] = useState("");
+  const {userId, setUserId} = useAppContext();
 
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/signup", { 
         method: "POST",
@@ -20,12 +23,15 @@ const Signup = () => {
         body: JSON.stringify({
           email,
           password,
-          role: "attendee", // Change role if needed
+          role: role, // Change role if needed
         }),
       });
   
       const data = await response.json();
-      if (response.ok) {
+      console.log(data);
+      if (data.status === true) {
+        setUserId(data.user_id);
+        console.log("stored id", data.user_id)
         alert("Signup successful!");
       } else {
         alert(`Signup failed: ${data.detail}`);
