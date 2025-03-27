@@ -1,7 +1,7 @@
 // app/events/AllEvents.tsx
 "use client";
 import { useState, useEffect } from "react";
-import { useAppContext } from './StateContext';
+import { useAppContext } from "./StateContext";
 
 interface Session {
   title: string;
@@ -78,22 +78,20 @@ const AllEvents: React.FC = () => {
     //   ],
     // },
   ]);
-    const { userId, setUserId } = useAppContext();
-
+  const { userId, setUserId } = useAppContext();
 
   // Fetch all events from the backend
   useEffect(() => {
     fetch("http://localhost:8000/events")
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.events)
-        setEvents(data.events)})
+        console.log(data.events);
+        setEvents(data.events);
+      })
       .catch((error) => console.error("Error fetching events:", error));
   }, []);
 
-  const handleSignup = () => {
-
-  }
+  const handleSignup = () => {};
 
   //for testing with fake data
 
@@ -156,42 +154,41 @@ const AllEvents: React.FC = () => {
               <button
                 type="submit"
                 onClick={async () => {
-                  console.log("trying to signup")
-                  console.log(event)
-                  console.log(userId)
-                  const res = await fetch("http://localhost:8000/events/event_signup", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json" // Set content-type to JSON
-                    },
-                    body: JSON.stringify({
-                      user_id: localStorage.getItem("user_id"),
-                      event_id: event.id
-                    }) // Convert the data to JSON string
-                  })
-                  .then((res) => res.json())
-                  .then(async (data) => {
-                    if (data.status == false) {
-                      console.log("signup failed");
-                    } else {
-                      await fetch("http://localhost:8000/tickets/", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                          event_id: event.id,
-                          price: 20.50,
-                          status: "unpaind",
-                          attendee_id: localStorage.getItem("user_id")
-                        })
-                      })
-                      .then((res) => res.json())
-                      .then((data) => {
-                        alert("You sucessfully registered for this event.")
-                      })
+                  console.log("trying to signup");
+                  console.log(event);
+                  console.log(userId);
+                  const res = await fetch(
+                    "http://localhost:8000/events/event_signup",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json", // Set content-type to JSON
+                      },
+                      body: JSON.stringify({
+                        user_id: localStorage.getItem("user_id"),
+                        event_id: event.id,
+                      }), // Convert the data to JSON string
                     }
-                  })
+                  )
+                    .then((res) => res.json())
+                    .then(async (data) => {
+                      if (data.status == false) {
+                        console.log("signup failed");
+                      } else {
+                        await fetch("http://localhost:8000/tickets/", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            event_id: event.id,
+                            price: 20.5,
+                            status: "unpaind",
+                            attendee_id: localStorage.getItem("user_id"),
+                          }),
+                        });
+                      }
+                    });
                 }}
                 className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
               >

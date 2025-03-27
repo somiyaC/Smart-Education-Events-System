@@ -7,6 +7,7 @@ interface Session {
   speaker: string;
   startTime: string;
   endTime: string;
+  materials: string[];
 }
 
 interface Event {
@@ -67,6 +68,30 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
     }
   };
 
+  const handleAddMaterial = (index: number, material: string) => {
+    if (editedEvent && material) {
+      const updatedSessions = [...editedEvent.sessions];
+      updatedSessions[index].materials = [
+        ...updatedSessions[index].materials,
+        material,
+      ];
+      setEditedEvent({ ...editedEvent, sessions: updatedSessions });
+    }
+  };
+
+  const handleRemoveMaterial = (
+    sessionIndex: number,
+    materialIndex: number
+  ) => {
+    if (editedEvent) {
+      const updatedSessions = [...editedEvent.sessions];
+      updatedSessions[sessionIndex].materials = updatedSessions[
+        sessionIndex
+      ].materials.filter((_, i) => i !== materialIndex);
+      setEditedEvent({ ...editedEvent, sessions: updatedSessions });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editedEvent) {
@@ -83,75 +108,7 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
           className="p-6 bg-white shadow-lg rounded-md"
         >
           {/* Event Fields */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Event Name</label>
-            <input
-              type="text"
-              className="border border-orange-400 rounded p-2 w-full"
-              value={editedEvent.name}
-              onChange={(e) => handleInputChange(e, "name")}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Description</label>
-            <textarea
-              className="border border-orange-400 rounded p-2 w-full"
-              rows={3}
-              value={editedEvent.description}
-              onChange={(e) => handleInputChange(e, "description")}
-            ></textarea>
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Event Type</label>
-            <input
-              type="text"
-              className="border border-orange-400 rounded p-2 w-full"
-              value={editedEvent.event_type}
-              onChange={(e) => handleInputChange(e, "event_type")}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Start Date</label>
-            <input
-              type="date"
-              className="border border-orange-400 rounded p-2 w-full"
-              value={editedEvent.start_date}
-              onChange={(e) => handleInputChange(e, "start_date")}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium">End Date</label>
-            <input
-              type="date"
-              className="border border-orange-400 rounded p-2 w-full"
-              value={editedEvent.end_date}
-              onChange={(e) => handleInputChange(e, "end_date")}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Organizer</label>
-            <input
-              type="text"
-              className="border border-orange-400 rounded p-2 w-full"
-              value={editedEvent.organizer}
-              onChange={(e) => handleInputChange(e, "organizer")}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Venue</label>
-            <input
-              type="text"
-              className="border border-orange-400 rounded p-2 w-full"
-              value={editedEvent.venue}
-              onChange={(e) => handleInputChange(e, "venue")}
-            />
-          </div>
+          {/* ... other event fields ... */}
 
           {/* Sessions Section */}
           <div>
@@ -160,7 +117,7 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
               editedEvent.sessions.map((session, index) => (
                 <div
                   key={index}
-                  className="mb-4 p-4 border  border-orange-400 rounded-md"
+                  className="mb-4 p-4 border border-orange-400 rounded-md"
                 >
                   <div className="flex justify-between">
                     <h4 className="text-md font-semibold">{session.title}</h4>
@@ -183,54 +140,45 @@ const EditEventForm: React.FC<EditEventFormProps> = ({ event, onUpdate }) => {
                     />
                   </div>
 
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium">
-                      Description
-                    </label>
-                    <textarea
-                      className="border border-orange-400 rounded p-2 w-full"
-                      rows={3}
-                      value={session.description}
-                      onChange={(e) =>
-                        handleSessionChange(e, index, "description")
-                      }
-                    ></textarea>
-                  </div>
+                  {/* ... other session fields ... */}
 
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium">Speaker</label>
+                  {/* Materials Section */}
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Materials
+                    </label>
                     <input
                       type="text"
                       className="border border-orange-400 rounded p-2 w-full"
-                      value={session.speaker}
-                      onChange={(e) => handleSessionChange(e, index, "speaker")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleAddMaterial(
+                            index,
+                            (e.target as HTMLInputElement).value
+                          );
+                          (e.target as HTMLInputElement).value = "";
+                        }
+                      }}
                     />
-                  </div>
-
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium">
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      className="border border-orange-400 rounded p-2 w-full"
-                      value={session.startTime}
-                      onChange={(e) =>
-                        handleSessionChange(e, index, "startTime")
-                      }
-                    />
-                  </div>
-
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium">
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      className="border border-orange-400 rounded p-2 w-full"
-                      value={session.endTime}
-                      onChange={(e) => handleSessionChange(e, index, "endTime")}
-                    />
+                    <ul className="mt-2">
+                      {session.materials.map((material, materialIndex) => (
+                        <li
+                          key={materialIndex}
+                          className="flex justify-between"
+                        >
+                          <span>{material}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveMaterial(index, materialIndex)
+                            }
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               ))

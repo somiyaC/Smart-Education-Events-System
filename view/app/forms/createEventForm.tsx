@@ -9,6 +9,7 @@ interface Session {
   speaker: string;
   startTime: string;
   endTime: string;
+  materials: string[];
 }
 
 interface Event {
@@ -41,7 +42,13 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
   const [speaker, setSpeaker] = useState("");
   const [sessionStartTime, setSessionStartTime] = useState("");
   const [sessionEndTime, setSessionEndTime] = useState("");
+  const [sessionMaterials, setSessionMaterials] = useState<string[]>([]);
 
+  const addMaterial = (material: string) => {
+    if (material && !sessionMaterials.includes(material)) {
+      setSessionMaterials([...sessionMaterials, material]);
+    }
+  };
   // Add a new session to the event
   const addSession = () => {
     if (
@@ -57,6 +64,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         speaker: speaker,
         startTime: sessionStartTime,
         endTime: sessionEndTime,
+        materials: sessionMaterials,
       };
       setEvent({ ...event, sessions: [...event.sessions, newSession] });
       // Clear session form fields after adding
@@ -65,6 +73,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       setSpeaker("");
       setSessionStartTime("");
       setSessionEndTime("");
+      setSessionMaterials([]);
     } else {
       alert("Please fill out both session title and time.");
     }
@@ -78,7 +87,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     const res = await fetch("http://localhost:8000/events/create_event", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json" // Set content-type to JSON
+        "Content-Type": "application/json", // Set content-type to JSON
       },
       body: JSON.stringify({...event,...{organizer: localStorage.getItem("user_id"),participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}}) // Convert the data to JSON string
     })
@@ -210,6 +219,35 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
           onChange={(e) => setSessionEndTime(e.target.value)}
         />
       </div>
+
+      <input
+        type="text"
+        placeholder="Material"
+        className="border border-orange-400 rounded p-2 w-full mt-2"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            addMaterial((e.target as HTMLInputElement).value);
+            (e.target as HTMLInputElement).value = "";
+          }
+        }}
+      />
+      <button
+        type="button"
+        className="bg-orange-300 text-xs text-white p-2 my-3 mx-1 rounded-3xl hover:bg-orange-200 transition"
+        onClick={() =>
+          addMaterial(
+            (document.querySelector("input[type='text']") as HTMLInputElement)
+              .value
+          )
+        }
+      >
+        + Add Material
+      </button>
+      <ul className="mt-2">
+        {sessionMaterials.map((material, index) => (
+          <li key={index}>{material}</li>
+        ))}
+      </ul>
       <button
         type="button"
         className="bg-orange-300 text-white p-2 my-3 mx-1 rounded-3xl hover:bg-orange-200 transition"
