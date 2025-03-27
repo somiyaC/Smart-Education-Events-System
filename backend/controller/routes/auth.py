@@ -21,7 +21,7 @@ class LoginRequest(BaseModel):
     password: str
 
 @router.post("/signup")
-def signup(user: SignupRequest):
+async def signup(user: SignupRequest):
     existing_user = users_collection.find_one({"email": user.email})
     if existing_user:
         print("email exists")
@@ -33,7 +33,7 @@ def signup(user: SignupRequest):
     return {"status": True, "first_name":"john doe","user_id":str(_id)}
 
 @router.post("/login")
-def login(user: LoginRequest):  # ✅ Now only expects email & password
+async def login(user: LoginRequest): 
     db_user = users_collection.find_one({"email": user.email})
     if not db_user or not bcrypt.verify(user.password, db_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
