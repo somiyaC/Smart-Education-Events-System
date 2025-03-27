@@ -93,14 +93,14 @@ const AllEvents: React.FC = () => {
   }, []);
 
   const isRegistered = (event: Event) => {
-    console.log(event.participants)
+    console.log(event.participants);
     let userId = localStorage.getItem("user_id");
-    console.log(userId)
+    console.log(userId);
     if (userId && event.participants.includes(userId)) {
       return true;
     }
     return false;
-  }
+  };
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -158,53 +158,53 @@ const AllEvents: React.FC = () => {
                   ))}
                 </ul> 
                </div> */}
-              { !isRegistered(event) && <button
-                type="submit"
-                onClick={async () => {
-                  const res = await fetch(
-                    "http://localhost:8000/events/event_signup",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json", // Set content-type to JSON
-                      },
-                      body: JSON.stringify({
-                        user_id: localStorage.getItem("user_id"),
-                        event_id: event.id,
-                      }), // Convert the data to JSON string
-                    }
-                  )
-                    .then((res) => res.json())
-                    .then(async (data) => {
-                      if (data.status == false) {
-                        console.log("signup failed");
-                      } else {
-                        await fetch("http://localhost:8000/tickets/", {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            event_id: event.id,
-                            price: 20.5,
-                            status: "unpaind",
-                            attendee_id: localStorage.getItem("user_id"),
-                          }),
-                        })
-                        .then(res => alert("Successfully signed up."));
-                      }
-                    });
-                }}
-                className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
-              >
-                Sign Up
-              </button>}
-              {isRegistered(event) && 
+              {!isRegistered(event) && (
                 <button
+                  type="submit"
+                  onClick={async () => {
+                    const res = await fetch(
+                      "http://localhost:8000/events/event_signup",
+                      {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json", // Set content-type to JSON
+                        },
+                        body: JSON.stringify({
+                          user_id: localStorage.getItem("user_id"),
+                          event_id: event.id,
+                        }), // Convert the data to JSON string
+                      }
+                    )
+                      .then((res) => res.json())
+                      .then(async (data) => {
+                        if (data.status == false) {
+                          console.log("signup failed");
+                        } else {
+                          await fetch("http://localhost:8000/tickets/", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              event_id: event.id,
+                              price: 20.5,
+                              status: "unpaind",
+                              attendee_id: localStorage.getItem("user_id"),
+                            }),
+                          }).then((res) => alert("Successfully signed up."));
+                        }
+                      });
+                  }}
                   className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
                 >
+                  Sign Up
+                </button>
+              )}
+              {isRegistered(event) && (
+                <button className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition">
                   Already Registered
-                </button>}
+                </button>
+              )}
             </div>
           ))}
         </div>
