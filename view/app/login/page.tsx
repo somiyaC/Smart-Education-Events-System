@@ -38,7 +38,7 @@ const Login = () => {
         if (data.role === "admin") {
           router.push("/admin-dashboard");
         } else {
-          router.push("/dashboard"); 
+          router.push("/"); 
         }
       } else {
         setError(data.detail || "Login failed. Please try again.");
