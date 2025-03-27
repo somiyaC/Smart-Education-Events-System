@@ -23,7 +23,7 @@ export default function EventList({ onSelectEvent }: EventListProps) {
     const fetchEvents = async () => {
       const res = await fetch("http://localhost:8000/events");
       const data = await res.json();
-      setEvents(data);
+      setEvents(data.events);
     };
     fetchEvents();
   }, []);

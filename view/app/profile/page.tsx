@@ -18,11 +18,14 @@ const ProfilePage: React.FC = () => {
     let userId = localStorage.getItem("user_id");
     if (!userId) return;
 
-    fetch(`http://localhost:8000/users/${userId}`, {
-      method: "GET",
+    fetch(`http://localhost:8000/auth/user}`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        user_id: localStorage.getItem("user_id")
+      })
     })
       .then((res) => res.json())
       .then((data: User) => {
@@ -45,23 +48,24 @@ const ProfilePage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/users/${editedUser.id}`,
+        `http://localhost:8000/auth/update_user`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             email: editedUser.email,
             password: editedUser.password,
-            // Add other fields as necessary
+            user_id: localStorage.getItem("user_id")
           }),
         }
       );
 
       const data = await response.json();
-      if (response.ok) {
+      if (response.status) {
         setUser(data); // Update the user state with the saved data
+        localStorage.setItem("email",editedUser.email)
         alert("Profile updated successfully!");
       } else {
         alert("Failed to update profile.");
@@ -80,7 +84,7 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-center text-orange-500 mb-6">
-        Profile
+        Update Profile
       </h2>
       <div className="space-y-4">
         {/* Email */}

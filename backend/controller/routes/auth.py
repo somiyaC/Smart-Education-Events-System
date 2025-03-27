@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from controller.database import users_collection
 from passlib.hash import bcrypt
+from models.user_model import UserModel
 import jwt
 import os
 
@@ -19,6 +20,14 @@ class SignupRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+class UserData(BaseModel):
+    user_id: str
+
+class UserUpdateData(BaseModel):
+    email: str
+    password: str
+    user_id: str
 
 @router.post("/signup")
 async def signup(user: SignupRequest):
@@ -40,3 +49,24 @@ async def login(user: LoginRequest):
     print(db_user)
     token = jwt.encode({"email": user.email, "role": db_user["role"]}, SECRET_KEY, algorithm="HS256")
     return {"token": token, "email":user.email, "role": db_user["role"], "user_id": str(db_user['_id'])}
+
+@router.post("/user")
+async def user(user_data: UserData):
+    user = await UserModel.get_user_by_id(user_data.user_id)
+
+    return {"user":user}
+
+@router.post("/update_user")
+async def update_user(user_data: UserUpdateData):
+    email = user_data.email
+    password = user_data.password
+    user_id = user_data.user_id
+    hashed_password = bcrypt.hash(password)
+    update_data = {}
+    if email != "":
+        update_data['email'] = email
+    if password != "":
+        update_data['password'] = hashed_password
+
+    user_id = await UserModel.update_user(user_id, update_data)
+    return {"status":True}
