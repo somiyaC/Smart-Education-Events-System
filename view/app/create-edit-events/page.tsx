@@ -9,6 +9,7 @@ interface Session {
   speaker: string;
   startTime: string;
   endTime: string;
+  materials: string[];
 }
 
 interface Event {
@@ -20,7 +21,7 @@ interface Event {
   organizer: string;
   venue: string;
   sessions: Session[];
-  participants: []
+  participants?: [];
 }
 
 const EventFormPage: React.FC = () => {
@@ -32,14 +33,17 @@ const EventFormPage: React.FC = () => {
 
   const handleCreateEvent = async () => {
     setIsEditing(false);
-    console.log(event)
+    console.log(event);
     const res = await fetch("http://localhost:8000/events/create_event", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json" // Set content-type to JSON
+        "Content-Type": "application/json", // Set content-type to JSON
       },
-      body: JSON.stringify({...event,...{participants:[],is_virtual:false,capacity:100}}) // Convert the data to JSON string
-    })
+      body: JSON.stringify({
+        ...event,
+        ...{ participants: [], is_virtual: false, capacity: 100 },
+      }), // Convert the data to JSON string
+    });
     setEvent(null);
   };
 
@@ -61,9 +65,7 @@ const EventFormPage: React.FC = () => {
     setError("");
 
     try {
-      const res = await fetch(
-        `https://your-backend-api.com/events?name=${searchQuery}`
-      );
+      const res = await fetch("http://localhost:8000/events/");
       const data = await res.json();
 
       // Ensure that the event data contains all necessary fields
@@ -138,8 +140,7 @@ const EventFormPage: React.FC = () => {
         !isEditing && (
           <CreateEventForm
             onSubmit={async (newEvent) => {
-              console.log(newEvent)
-              
+              console.log(newEvent);
             }}
           />
         )
