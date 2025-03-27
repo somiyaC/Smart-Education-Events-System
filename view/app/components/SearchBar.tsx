@@ -1,27 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
+import { useRouter,useSearchParams } from "next/navigation";
 
 const SearchBar: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
 
+  const search = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(search.get('q'));
+  const router = useRouter();
   const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle the search query, e.g., log it or make an API call
-    fetch("http://localhost:8000/events/event_search", {
-      method: "POST",  // HTTP method set to POST
-      headers: {
-        "Content-Type": "application/json",  // Set content-type to JSON
-      },
-      body: JSON.stringify({ query: searchQuery }),  // Send the query as JSON
-    })
-      .then(response => response.json())  // Parse the response as JSON
-      .then(data => {
-        console.log("Search results:", data);  // Handle the response data
-      })
-      .catch(error => {
-        console.error("Error:", error);  // Handle any errors
-      });
+    router.push("/?q=" + searchQuery);
   };
 
   return (
