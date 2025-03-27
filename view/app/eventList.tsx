@@ -21,6 +21,7 @@ interface Event {
   organizer: string;
   venue: string;
   sessions: Session[];
+  participants: string[];
 }
 
 const AllEvents: React.FC = () => {
@@ -91,9 +92,15 @@ const AllEvents: React.FC = () => {
       .catch((error) => console.error("Error fetching events:", error));
   }, []);
 
-  const handleSignup = () => {};
-
-  //for testing with fake data
+  const isRegistered = (event: Event) => {
+    console.log(event.participants)
+    let userId = localStorage.getItem("user_id");
+    console.log(userId)
+    if (userId && event.participants.includes(userId)) {
+      return true;
+    }
+    return false;
+  }
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -151,12 +158,9 @@ const AllEvents: React.FC = () => {
                   ))}
                 </ul> 
                </div> */}
-              <button
+              { !isRegistered(event) && <button
                 type="submit"
                 onClick={async () => {
-                  console.log("trying to signup");
-                  console.log(event);
-                  console.log(userId);
                   const res = await fetch(
                     "http://localhost:8000/events/event_signup",
                     {
@@ -186,14 +190,21 @@ const AllEvents: React.FC = () => {
                             status: "unpaind",
                             attendee_id: localStorage.getItem("user_id"),
                           }),
-                        });
+                        })
+                        .then(res => alert("Successfully signed up."));
                       }
                     });
                 }}
                 className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
               >
                 Sign Up
-              </button>
+              </button>}
+              {isRegistered(event) && 
+                <button
+                  className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
+                >
+                  Already Registered
+                </button>}
             </div>
           ))}
         </div>

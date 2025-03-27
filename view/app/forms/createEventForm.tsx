@@ -83,13 +83,24 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(event); // Call the parent handler when submitted
-
+    console.log("event", event)
     const res = await fetch("http://localhost:8000/events/create_event", {
       method: "POST",
       headers: {
         "Content-Type": "application/json", // Set content-type to JSON
       },
-      body: JSON.stringify({...event,...{organizer: localStorage.getItem("user_id"),participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}}) // Convert the data to JSON string
+      body: JSON.stringify({
+        ...event,
+        ...{organizer: localStorage.getItem("user_id"),participants:[],is_virtual:false,capacity:100,virtual_meeting_url:""}
+      })
+    })
+    .then(res => res.json())
+    .then((data) => {
+      if (data.event_id !== undefined) {
+        alert("Successfully created an event.")
+      } else {
+        alert("Failed to create event. Please contact and administrator.")
+      }
     })
   };
   

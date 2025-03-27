@@ -7,10 +7,11 @@ import React, { useEffect, useState } from "react";
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const email = localStorage.getItem("email");
+  const [email, setEmail] = useState<string | null>("");
 
   useEffect(() => {
     if (localStorage.getItem("user_id") !== undefined) {
+      setEmail(localStorage.getItem("email"));
       setIsLoggedIn(true);
     }
 
@@ -18,7 +19,7 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
 
-  }, [isLoggedIn])
+  }, [isLoggedIn, email])
 
   const handleLogout = async () => {
     try {
