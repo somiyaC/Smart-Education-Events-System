@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { useAppContext } from '../StateContext';
 import Link from "next/link";
 
 const Login = () => {
@@ -10,6 +11,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { userId, setUserId } = useAppContext();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // ✅ Prevent default form submission
@@ -25,14 +27,16 @@ const Login = () => {
 
       if (response.ok) {
         alert("Login successful!");
-        localStorage.setItem("token", data.token); // ✅ Save token
-        localStorage.setItem("role", data.role); // ✅ Save user role
+        localStorage.setItem("token", data.token); 
+        localStorage.setItem("role", data.role);
+        console.log("user_id", data.user_id)
+        setUserId(data.user_id)
 
         // Redirect based on role
         if (data.role === "admin") {
           router.push("/admin-dashboard");
         } else {
-          router.push("/dashboard"); // ✅ Adjust the dashboard route as needed
+          router.push("/dashboard"); 
         }
       } else {
         setError(data.detail || "Login failed. Please try again.");

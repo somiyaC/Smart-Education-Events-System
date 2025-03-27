@@ -30,6 +30,9 @@ class EventUserData(BaseModel):
     user_id: str
     event_id: str
 
+class UserData(BaseModel):
+    user_id: str
+
 class EventSearch(BaseModel):
     query: str
 
@@ -37,6 +40,18 @@ def document_to_dict(doc):
     if doc and '_id' in doc.keys():
         doc['_id'] = str(doc['_id'])
     return doc
+
+
+@router.post("/user_events")
+async def user_events(user_data: UserData):
+    user_id = user_data.user_id
+    all_events = await EventModel.get_upcoming_events()
+    user_events = []
+    for event in all_events:
+        if user_id in event.participants:
+            user_events.append(event)
+    
+    return {"events":[document_to_dict(event) for event in user_events] }    
 
 
 @router.post("/create_event")
@@ -57,12 +72,15 @@ def create_event(event_signup_data: EventSignupData):
     user_id = event_signup_data.user_id
     event_id = event_signup_data.event_id
 
-    purchase_date = datetime.now()
+    event = EventModel.get_event_by_id(event_id)
 
-    status = False
-    #status = Tickets.create_ticket()
+    current_participants = len(event.particpants)
+    if current_participants >= event.capacity:
+        return {"status": False}
 
-    return {"status":status}
+    EventModel.add_participant(event_id, user_id)
+
+    return {"status":True}
 
 @router.post("/event_cancel")
 def event_cancel(event_cancel_data: EventUserData):
@@ -72,10 +90,14 @@ def event_cancel(event_cancel_data: EventUserData):
     user_id = event_cancel_data.user_id
     event_id = event_cancel_data.event_id
 
-    status = False
-    #status = Tickets.cancel_signup(user_id, event_id)
+    event = EventModel.get_event_by_id(event_id)
 
-    return {"status": status}
+    if event is None:
+        return {"status": False}
+
+    EventModel.remove_participant(event_id,user_id)
+    
+    return {"status": True}
 
 @router.get("/upcoming_events")
 def get_upcoming_events(user_upcoming_event: EventUserData):
