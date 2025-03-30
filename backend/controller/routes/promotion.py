@@ -7,6 +7,7 @@ from datetime import datetime
 from controller.database import get_db
 from models.event_model import EventModel
 from models.email_model import EmailModel
+from models.user_model import UserModel
 
 router = APIRouter(prefix="/promotion", tags=["Event Promotion"])
 
@@ -28,23 +29,18 @@ async def create_email_campaign(
     Create and send an email campaign to a list of recipients or to all attendees of an event.
     """
     # If event_id is provided, fetch all attendee emails from that event
-    recipient_list = campaign.recipients or []
-    if campaign.event_id:
-        event = await EventModel.get_event_by_id(campaign.event_id)
-        if not event:
-            raise HTTPException(status_code=404, detail="Event not found")
-        
-        # Suppose your event document has a list of attendees with their emails
-        # Adjust this logic to match your schema
-        attendees = event.get("attendees", [])
-        attendee_emails = [att["email"] for att in attendees if "email" in att]
-        recipient_list.extend(attendee_emails)
+    user_ids = campaign.recipients
+    for idx, user_id in enumerate(user_ids):
+        user_data = await UserModel.get_user_by_id(user_id)
+        user_ids[idx] = user_data['email']
+    campaign.recipients = user_ids
+    print(user_ids)
+    print("--")
+    print(campaign.recipients)
 
-    if not recipient_list:
-        raise HTTPException(status_code=400, detail="No recipients specified")
 
     # Remove duplicates
-    recipient_list = list(set(recipient_list))
+    recipient_list = list(set(campaign.recipients))
 
     # Send the email campaign (adjust to your EmailModel’s actual method signature)
     # For example:
@@ -56,10 +52,7 @@ async def create_email_campaign(
             db=db
         )
 
-    return {
-        "detail": "Email campaign sent successfully",
-        "recipients_count": len(recipient_list)
-    }
+    return {"status":True} 
 
 # --------------------------------
 # 2) Social Media Integration

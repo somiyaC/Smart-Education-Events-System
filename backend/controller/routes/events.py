@@ -32,6 +32,8 @@ class Event(BaseModel):
     capacity: int
     sessions: List[Session]
 
+class SearchData(BaseModel):
+    query: Optional[str]
 
 class EventSignupData(BaseModel):
     user_id: str
@@ -142,8 +144,9 @@ async def event_cancel(event_cancel_data: EventUserData):
     event = await EventModel.get_event_by_id(event_id)
 
     if event is None:
+        print("failed")
         return {"status": False}
-
+    print("removing participant")
     result = await EventModel.remove_participant(event_id,user_id)
     
     return {"status": result}
@@ -179,12 +182,20 @@ async def event_search(query: EventSearch):
     return {"events":[document_to_dict(event) for event in results] }
 
 
-@router.get("/")
-async def get_all_events():
+@router.post("/")
+async def get_all_events(search: SearchData):
+    query = search.query
     all_events = await EventModel.get_upcoming_events()
-    print("aall")
-    print(all_events)
-
+    matched_query = all_events
+    if query != "":
+        matched_query = []
+        query_events = await EventModel.search_events(query=query)
+        query_events_ids = [event['id'] for event in query_events]
+        
+        for event in all_events:
+            if event['id'] in query_events_ids:
+                matched_query.append(event)
+    all_events = matched_query
     for event in all_events:
         organizer_id = event['organizer_id']
         try:
@@ -193,15 +204,14 @@ async def get_all_events():
                 event['organizer'] = 'John Doe'
             else:
                 event['organizer'] = user.first_name
-        except:
+        except Exception:
             event['organizer'] = "John Doe"
 
         venue_id = event['venue_id']
         try:
             venue = await VenueModel.get_venue_by_id(venue_id)
             event['venue'] = venue.name
-        except:
+        except Exception:
             event['venue'] = 'Mezzanine'
 
-    return {"events":[document_to_dict(event) for event in all_events] }
-
+    return {"events": [document_to_dict(event) for event in all_events]}

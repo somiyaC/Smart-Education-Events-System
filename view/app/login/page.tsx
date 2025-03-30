@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
-import { useAppContext } from '../StateContext';
+import { useAppContext } from "../StateContext";
 import Link from "next/link";
 
 const Login = () => {
@@ -26,20 +26,19 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Login successful!");
-        localStorage.setItem("token", data.token); 
+        localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
-        localStorage.setItem("user_id", data.user_id)
-        localStorage.setItem("email",data.email)
-        console.log("user_id", data.user_id)
-        setUserId(data.user_id)
-        console.log("user",data.user_id)
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("email", data.email);
+        console.log("user_id", data.user_id);
+        setUserId(data.user_id);
+        console.log("user", data.user_id);
 
         // Redirect based on role
         if (data.role === "admin") {
           router.push("/admin-dashboard");
         } else {
-          router.push("/"); 
+          router.push("/");
         }
       } else {
         setError(data.detail || "Login failed. Please try again.");
@@ -53,7 +52,7 @@ const Login = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
       <div className="flex flex-col justify-center px-8 lg:px-24 bg-white">
-        <h1 className="text-3xl mb-4 text-gray-900">Sign In</h1>
+        <h1 className="text-3xl mb-4 text-gray-900">Log In</h1>
         {error && <p className="text-red-500">{error}</p>}
         <form className="space-y-4" onSubmit={handleLogin}>
           <input
@@ -80,7 +79,12 @@ const Login = () => {
           </button>
         </form>
         <div className="mt-4 text-center">
-          <p>Don't have an account? <Link href="/signup" className="text-orange-500">Sign Up</Link></p>
+          <p>
+            Don't have an account?{" "}
+            <Link href="/signup" className="text-orange-500">
+              Sign Up
+            </Link>
+          </p>
         </div>
       </div>
     </div>

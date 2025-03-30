@@ -2,6 +2,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAppContext } from "./StateContext";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from 'next/navigation';
+
 
 interface Session {
   title: string;
@@ -25,65 +28,28 @@ interface Event {
 }
 
 const AllEvents: React.FC = () => {
-  const [events, setEvents] = useState<Event[]>([
-    //for testing with fake data
-    // {
-    //   name: "Tech Conference 2025",
-    //   description:
-    //     "A conference exploring AI, cloud computing, and software trends.",
-    //   event_type: "Technology",
-    //   start_date: "2025-05-10",
-    //   end_date: "2025-05-12",
-    //   organizer: "TechWorld Inc.",
-    //   venue: "Toronto Convention Center",
-    //   sessions: [
-    //     {
-    //       title: "AI and the Future",
-    //       description: "Discussing AI advancements and impacts.",
-    //       speaker: "Dr. Jane Smith",
-    //       startTime: "10:00 AM",
-    //       endTime: "11:30 AM",
-    //     },
-    //     {
-    //       title: "Quantum Computing",
-    //       description: "How quantum computing is shaping the future.",
-    //       speaker: "Dr. John Doe",
-    //       startTime: "2:00 PM",
-    //       endTime: "3:30 PM",
-    //     },
-    //   ],
-    // },
-    // {
-    //   name: "Music Fest 2025",
-    //   description: "A weekend of amazing live performances.",
-    //   event_type: "Music Festival",
-    //   start_date: "2025-07-20",
-    //   end_date: "2025-07-22",
-    //   organizer: "Live Music Co.",
-    //   venue: "Central Park, NYC",
-    //   sessions: [
-    //     {
-    //       title: "Rock Band Performance",
-    //       description: "Live rock music performance.",
-    //       speaker: "The Rockers",
-    //       startTime: "5:00 PM",
-    //       endTime: "6:30 PM",
-    //     },
-    //     {
-    //       title: "Jazz Night",
-    //       description: "Smooth jazz performances by famous artists.",
-    //       speaker: "Jazz Masters",
-    //       startTime: "8:00 PM",
-    //       endTime: "10:00 PM",
-    //     },
-    //   ],
-    // },
-  ]);
+  const [events, setEvents] = useState<Event[]>([]);
   const { userId, setUserId } = useAppContext();
+  const searchParams = useSearchParams();
+  const search = searchParams.get('q');
+  console.log("param",search)
+
 
   // Fetch all events from the backend
   useEffect(() => {
-    fetch("http://localhost:8000/events")
+    
+    let search_query = "";
+    if (search) {
+      search_query = search;
+    }
+    fetch("http://localhost:8000/events", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({query: search_query})
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         console.log(data.events);
@@ -93,14 +59,14 @@ const AllEvents: React.FC = () => {
   }, []);
 
   const isRegistered = (event: Event) => {
-    console.log(event.participants)
+    console.log(event.participants);
     let userId = localStorage.getItem("user_id");
-    console.log(userId)
+    console.log(userId);
     if (userId && event.participants.includes(userId)) {
       return true;
     }
     return false;
-  }
+  };
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -158,53 +124,53 @@ const AllEvents: React.FC = () => {
                   ))}
                 </ul> 
                </div> */}
-              { !isRegistered(event) && <button
-                type="submit"
-                onClick={async () => {
-                  const res = await fetch(
-                    "http://localhost:8000/events/event_signup",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json", // Set content-type to JSON
-                      },
-                      body: JSON.stringify({
-                        user_id: localStorage.getItem("user_id"),
-                        event_id: event.id,
-                      }), // Convert the data to JSON string
-                    }
-                  )
-                    .then((res) => res.json())
-                    .then(async (data) => {
-                      if (data.status == false) {
-                        console.log("signup failed");
-                      } else {
-                        await fetch("http://localhost:8000/tickets/", {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            event_id: event.id,
-                            price: 20.5,
-                            status: "unpaind",
-                            attendee_id: localStorage.getItem("user_id"),
-                          }),
-                        })
-                        .then(res => alert("Successfully signed up."));
-                      }
-                    });
-                }}
-                className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
-              >
-                Sign Up
-              </button>}
-              {isRegistered(event) && 
+              {!isRegistered(event) && (
                 <button
+                  type="submit"
+                  onClick={async () => {
+                    const res = await fetch(
+                      "http://localhost:8000/events/event_signup",
+                      {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json", // Set content-type to JSON
+                        },
+                        body: JSON.stringify({
+                          user_id: localStorage.getItem("user_id"),
+                          event_id: event.id,
+                        }), // Convert the data to JSON string
+                      }
+                    )
+                      .then((res) => res.json())
+                      .then(async (data) => {
+                        if (data.status == false) {
+                          console.log("signup failed");
+                        } else {
+                          await fetch("http://localhost:8000/tickets/", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              event_id: event.id,
+                              price: 20.5,
+                              status: "unpaind",
+                              attendee_id: localStorage.getItem("user_id"),
+                            }),
+                          }).then((res) => alert("Successfully signed up."));
+                        }
+                      });
+                  }}
                   className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
                 >
+                  Sign Up
+                </button>
+              )}
+              {isRegistered(event) && (
+                <button className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition">
                   Already Registered
-                </button>}
+                </button>
+              )}
             </div>
           ))}
         </div>

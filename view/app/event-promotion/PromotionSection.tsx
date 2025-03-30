@@ -8,6 +8,7 @@ interface Event {
   start_date: string;
   end_date: string;
   organizer_id: string;
+  participants: [string]
 }
 
 interface User {
@@ -29,9 +30,16 @@ export default function PromotionSection({
 
   // Fetch organizer details on load
   useEffect(() => {
+    console.log(event.participants)
     const fetchOrganizer = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/users/${event.organizer_id}`);
+        const res = await fetch(`http://localhost:8000/auth/user`,
+          {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({user_id:localStorage.getItem("user_id")})
+          }
+        );
         if (!res.ok) throw new Error("Failed to fetch organizer info");
         const data = await res.json();
         setOrganizer(data);
@@ -57,17 +65,18 @@ export default function PromotionSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           event_id: event.id,
-          name: `${event.name} Campaign`,
           subject: `Join us for ${event.name}`,
-          body_html: `<p>${emailContent}</p>`,
-          body_text: emailContent,
-          audience: { type: audienceType },
-          sender_name: `${organizer.first_name} ${organizer.last_name}`,
-          sender_email: organizer.email,
+          body: emailContent,
+          recipients: event.participants
         }),
-      });
+      })
+      .then((res) => res.json())
+      .then(data => {
+        if (data.status === true) {
+        } else {
+        }
+      })
 
-      if (!res.ok) throw new Error("Failed to send email.");
 
       setStatus("✅ Email campaign sent successfully!");
     } catch (error) {

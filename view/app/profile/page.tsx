@@ -1,224 +1,140 @@
 "use client";
 
-import { useAppContext } from "../StateContext"; // Adjust the import path as needed
 import { useState, useEffect } from "react";
 
-type User = {
+interface User {
+  id: string;
   email: string;
-  full_name: string;
   password: string;
-};
+  // Add other fields here as necessary
+}
 
-export default function ProfilePage() {
-  const { userId } = useAppContext();
-  const [user, setUser] = useState<User | null>(null);
+const ProfilePage: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null); // Default to null, as we haven't fetched the user yet
+  const [editedUser, setEditedUser] = useState<User | null>(null); // For editing the user info
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState<Omit<User, "password">>({
-    email: "",
-    full_name: "",
-  });
 
   useEffect(() => {
-    async function fetchUserData() {
-      if (!userId) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
+    let userId = localStorage.getItem("user_id");
+    if (!userId) return;
 
-      try {
-        const response = await fetch(`/api/users/${userId}`);
+    fetch(`http://localhost:8000/auth/user}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: localStorage.getItem("user_id")
+      })
+    })
+      .then((res) => res.json())
+      .then((data: User) => {
+        setUser(data);
+        setEditedUser(data);
+      })
+      .catch((error) => console.error("Error fetching user:", error))
+      .finally(() => setLoading(false));
+  }, []);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-
-        const userData = await response.json();
-        setUser(userData);
-        setFormData({
-          email: userData.email,
-          full_name: userData.full_name,
-        });
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setUser(null);
-        setLoading(false);
-      }
-    }
-
-    fetchUserData();
-  }, [userId]);
-
-  // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setEditedUser((prevUser) =>
+      prevUser ? { ...prevUser, [name]: value } : null
+    );
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!userId) {
-      alert("You must be logged in to update profile");
-      return;
-    }
+  const handleSaveChanges = async () => {
+    if (!editedUser) return;
 
     try {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `http://localhost:8000/auth/update_user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: editedUser.email,
+            password: editedUser.password,
+            user_id: localStorage.getItem("user_id")
+          }),
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
+      const data = await response.json();
+      if (response.status) {
+        setUser(data); // Update the user state with the saved data
+        localStorage.setItem("email",editedUser.email)
+        alert("Profile updated successfully!");
+      } else {
+        alert("Failed to update profile.");
       }
-
-      const updatedUser = await response.json();
-      setUser(updatedUser);
-      alert("Profile updated successfully!");
     } catch (error) {
-      console.error("Profile update error:", error);
-      alert("Failed to update profile");
+      console.error("Error saving changes:", error);
     }
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  if (loading) return <p>Loading...</p>;
 
   if (!user) {
-    return <p>Log In to edit your profile!</p>;
+    return <p>No user found. Please log in to view your profile.</p>;
   }
 
   return (
-    <div className="flex justify-center items-center ">
-      <div className="w-full max-w-lg ml-1">
-        <h1 className="text-3xl font-bold mb-4">Edit Your Profile</h1>
-        <form action="/profile/update" method="POST" className="space-y-4">
-          <div>
-            <label className="block text-lg font-medium text-gray-700">
-              Name:
-            </label>
-            <input
-              type="text"
-              name="name"
-              defaultValue={user.full_name}
-              className="w-full p-3 border border-orange-400 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 "
-            />
-          </div>
-          <div>
-            <label className="block text-lg font-medium text-gray-700">
-              Email:
-            </label>
-            <input
-              type="email"
-              name="email"
-              defaultValue={user.email}
-              className="w-full p-3 border border-orange-400 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
-          <div>
-            <label className="block text-lg font-medium text-gray-700">
-              Password:
-            </label>
-            <input
-              type="password"
-              name="password"
-              defaultValue={user.password}
-              className="w-full p-3 border border-orange-400 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
+    <div className="p-6 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold text-center text-orange-500 mb-6">
+        Update Profile
+      </h2>
+      <div className="space-y-4">
+        {/* Email */}
+        <div>
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={editedUser?.email || ""}
+            onChange={handleInputChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+          />
+        </div>
+
+        {/* Password */}
+        <div>
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={editedUser?.password || ""}
+            onChange={handleInputChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+          />
+        </div>
+
+        {/* Save Changes Button */}
+        <div className="flex justify-center">
           <button
-            type="submit"
-            className="w-full py-3 bg-orange-400 text-white rounded-md hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={handleSaveChanges}
+            className="bg-orange-400 text-white text-sm rounded-3xl px-4 py-2 mt-4 hover:bg-orange-500 transition"
           >
             Save Changes
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );
-}
+};
 
-//for testing with fake data
-
-// "use client";
-
-// type User = {
-//   email: string;
-//   full_name: string;
-//   password: string;
-// };
-
-// interface ProfilePageProps {
-//   user: User | null;
-// }
-
-// export default function ProfilePage({ user }: ProfilePageProps) {
-//   // Fake data for testing
-//   const fakeUser: User = {
-//     email: "john.doe@example.com",
-//     full_name: "John Doe",
-//     password: "password123", // In a real app, you'd never prefill the password
-//   };
-
-//   // Use fake data if the user is null
-//   const userData = user || fakeUser;
-
-//   return (
-//     <div className="flex justify-center items-center ">
-//       <div className="w-full max-w-lg ml-1">
-//         <h1 className="text-3xl font-bold mb-4">Edit Your Profile</h1>
-//         <form action="/profile/update" method="POST" className="space-y-4">
-//           <div>
-//             <label className="block text-lg font-medium text-gray-700">
-//               Name:
-//             </label>
-//             <input
-//               type="text"
-//               name="name"
-//               defaultValue={userData.full_name}
-//               className="w-full p-3 border border-orange-400 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 "
-//             />
-//           </div>
-//           <div>
-//             <label className="block text-lg font-medium text-gray-700">
-//               Email:
-//             </label>
-//             <input
-//               type="email"
-//               name="email"
-//               defaultValue={userData.email}
-//               className="w-full p-3 border border-orange-400 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-//             />
-//           </div>
-//           <div>
-//             <label className="block text-lg font-medium text-gray-700">
-//               Password:
-//             </label>
-//             <input
-//               type="password"
-//               name="password"
-//               defaultValue={userData.password}
-//               className="w-full p-3 border border-orange-400 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-//             />
-//           </div>
-//           <button
-//             type="submit"
-//             className="w-full py-3 bg-orange-400 text-white rounded-md hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-//           >
-//             Save Changes
-//           </button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
+export default ProfilePage;

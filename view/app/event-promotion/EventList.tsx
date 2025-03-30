@@ -10,6 +10,7 @@ export interface Event {
   end_date: string;
   venue_id: string;
   organizer_id: string;
+  participants: [string]
 }
 
 interface EventListProps {
@@ -21,7 +22,11 @@ export default function EventList({ onSelectEvent }: EventListProps) {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      const res = await fetch("http://localhost:8000/events");
+      const res = await fetch("http://localhost:8000/events", 
+        {method:"POST",
+        headers: {"Content-Type":"application/json"}, 
+        body: JSON.stringify({query:""})
+      });
       const data = await res.json();
       setEvents(data.events);
     };

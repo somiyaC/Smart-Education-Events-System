@@ -31,6 +31,14 @@ const SideBarNavBar: React.FC = () => {
             Your Events
           </Link>
         </li>
+        <li>
+          <Link
+            href="/calendar"
+            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+          >
+            Calendar
+          </Link>
+        </li>
         {isOrganizer && (
           <li>
             {/* Only for event organizers, planners, sponsors, and exhibitors */}
@@ -39,17 +47,6 @@ const SideBarNavBar: React.FC = () => {
               className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
             >
               Create/Edit Events
-            </Link>
-          </li>
-        )}
-        {isOrganizer && (
-          <li>
-            {/* Only for Technical administrator */}
-            <Link
-              href="/edit-create-user"
-              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
-            >
-              Edit/Create User
             </Link>
           </li>
         )}
