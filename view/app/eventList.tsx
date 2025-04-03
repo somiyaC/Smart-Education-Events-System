@@ -1,10 +1,8 @@
-// app/events/AllEvents.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { useAppContext } from "./StateContext";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from 'next/navigation';
-
+import { useSearchParams } from "next/navigation";
 
 interface Session {
   title: string;
@@ -31,13 +29,11 @@ const AllEvents: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const { userId, setUserId } = useAppContext();
   const searchParams = useSearchParams();
-  const search = searchParams.get('q');
-  console.log("param",search)
-
+  const search = searchParams.get("q");
+  console.log("param", search);
 
   // Fetch all events from the backend
   useEffect(() => {
-    
     let search_query = "";
     if (search) {
       search_query = search;
@@ -47,16 +43,15 @@ const AllEvents: React.FC = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({query: search_query})
-      }
-    )
+      body: JSON.stringify({ query: search_query }),
+    })
       .then((res) => res.json())
       .then((data) => {
         console.log(data.events);
         setEvents(data.events);
       })
       .catch((error) => console.error("Error fetching events:", error));
-  }, []);
+  }, [search]);
 
   const isRegistered = (event: Event) => {
     console.log(event.participants);
@@ -68,6 +63,64 @@ const AllEvents: React.FC = () => {
     return false;
   };
 
+  const handleSignUp = async (event: Event) => {
+    const userId = localStorage.getItem("user_id");
+
+    try {
+      const signupResponse = await fetch(
+        "http://localhost:8000/events/event_signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            event_id: event.id,
+          }),
+        }
+      );
+
+      const signupData = await signupResponse.json();
+
+      if (signupData.status === false) {
+        console.log("signup failed");
+        return;
+      }
+
+      const ticketResponse = await fetch("http://localhost:8000/tickets/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          event_id: event.id,
+          price: 20.5,
+          status: "unpaind",
+          attendee_id: userId,
+        }),
+      });
+
+      // Update the local state to reflect the new registration
+      setEvents((currentEvents) =>
+        currentEvents.map((e) => {
+          if (e.id === event.id && userId) {
+            // Create a new event object with the user added to participants
+            return {
+              ...e,
+              participants: [...e.participants, userId],
+            };
+          }
+          return e;
+        })
+      );
+
+      //alert("Successfully signed up.");
+    } catch (error) {
+      console.error("Error during signup:", error);
+    }
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {events.length === 0 ? (
@@ -75,10 +128,7 @@ const AllEvents: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {events.map((event, index) => (
-            <div
-              key={index}
-              className="border border-gray-300 p-6 rounded-lg shadow-lg bg-white"
-            >
+            <div key={index} className="p-6 rounded-lg shadow-lg bg-orange-200">
               {/* Event Header */}
               <h2 className="text-2xl font-bold text-orange-400">
                 {event.name}
@@ -101,73 +151,18 @@ const AllEvents: React.FC = () => {
                 </p>
               </div>
 
-              {/* Sessions */}
-              {/* <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Sessions:
-                </h3>
-                <ul className="mt-2 space-y-4">
-                  {event.sessions.map((session, idx) => (
-                    <li key={idx} className="p-4 border rounded-lg">
-                      <h4 className="text-md font-bold text-orange-300">
-                        {session.title}
-                      </h4>
-                      <p className="text-gray-600">{session.description}</p>
-                      <p className="text-gray-700">
-                        <strong>Speaker:</strong> {session.speaker}
-                      </p>
-                      <p className="text-gray-700">
-                        <strong>Time:</strong> {session.startTime} -{" "}
-                        {session.endTime}
-                      </p>
-                    </li>
-                  ))}
-                </ul> 
-               </div> */}
-              {!isRegistered(event) && (
+              {/* Sessions section commented out in original code */}
+
+              {!isRegistered(event) ? (
                 <button
                   type="submit"
-                  onClick={async () => {
-                    const res = await fetch(
-                      "http://localhost:8000/events/event_signup",
-                      {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json", // Set content-type to JSON
-                        },
-                        body: JSON.stringify({
-                          user_id: localStorage.getItem("user_id"),
-                          event_id: event.id,
-                        }), // Convert the data to JSON string
-                      }
-                    )
-                      .then((res) => res.json())
-                      .then(async (data) => {
-                        if (data.status == false) {
-                          console.log("signup failed");
-                        } else {
-                          await fetch("http://localhost:8000/tickets/", {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                              event_id: event.id,
-                              price: 20.5,
-                              status: "unpaind",
-                              attendee_id: localStorage.getItem("user_id"),
-                            }),
-                          }).then((res) => alert("Successfully signed up."));
-                        }
-                      });
-                  }}
-                  className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition"
+                  onClick={() => handleSignUp(event)}
+                  className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block active:bg-orange-500"
                 >
                   Sign Up
                 </button>
-              )}
-              {isRegistered(event) && (
-                <button className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-orange-500 transition">
+              ) : (
+                <button className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block">
                   Already Registered
                 </button>
               )}

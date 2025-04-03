@@ -51,7 +51,7 @@ const Login = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-      <div className="flex flex-col justify-center px-8 lg:px-24 bg-white">
+      <div className="flex flex-col justify-start items-center px-8 lg:px-24 bg-white">
         <h1 className="text-3xl mb-4 text-gray-900">Log In</h1>
         {error && <p className="text-red-500">{error}</p>}
         <form className="space-y-4" onSubmit={handleLogin}>
@@ -86,6 +86,13 @@ const Login = () => {
             </Link>
           </p>
         </div>
+      </div>
+      <div className="hidden lg:block">
+        <img
+          src="/images/signup.png"
+          alt="Signup Illustration"
+          className="w-full max-h-[800px] object-cover rounded-3xl"
+        />
       </div>
     </div>
   );

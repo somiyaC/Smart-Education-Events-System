@@ -55,23 +55,29 @@ const YourEvents: React.FC = () => {
 
   const handleUnsignUp = async (eventId: string) => {
     try {
-      const response = await fetch("http://localhost:8000/events/event_cancel", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user_id: localStorage.getItem("user_id"), event_id: eventId }),
-      });
+      const response = await fetch(
+        "http://localhost:8000/events/event_cancel",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: localStorage.getItem("user_id"),
+            event_id: eventId,
+          }),
+        }
+      );
 
       const data = await response.json();
       if (data.status === false) {
-        alert("Unable to cancel registration")
+        alert("Unable to cancel registration");
         console.log("Unsignup failed");
       } else {
         setEvents((prevEvents) =>
           prevEvents.filter((event) => event.id !== eventId)
         );
-        alert("Successfully canceled registration");
+        //alert("Successfully canceled registration");
       }
     } catch (error) {
       console.error("Error unsubscribing:", error);
@@ -98,7 +104,7 @@ const YourEvents: React.FC = () => {
         {events.map((event) => (
           <div
             key={event.id}
-            className="border border-gray-300 p-6 rounded-lg shadow-lg bg-white"
+            className="p-6 rounded-lg shadow-lg bg-orange-200"
           >
             {/* Event Header */}
             <h2 className="text-2xl font-bold text-orange-400">{event.name}</h2>
@@ -125,7 +131,7 @@ const YourEvents: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-800">Sessions:</h3>
               <ul className="mt-2 space-y-4">
                 {event.sessions.map((session, idx) => (
-                  <li key={idx} className="p-4 border rounded-lg bg-gray-50">
+                  <li key={idx} className="p-4 rounded-lg bg-orange-100">
                     <h4 className="text-md font-bold text-orange-300">
                       {session.title}
                     </h4>
@@ -145,14 +151,14 @@ const YourEvents: React.FC = () => {
                           Materials:
                         </h5>
                         <ul className="mt-2 space-y-2">
-                            <li className="text-sm">
-                              <p
-                                rel="noopener noreferrer"
-                                className="text-blue-500 hover:underline"
-                              >
-                                {session.materials}
-                              </p>
-                            </li>
+                          <li className="text-sm">
+                            <p
+                              rel="noopener noreferrer"
+                              className="text-yellow-800 hover:underline"
+                            >
+                              {session.materials}
+                            </p>
+                          </li>
                         </ul>
                       </div>
                     )}
@@ -164,7 +170,7 @@ const YourEvents: React.FC = () => {
             {/* Unsign Up Button */}
             <button
               onClick={() => handleUnsignUp(event.id)}
-              className="bg-red-500 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-red-600 transition"
+              className="bg-red-500 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block active:bg-red-600"
             >
               Cancel Registration
             </button>

@@ -14,7 +14,7 @@ const Signup = () => {
   const [error, setError] = useState("");
   const { userId, setUserId } = useAppContext();
 
-  const handleSignup = async (e:  React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/signup", {
@@ -45,14 +45,7 @@ const Signup = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-      <div className="flex flex-col justify-center px-8 lg:px-24 bg-white">
-        <div className="mb-6">
-          <Link href={"/"}>
-            <div className="text-5xl font-semibold text-gray-800">
-              Smart Education Events System
-            </div>
-          </Link>
-        </div>
+      <div className="flex flex-col justify-start items-center px-8 lg:px-24 bg-white">
         <h1 className="text-3xl mb-4 text-gray-900">Create an account</h1>
         {error && <p className="text-red-500">{error}</p>}
         <form className="space-y-4" onSubmit={handleSignup}>
