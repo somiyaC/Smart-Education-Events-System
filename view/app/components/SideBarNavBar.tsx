@@ -13,12 +13,12 @@ const SideBarNavBar: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-60 h-screen bg-white text-white p-2 h-full">
-      <ul className="space-y-1.5">
+    <div className="w-50 h-screen bg-white text-white p-2 h-full">
+      <ul className="space-y-0.5">
         <li>
           <Link
             href="/"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
           >
             Home
           </Link>
@@ -26,7 +26,7 @@ const SideBarNavBar: React.FC = () => {
         <li>
           <Link
             href="/your-events"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
           >
             Your Events
           </Link>
@@ -34,7 +34,7 @@ const SideBarNavBar: React.FC = () => {
         <li>
           <Link
             href="/calendar"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
           >
             Calendar
           </Link>
@@ -44,7 +44,7 @@ const SideBarNavBar: React.FC = () => {
             {/* Only for event organizers, planners, sponsors, and exhibitors */}
             <Link
               href="/create-edit-events"
-              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+              className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
             >
               Create/Edit Events
             </Link>
@@ -55,7 +55,7 @@ const SideBarNavBar: React.FC = () => {
             {/* Only for Executive administrator */}
             <Link
               href="/event-management"
-              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+              className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
             >
               Event Information and Management
             </Link>
@@ -66,7 +66,7 @@ const SideBarNavBar: React.FC = () => {
             {/* Only for Executive administrator */}
             <Link
               href="/event-promotion"
-              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+              className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
             >
               Event Promotion
             </Link>
@@ -75,7 +75,7 @@ const SideBarNavBar: React.FC = () => {
         <li>
           <Link
             href="/networking"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
           >
             Networking & Engagement
           </Link>
@@ -85,7 +85,7 @@ const SideBarNavBar: React.FC = () => {
             {/* Only for Technical administrator */}
             <Link
               href="/system-maintenance"
-              className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+              className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
             >
               System Maintenance
             </Link>
@@ -94,7 +94,7 @@ const SideBarNavBar: React.FC = () => {
         <li>
           <Link
             href="/profile"
-            className="bg-orange-400 rounded-2xl p-2 block hover:bg-orange-300 transition"
+            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
           >
             Profile
           </Link>

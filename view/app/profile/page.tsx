@@ -24,8 +24,8 @@ const ProfilePage: React.FC = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: localStorage.getItem("user_id")
-      })
+        user_id: localStorage.getItem("user_id"),
+      }),
     })
       .then((res) => res.json())
       .then((data: User) => {
@@ -47,25 +47,22 @@ const ProfilePage: React.FC = () => {
     if (!editedUser) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/auth/update_user`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: editedUser.email,
-            password: editedUser.password,
-            user_id: localStorage.getItem("user_id")
-          }),
-        }
-      );
+      const response = await fetch(`http://localhost:8000/auth/update_user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: editedUser.email,
+          password: editedUser.password,
+          user_id: localStorage.getItem("user_id"),
+        }),
+      });
 
       const data = await response.json();
       if (response.status) {
         setUser(data); // Update the user state with the saved data
-        localStorage.setItem("email",editedUser.email)
+        localStorage.setItem("email", editedUser.email);
         alert("Profile updated successfully!");
       } else {
         alert("Failed to update profile.");
@@ -101,7 +98,7 @@ const ProfilePage: React.FC = () => {
             name="email"
             value={editedUser?.email || ""}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
 
@@ -119,7 +116,7 @@ const ProfilePage: React.FC = () => {
             name="password"
             value={editedUser?.password || ""}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
 

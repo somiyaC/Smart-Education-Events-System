@@ -14,7 +14,7 @@ const Login = () => {
   const { userId, setUserId } = useAppContext();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // ✅ Prevent default form submission
+    e.preventDefault();
 
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/login", {
@@ -34,6 +34,7 @@ const Login = () => {
         setUserId(data.user_id);
         console.log("user", data.user_id);
 
+        window.dispatchEvent(new Event("authStateChanged"));
         // Redirect based on role
         if (data.role === "admin") {
           router.push("/admin-dashboard");
@@ -51,7 +52,7 @@ const Login = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-      <div className="flex flex-col justify-start items-center px-8 lg:px-24 bg-white">
+      <div className="flex flex-col justify-start items-center px-4 lg:px-24 bg-white">
         <h1 className="text-3xl mb-4 text-gray-900">Log In</h1>
         {error && <p className="text-red-500">{error}</p>}
         <form className="space-y-4" onSubmit={handleLogin}>
@@ -73,9 +74,9 @@ const Login = () => {
           />
           <button
             type="submit"
-            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-700"
+            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium cursor-pointer active:bg-orange-600"
           >
-            Sign In
+            Log In
           </button>
         </form>
         <div className="mt-4 text-center">
@@ -89,9 +90,9 @@ const Login = () => {
       </div>
       <div className="hidden lg:block">
         <img
-          src="/images/signup.png"
+          src="/images/signup.jpg"
           alt="Signup Illustration"
-          className="w-full max-h-[800px] object-cover rounded-3xl"
+          className="w-full max-h-[400px] object-cover rounded-3xl"
         />
       </div>
     </div>

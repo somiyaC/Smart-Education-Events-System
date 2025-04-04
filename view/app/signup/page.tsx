@@ -32,6 +32,7 @@ const Signup = () => {
       if (data.status === true) {
         setUserId(data.user_id);
         console.log("stored id", data.user_id);
+        window.dispatchEvent(new Event("authStateChanged"));
         alert("Signup successful!");
         router.push("/login");
       } else {
@@ -76,7 +77,7 @@ const Signup = () => {
           </select>
           <button
             type="submit"
-            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-700"
+            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium cursor-pointer active:bg-orange-600"
           >
             Sign Up
           </button>
@@ -90,9 +91,9 @@ const Signup = () => {
       </div>
       <div className="hidden lg:block">
         <img
-          src="/images/signup.png"
+          src="/images/signup.jpg"
           alt="Signup Illustration"
-          className="w-full max-h-[800px] object-cover rounded-3xl"
+          className="w-full max-h-[400px] object-cover rounded-3xl"
         />
       </div>
     </div>

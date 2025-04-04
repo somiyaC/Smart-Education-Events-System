@@ -128,7 +128,7 @@ const AllEvents: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {events.map((event, index) => (
-            <div key={index} className="p-6 rounded-lg shadow-lg bg-orange-200">
+            <div key={index} className="p-6 rounded-lg shadow-lg bg-orange-100">
               {/* Event Header */}
               <h2 className="text-2xl font-bold text-orange-400">
                 {event.name}
@@ -157,14 +157,14 @@ const AllEvents: React.FC = () => {
                 <button
                   type="submit"
                   onClick={() => handleSignUp(event)}
-                  className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block active:bg-orange-500"
+                  className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block cursor-pointer active:bg-orange-500"
                 >
                   Sign Up
                 </button>
               ) : (
-                <button className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block">
-                  Already Registered
-                </button>
+                <div className="flex justify-end text-orange-400 text-sm mt-10 font-bold block">
+                  You're Registered!
+                </div>
               )}
             </div>
           ))}
