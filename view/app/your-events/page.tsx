@@ -97,15 +97,10 @@ const YourEvents: React.FC = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold text-center text-black mb-6">
-        Your Events
-      </h2>
+      <h2 className="text-3xl font-bold text-black mb-6">Your Events</h2>
       <div className="space-y-6">
         {events.map((event) => (
-          <div
-            key={event.id}
-            className="p-6 rounded-lg shadow-lg bg-orange-100"
-          >
+          <div key={event.id} className="p-6 rounded-lg shadow-lg bg-[#fff6e5]">
             {/* Event Header */}
             <h2 className="text-2xl font-bold text-orange-400">{event.name}</h2>
             <p className="text-gray-700 mt-2">{event.description}</p>
@@ -131,7 +126,10 @@ const YourEvents: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-800">Sessions:</h3>
               <ul className="mt-2 space-y-4">
                 {event.sessions.map((session, idx) => (
-                  <li key={idx} className="p-4 rounded-lg">
+                  <li
+                    key={idx}
+                    className="p-4 rounded-lg border border-orange-200"
+                  >
                     <h4 className="text-md font-bold text-orange-300">
                       {session.title}
                     </h4>
@@ -170,7 +168,7 @@ const YourEvents: React.FC = () => {
             {/* Unsign Up Button */}
             <button
               onClick={() => handleUnsignUp(event.id)}
-              className="bg-red-500 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block cursor-pointer active:bg-red-600"
+              className="bg-red-500 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto mt-5 block cursor-pointer active:bg-red-600"
             >
               Cancel Registration
             </button>

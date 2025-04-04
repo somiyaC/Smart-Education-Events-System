@@ -72,7 +72,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>Sign in to Edit Your Profile!</p>;
 
   if (!user) {
     return <p>No user found. Please log in to view your profile.</p>;

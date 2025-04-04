@@ -128,7 +128,7 @@ const AllEvents: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {events.map((event, index) => (
-            <div key={index} className="p-6 rounded-lg shadow-lg bg-orange-100">
+            <div key={index} className="p-6 rounded-lg shadow-lg bg-[#fff6e5]">
               {/* Event Header */}
               <h2 className="text-2xl font-bold text-orange-400">
                 {event.name}
