@@ -17,6 +17,8 @@ from .poll_model import PollModel
 from .question_model import QuestionModel
 from .chat_model import ChatRoomModel, ChatMessageModel
 from .email_model import EmailCampaignModel
+from .analytics_model import EventAnalyticsModel, FeedbackAnalyticsModel, ReportConfigModel
+from .payment_model import PaymentModel, RefundModel, DiscountCodeModel, SponsorshipModel
 
 # Export all models
 __all__ = [
@@ -32,5 +34,12 @@ __all__ = [
     'QuestionModel',
     'ChatRoomModel',
     'ChatMessageModel',
-    'EmailCampaignModel'
+    'EmailCampaignModel',
+    'EventAnalyticsModel',
+    'FeedbackAnalyticsModel',
+    'ReportConfigModel',
+    'PaymentModel',
+    'RefundModel',
+    'DiscountCodeModel',
+    'SponsorshipModel'
 ]
