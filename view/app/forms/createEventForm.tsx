@@ -179,7 +179,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
 
   useEffect(() => {
     let role = localStorage.getItem("role");
-    if (role !== "organizer") {
+    if (role !== "organizer" && role !== "admin") {
       alert("Unauthorized");
       router.push("/");
       return;

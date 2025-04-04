@@ -5,6 +5,7 @@ from passlib.hash import bcrypt
 from models.user_model import UserModel
 import jwt
 import os
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -27,6 +28,11 @@ class UserData(BaseModel):
 class UserUpdateData(BaseModel):
     email: str
     password: str
+    user_id: str
+
+class PasswordUpdateData(BaseModel):
+    current_password: str
+    new_password: str
     user_id: str
 
 @router.post("/signup")
@@ -70,3 +76,33 @@ async def update_user(user_data: UserUpdateData):
 
     user_id = await UserModel.update_user(user_id, update_data)
     return {"status":True}
+
+@router.post("/update_password")
+async def update_password(password_data: PasswordUpdateData):
+    try:
+        # Get the user from database
+        user = users_collection.find_one({"_id": ObjectId(password_data.user_id)})
+        if not user:
+            return {"status": False, "message": "User not found"}
+        
+        # Verify current password
+        if not bcrypt.verify(password_data.current_password, user["password"]):
+            return {"status": False, "message": "Current password is incorrect"}
+        
+        # Hash the new password
+        hashed_password = bcrypt.hash(password_data.new_password)
+        
+        # Update the password in database
+        result = users_collection.update_one(
+            {"_id": ObjectId(password_data.user_id)},
+            {"$set": {"password": hashed_password}}
+        )
+        
+        if result.modified_count == 0:
+            return {"status": False, "message": "Failed to update password"}
+        
+        return {"status": True, "message": "Password updated successfully"}
+    
+    except Exception as e:
+        print(f"Error updating password: {str(e)}")
+        return {"status": False, "message": "An error occurred while updating password"}

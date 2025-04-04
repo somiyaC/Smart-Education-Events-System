@@ -100,7 +100,7 @@ const YourEvents: React.FC = () => {
       <h2 className="text-3xl font-bold text-black mb-6">Your Events</h2>
       <div className="space-y-6">
         {events.map((event) => (
-          <div key={event.id} className="p-6 rounded-lg shadow-lg bg-[#fff6e5]">
+          <div key={event.id} className="p-6 rounded-lg shadow-lg bg-[#FFFAF0]">
             {/* Event Header */}
             <h2 className="text-2xl font-bold text-orange-400">{event.name}</h2>
             <p className="text-gray-700 mt-2">{event.description}</p>
@@ -168,7 +168,7 @@ const YourEvents: React.FC = () => {
             {/* Unsign Up Button */}
             <button
               onClick={() => handleUnsignUp(event.id)}
-              className="bg-red-500 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto mt-5 block cursor-pointer active:bg-red-600"
+              className="bg-red-100 border border-red-400 text-red-700 text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto mt-5 block cursor-pointer active:bg-red-600"
             >
               Cancel Registration
             </button>
