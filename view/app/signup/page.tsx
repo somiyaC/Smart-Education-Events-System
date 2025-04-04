@@ -14,7 +14,7 @@ const Signup = () => {
   const [error, setError] = useState("");
   const { userId, setUserId } = useAppContext();
 
-  const handleSignup = async (e:  React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/signup", {
@@ -32,6 +32,7 @@ const Signup = () => {
       if (data.status === true) {
         setUserId(data.user_id);
         console.log("stored id", data.user_id);
+        window.dispatchEvent(new Event("authStateChanged"));
         alert("Signup successful!");
         router.push("/login");
       } else {
@@ -45,14 +46,7 @@ const Signup = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-      <div className="flex flex-col justify-center px-8 lg:px-24 bg-white">
-        <div className="mb-6">
-          <Link href={"/"}>
-            <div className="text-5xl font-semibold text-gray-800">
-              Smart Education Events System
-            </div>
-          </Link>
-        </div>
+      <div className="flex flex-col justify-start items-center px-8 lg:px-24 bg-white">
         <h1 className="text-3xl mb-4 text-gray-900">Create an account</h1>
         {error && <p className="text-red-500">{error}</p>}
         <form className="space-y-4" onSubmit={handleSignup}>
@@ -83,7 +77,7 @@ const Signup = () => {
           </select>
           <button
             type="submit"
-            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-700"
+            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium cursor-pointer active:bg-orange-600"
           >
             Sign Up
           </button>
@@ -97,9 +91,9 @@ const Signup = () => {
       </div>
       <div className="hidden lg:block">
         <img
-          src="/images/signup.png"
+          src="/images/signup.jpg"
           alt="Signup Illustration"
-          className="w-full max-h-[800px] object-cover rounded-3xl"
+          className="w-full max-h-[400px] object-cover rounded-3xl"
         />
       </div>
     </div>

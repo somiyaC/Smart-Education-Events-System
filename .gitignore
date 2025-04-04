@@ -19,6 +19,8 @@ view/node_modules
 /view/node_modules/
 /out/
 
+/node_modules/
+
 # production
 /build
 

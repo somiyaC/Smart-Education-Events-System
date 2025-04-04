@@ -55,23 +55,29 @@ const YourEvents: React.FC = () => {
 
   const handleUnsignUp = async (eventId: string) => {
     try {
-      const response = await fetch("http://localhost:8000/events/event_cancel", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user_id: localStorage.getItem("user_id"), event_id: eventId }),
-      });
+      const response = await fetch(
+        "http://localhost:8000/events/event_cancel",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: localStorage.getItem("user_id"),
+            event_id: eventId,
+          }),
+        }
+      );
 
       const data = await response.json();
       if (data.status === false) {
-        alert("Unable to cancel registration")
+        alert("Unable to cancel registration");
         console.log("Unsignup failed");
       } else {
         setEvents((prevEvents) =>
           prevEvents.filter((event) => event.id !== eventId)
         );
-        alert("Successfully canceled registration");
+        //alert("Successfully canceled registration");
       }
     } catch (error) {
       console.error("Error unsubscribing:", error);
@@ -91,15 +97,10 @@ const YourEvents: React.FC = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold text-center text-orange-500 mb-6">
-        Your Events
-      </h2>
+      <h2 className="text-3xl font-bold text-black mb-6">Your Events</h2>
       <div className="space-y-6">
         {events.map((event) => (
-          <div
-            key={event.id}
-            className="border border-gray-300 p-6 rounded-lg shadow-lg bg-white"
-          >
+          <div key={event.id} className="p-6 rounded-lg shadow-lg bg-[#FFFAF0]">
             {/* Event Header */}
             <h2 className="text-2xl font-bold text-orange-400">{event.name}</h2>
             <p className="text-gray-700 mt-2">{event.description}</p>
@@ -125,7 +126,10 @@ const YourEvents: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-800">Sessions:</h3>
               <ul className="mt-2 space-y-4">
                 {event.sessions.map((session, idx) => (
-                  <li key={idx} className="p-4 border rounded-lg bg-gray-50">
+                  <li
+                    key={idx}
+                    className="p-4 rounded-lg border border-orange-200"
+                  >
                     <h4 className="text-md font-bold text-orange-300">
                       {session.title}
                     </h4>
@@ -145,14 +149,14 @@ const YourEvents: React.FC = () => {
                           Materials:
                         </h5>
                         <ul className="mt-2 space-y-2">
-                            <li className="text-sm">
-                              <p
-                                rel="noopener noreferrer"
-                                className="text-blue-500 hover:underline"
-                              >
-                                {session.materials}
-                              </p>
-                            </li>
+                          <li className="text-sm">
+                            <p
+                              rel="noopener noreferrer"
+                              className="text-yellow-800 hover:underline"
+                            >
+                              {session.materials}
+                            </p>
+                          </li>
                         </ul>
                       </div>
                     )}
@@ -164,7 +168,7 @@ const YourEvents: React.FC = () => {
             {/* Unsign Up Button */}
             <button
               onClick={() => handleUnsignUp(event.id)}
-              className="bg-red-500 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block hover:bg-red-600 transition"
+              className="bg-red-100 border border-red-400 text-red-700 text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto mt-5 block cursor-pointer active:bg-red-600"
             >
               Cancel Registration
             </button>

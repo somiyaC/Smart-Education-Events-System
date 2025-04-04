@@ -179,7 +179,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
 
   useEffect(() => {
     let role = localStorage.getItem("role");
-    if (role !== "organizer") {
+    if (role !== "organizer" && role !== "admin") {
       alert("Unauthorized");
       router.push("/");
       return;
@@ -196,21 +196,21 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       <input
         type="text"
         placeholder="Event Title"
-        className="border border-orange-400 rounded p-2 w-full"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
         value={event.name}
         onChange={(e) => setEvent({ ...event, name: e.target.value })}
       />
       <input
         type="text"
         placeholder="Event Description"
-        className="border border-orange-400 rounded p-2 w-full mt-2"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
         value={event.description}
         onChange={(e) => setEvent({ ...event, description: e.target.value })}
       />
       <input
         type="text"
         placeholder="Event Type"
-        className="border border-orange-400 rounded p-2 w-full mt-2"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
         value={event.event_type}
         onChange={(e) => setEvent({ ...event, event_type: e.target.value })}
       />
@@ -221,7 +221,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         <input
           id="start_date"
           type="date"
-          className="border border-orange-400 rounded p-2 w-full mt-2"
+          className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
           value={event.start_date}
           onChange={(e) => setEvent({ ...event, start_date: e.target.value })}
         />
@@ -233,7 +233,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         <input
           id="end-date"
           type="date"
-          className="border border-orange-400 rounded p-2 w-full mt-2"
+          className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
           value={event.end_date}
           onChange={(e) => setEvent({ ...event, end_date: e.target.value })}
         />
@@ -241,14 +241,17 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       <input
         type="text"
         placeholder="Venue"
-        className="border border-orange-400 rounded p-2 w-full mt-2"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
         value={event.venue}
         onChange={(e) => setEvent({ ...event, venue: e.target.value })}
       />
 
       <h3 className="mt-4 font-semibold">Sessions</h3>
       {event.sessions.map((session, index) => (
-        <div key={index} className="p-2 border rounded mt-2">
+        <div
+          key={index}
+          className="p-2 border rounded mt-2 focus:ring-1 focus:ring-orange-500"
+        >
           <p>
             {session.title} from {session.startTime} to {session.endTime}
           </p>
@@ -259,21 +262,21 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       <input
         type="text"
         placeholder="Session Title"
-        className="border border-orange-400 rounded p-2 w-full mt-2"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
         value={sessionTitle}
         onChange={(e) => setSessionTitle(e.target.value)}
       />
       <input
         type="text"
         placeholder="Session Description"
-        className="border border-orange-400 rounded p-2 w-full mt-2"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
         value={sessionDescription}
         onChange={(e) => setSessionDescription(e.target.value)}
       />
       <input
         type="text"
         placeholder="Speaker"
-        className="border border-orange-400 rounded p-2 w-full mt-2"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
         value={speaker}
         onChange={(e) => setSpeaker(e.target.value)}
       />
@@ -282,7 +285,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
           Start Time
         </label>
         <select
-          className="border border-orange-400 rounded p-2 w-full mt-2"
+          className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
           value={sessionStartTime}
           onChange={(e) => setSessionStartTime(e.target.value)}
         >
@@ -310,7 +313,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
           End Time
         </label>
         <select
-          className="border border-orange-400 rounded p-2 w-full mt-2"
+          className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
           value={sessionEndTime}
           onChange={(e) => setSessionEndTime(e.target.value)}
         >
@@ -336,7 +339,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       <input
         type="text"
         placeholder="Material"
-        className="border border-orange-400 rounded p-2 w-full mt-2"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             addMaterial((e.target as HTMLInputElement).value);
@@ -344,37 +347,37 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
           }
         }}
       />
-      <button
-        type="button"
-        className="bg-orange-300 text-xs text-white p-2 my-3 mx-1 rounded-3xl hover:bg-orange-200 transition"
-        onClick={() =>
-          addMaterial(
-            (document.querySelector("input[type='text']") as HTMLInputElement)
-              .value
-          )
-        }
-      >
-        + Add Material
-      </button>
-      <ul className="mt-2">
-        {sessionMaterials.map((material, index) => (
-          <li key={index}>{material}</li>
-        ))}
-      </ul>
-      <button
-        type="button"
-        className="bg-orange-300 text-white p-2 my-3 mx-1 rounded-3xl hover:bg-orange-200 transition"
-        onClick={addSession}
-      >
-        + Add Session
-      </button>
 
-      <button
-        type="submit"
-        className="bg-orange-400 text-white p-2 my-3 mx-1 rounded-3xl hover:bg-orange-300 transition"
-      >
-        Create Event
-      </button>
+      <div className="flex space-x-2 mt-3">
+        <button
+          type="button"
+          className="bg-orange-300 text-xs text-white p-2 rounded-3xl cursor-pointer active:bg-orange-100"
+          onClick={() =>
+            addMaterial(
+              (document.querySelector("input[type='text']") as HTMLInputElement)
+                .value
+            )
+          }
+        >
+          + Add Material
+        </button>
+
+        <button
+          type="button"
+          className="bg-orange-300 text-xs text-white p-2 rounded-3xl cursor-pointer active:bg-orange-100"
+          onClick={addSession}
+        >
+          + Add Session
+        </button>
+      </div>
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="bg-orange-400 text-white px-4 py-2 mt-5 mx-1 my-3 rounded-3xl cursor-pointer active:bg-orange-300"
+        >
+          Create Event
+        </button>
+      </div>
     </form>
   );
 };

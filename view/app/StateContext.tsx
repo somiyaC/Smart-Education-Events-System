@@ -1,9 +1,19 @@
 "use client";
-import React, { createContext, useState, ReactNode, useContext } from 'react';
+import React, {
+  createContext,
+  useState,
+  ReactNode,
+  useContext,
+  useEffect,
+} from "react";
 
 interface AppContextType {
   userId: string;
   setUserId: (value: string) => void;
+  userRole: string;
+  setUserRole: (value: string) => void;
+  isAdmin: boolean;
+  isOrganizer: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -14,9 +24,36 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [userId, setUserId] = useState<string>("");
+  const [userRole, setUserRole] = useState<string>("");
+
+  const isAdmin = userRole === "admin";
+  const isOrganizer = userRole === "organizer";
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("user_id");
+    const storedUserRole = localStorage.getItem("role");
+
+    if (storedUserId) setUserId(storedUserId);
+    if (storedUserRole) setUserRole(storedUserRole);
+  }, []);
+
+  // Update localStorage when values change
+  useEffect(() => {
+    if (userId) localStorage.setItem("user_id", userId);
+    if (userRole) localStorage.setItem("role", userRole);
+  }, [userId, userRole]);
 
   return (
-    <AppContext.Provider value={{ userId, setUserId }}>
+    <AppContext.Provider
+      value={{
+        userId,
+        setUserId,
+        userRole,
+        setUserRole,
+        isAdmin,
+        isOrganizer,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

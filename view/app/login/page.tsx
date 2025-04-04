@@ -11,10 +11,10 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { userId, setUserId } = useAppContext();
+  const { userId, setUserId, userRole, setUserRole } = useAppContext();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // ✅ Prevent default form submission
+    e.preventDefault();
 
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/login", {
@@ -26,20 +26,27 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Store in localStorage
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("user_id", data.user_id);
         localStorage.setItem("email", data.email);
-        console.log("user_id", data.user_id);
-        setUserId(data.user_id);
-        console.log("user", data.user_id);
 
-        // Redirect based on role
-        if (data.role === "admin") {
-          router.push("/admin-dashboard");
-        } else {
-          router.push("/");
-        }
+        // Update context
+        setUserId(data.user_id);
+        setUserRole(data.role);
+
+        window.dispatchEvent(new Event("authStateChanged"));
+
+        // Redirect to home page for all users
+        router.push("/");
+
+        console.log(
+          "Login successful, redirecting to home with role:",
+          data.role
+        );
+        console.log("Setting role in context:", data.role);
+        console.log("Role from localStorage:", localStorage.getItem("role"));
       } else {
         setError(data.detail || "Login failed. Please try again.");
       }
@@ -51,7 +58,7 @@ const Login = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-      <div className="flex flex-col justify-center px-8 lg:px-24 bg-white">
+      <div className="flex flex-col justify-start items-center px-4 lg:px-24 bg-white">
         <h1 className="text-3xl mb-4 text-gray-900">Log In</h1>
         {error && <p className="text-red-500">{error}</p>}
         <form className="space-y-4" onSubmit={handleLogin}>
@@ -73,9 +80,9 @@ const Login = () => {
           />
           <button
             type="submit"
-            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-700"
+            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium cursor-pointer active:bg-orange-600"
           >
-            Sign In
+            Log In
           </button>
         </form>
         <div className="mt-4 text-center">
@@ -86,6 +93,13 @@ const Login = () => {
             </Link>
           </p>
         </div>
+      </div>
+      <div className="hidden lg:block">
+        <img
+          src="/images/signup.jpg"
+          alt="Signup Illustration"
+          className="w-full max-h-[400px] object-cover rounded-3xl"
+        />
       </div>
     </div>
   );

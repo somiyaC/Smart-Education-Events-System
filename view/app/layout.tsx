@@ -4,7 +4,7 @@ import Navbar from "@/app/components/NavBar";
 import SearchBar from "@/app/components/SearchBar";
 import SideBarNavBar from "@/app/components/SideBarNavBar";
 import Footer from "@/app/components/Footer";
-import { AppProvider } from './StateContext';
+import { AppProvider } from "./StateContext";
 
 export const metadata: Metadata = {
   title: "SEES",
@@ -25,7 +25,7 @@ export default function RootLayout({
             <main className="flex-grow p-6">{children}</main>
           </div>
           <Footer />
-        </AppProvider>  
+        </AppProvider>
       </body>
     </html>
   );

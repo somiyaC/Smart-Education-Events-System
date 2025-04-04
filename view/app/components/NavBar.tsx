@@ -6,35 +6,55 @@ import React, { useEffect, useState } from "react";
 
 const Navbar: React.FC = () => {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const [email, setEmail] = useState<string | null>("");
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
 
-  useEffect(() => {
-    if (localStorage.getItem("user_id") !== undefined) {
-      setEmail(localStorage.getItem("email"));
+  // Function to check login status
+  const checkLoginStatus = () => {
+    const userId = localStorage.getItem("user_id");
+    const storedEmail = localStorage.getItem("email");
+
+    if (userId) {
       setIsLoggedIn(true);
-    }
-
-  }, []);
-
-  useEffect(() => {
-
-  }, [isLoggedIn, email])
-
-  const handleLogout = async () => {
-    try {
+      setEmail(storedEmail || "");
+    } else {
       setIsLoggedIn(false);
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      router.push("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
+      setEmail("");
     }
   };
 
-  if (isLoggedIn == null) {
-    return null; // Prevent flashing when checking authentication
-  }
+  useEffect(() => {
+    // Check login status when component mounts
+    checkLoginStatus();
+
+    // Set up an event listener for storage changes
+    window.addEventListener("storage", checkLoginStatus);
+
+    // Custom event listener for login/logout actions
+    const handleAuthEvent = () => checkLoginStatus();
+    window.addEventListener("authStateChanged", handleAuthEvent);
+
+    return () => {
+      // Clean up event listeners
+      window.removeEventListener("storage", checkLoginStatus);
+      window.removeEventListener("authStateChanged", handleAuthEvent);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("email");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+
+    setIsLoggedIn(false);
+    setEmail("");
+
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event("authStateChanged"));
+
+    router.push("/login");
+  };
 
   return (
     <div className="max-w-screen-xl w-full my-0 mx-auto">
@@ -50,9 +70,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
             <div className="flex flex-row justify-around items-center">
-              <p className="mr-2">
-                Welcome Back {email}!
-              </p>
+              <p className="mr-2">Welcome Back {email}!</p>
               <button
                 onClick={handleLogout}
                 className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition"
@@ -60,7 +78,6 @@ const Navbar: React.FC = () => {
                 Log Out
               </button>
             </div>
-            
           ) : (
             <>
               <Link href="/login">
