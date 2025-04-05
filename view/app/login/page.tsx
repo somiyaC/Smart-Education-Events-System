@@ -6,6 +6,7 @@ import { FaGoogle, FaFacebook } from "react-icons/fa";
 import { useAppContext } from "../StateContext";
 import Link from "next/link";
 
+// Make sure the component is declared as a function
 const Login = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -105,4 +106,5 @@ const Login = () => {
   );
 };
 
+// Make sure we're properly exporting the component
 export default Login;
