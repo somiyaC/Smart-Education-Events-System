@@ -63,62 +63,16 @@ const AllEvents: React.FC = () => {
     return false;
   };
 
+  const router = useRouter();
+
   const handleSignUp = async (event: Event) => {
     const userId = localStorage.getItem("user_id");
 
-    try {
-      const signupResponse = await fetch(
-        "http://localhost:8000/events/event_signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            event_id: event.id,
-          }),
-        }
-      );
-
-      const signupData = await signupResponse.json();
-
-      if (signupData.status === false) {
-        console.log("signup failed");
-        return;
-      }
-
-      const ticketResponse = await fetch("http://localhost:8000/tickets/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          event_id: event.id,
-          price: 20.5,
-          status: "unpaind",
-          attendee_id: userId,
-        }),
-      });
-
-      // Update the local state to reflect the new registration
-      setEvents((currentEvents) =>
-        currentEvents.map((e) => {
-          if (e.id === event.id && userId) {
-            // Create a new event object with the user added to participants
-            return {
-              ...e,
-              participants: [...e.participants, userId],
-            };
-          }
-          return e;
-        })
-      );
-
-      //alert("Successfully signed up.");
-    } catch (error) {
-      console.error("Error during signup:", error);
-    }
+    router.push(
+      `/payment?eventId=${event.id}&price=20.50&eventName=${encodeURIComponent(
+        event.name
+      )}`
+    );
   };
 
   return (
