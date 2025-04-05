@@ -7,6 +7,7 @@ interface Session {
   title: string;
   description: string;
   speaker: string;
+  speaker_id?: string; // Add speaker_id field
   startTime: string;
   endTime: string;
   materials: string[];
@@ -21,7 +22,7 @@ interface Event {
   organizer: string;
   venue: string;
   sessions: Session[];
-  participants?: [];
+  participants?: string[];
 }
 
 const EventFormPage: React.FC = () => {
@@ -32,26 +33,50 @@ const EventFormPage: React.FC = () => {
   const [event, setEvent] = useState<Event | null>(null);
 
   const handleCreateEvent = async () => {
+    if (!event) {
+      setError("No event data to create.");
+      return;
+    }
+
     setIsEditing(false);
     console.log(event);
 
-    const res = await fetch("http://localhost:8000/events/create_event", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // Set content-type to JSON
-      },
-      body: JSON.stringify({
-        ...event,
-        ...{ participants: [], is_virtual: false, capacity: 100 },
-      }),
-    });
-    setEvent(null);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:8000/events/create_event", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...event,
+          ...{ participants: [], is_virtual: false, capacity: 100 },
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to create event: ${res.status}`);
+      }
+
+      const data = await res.json();
+      alert("Event created successfully!");
+      setEvent(null);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      setError(
+        `Event creation failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
   };
 
   // Handle editing an event
   const handleEditEvent = () => {
     setIsEditing(true);
     setEvent(null);
+    setError("");
   };
 
   // Handle search input change for event name
@@ -66,13 +91,19 @@ const EventFormPage: React.FC = () => {
     setError("");
 
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch("http://localhost:8000/events/event_search", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ query: searchQuery }),
       });
+
+      if (!res.ok) {
+        throw new Error(`Search failed: ${res.status}`);
+      }
 
       const data = await res.json();
 
@@ -90,6 +121,34 @@ const EventFormPage: React.FC = () => {
           foundEvent.organizer_id &&
           foundEvent.venue_id
         ) {
+          // Also fetch the event's sessions
+          const sessionsRes = await fetch(
+            `http://localhost:8000/sessions/event/${foundEvent.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!sessionsRes.ok) {
+            throw new Error(`Failed to fetch sessions: ${sessionsRes.status}`);
+          }
+
+          const sessionsData = await sessionsRes.json();
+          const sessions = sessionsData.sessions || [];
+
+          // Format sessions for the form
+          const formattedSessions = sessions.map((session: any) => ({
+            title: session.title,
+            description: session.description || "",
+            speaker: session.speaker,
+            speaker_id: session.speaker_id,
+            startTime: session.start_time,
+            endTime: session.end_time,
+            materials: session.materials ? session.materials.split(", ") : [],
+          }));
+
           setEvent({
             name: foundEvent.name,
             description: foundEvent.description,
@@ -98,7 +157,7 @@ const EventFormPage: React.FC = () => {
             end_date: foundEvent.end_date,
             organizer: foundEvent.organizer_id,
             venue: foundEvent.venue_id,
-            sessions: [], // You might want to populate this if needed
+            sessions: formattedSessions,
             participants: foundEvent.participants || [],
           });
         } else {
@@ -108,17 +167,56 @@ const EventFormPage: React.FC = () => {
         setError("No events found matching the search query.");
       }
     } catch (err) {
-      setError("Error fetching event data.");
+      setError(
+        `Error fetching event data: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
       console.error(err);
     }
     setLoading(false);
+  };
+
+  // Handle updating an event after editing
+  const handleUpdateEvent = async (updatedEvent: Event) => {
+    try {
+      setEvent(updatedEvent);
+
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:8000/events/update_event", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedEvent),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to update event: ${res.status}`);
+      }
+
+      alert("Event updated successfully!");
+      setIsEditing(false);
+      setEvent(null);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      setError(
+        `Event update failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-4">
         <button
-          onClick={handleCreateEvent}
+          onClick={() => {
+            setIsEditing(false);
+            setError("");
+          }}
           className={`${
             !isEditing ? "bg-orange-400" : "bg-orange-300"
           } text-white p-2 rounded-3xl mr-4 transition-colors duration-300`}
@@ -159,15 +257,13 @@ const EventFormPage: React.FC = () => {
       {error && <p className="text-red-500">{error}</p>}
 
       {isEditing && event ? (
-        <EditEventForm
-          event={event}
-          onUpdate={(updatedEvent) => setEvent(updatedEvent)}
-        />
+        <EditEventForm event={event} onUpdate={handleUpdateEvent} />
       ) : (
         !isEditing && (
           <CreateEventForm
-            onSubmit={async (newEvent) => {
-              console.log(newEvent);
+            onSubmit={(newEvent: Event) => {
+              setEvent(newEvent);
+              handleCreateEvent();
             }}
           />
         )

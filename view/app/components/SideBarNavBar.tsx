@@ -8,6 +8,7 @@ const SideBarNavBar: React.FC = () => {
   const { isAdmin, isOrganizer, userRole } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
   const [permissionsVerified, setPermissionsVerified] = useState(false);
+  const [isSpeaker, setIsSpeaker] = useState(false);
 
   useEffect(() => {
     // Check if role exists in localStorage
@@ -16,9 +17,11 @@ const SideBarNavBar: React.FC = () => {
     if (storedRole) {
       setIsLoading(false);
       setPermissionsVerified(true);
+      setIsSpeaker(storedRole === "speaker");
       console.log("Current userRole in sidebar:", userRole);
       console.log("isAdmin:", isAdmin);
       console.log("isOrganizer:", isOrganizer);
+      console.log("isSpeaker:", storedRole === "speaker");
     } else {
       setIsLoading(false);
     }
@@ -60,6 +63,18 @@ const SideBarNavBar: React.FC = () => {
             Networking & Engagement
           </Link>
         </li>
+
+        {/* Links for speakers */}
+        {(isSpeaker || isOrganizer) && (
+          <li>
+            <Link
+              href="/messages"
+              className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
+            >
+              Messages
+            </Link>
+          </li>
+        )}
 
         {/* Links for organizers and admins */}
         {(isOrganizer || isAdmin) && (

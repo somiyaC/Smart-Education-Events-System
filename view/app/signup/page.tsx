@@ -73,6 +73,7 @@ const Signup = () => {
           >
             <option value="attendee">Attendee</option>
             <option value="organizer">Organizer</option>
+            <option value="speaker">Speaker</option>
             <option value="admin">Admin</option>
           </select>
           <button

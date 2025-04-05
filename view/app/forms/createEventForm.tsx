@@ -2,10 +2,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+interface Speaker {
+  id: string;
+  email: string;
+  name?: string;
+}
+
 interface Session {
   title: string;
   description: string;
   speaker: string;
+  speaker_id: string;
   startTime: string;
   endTime: string;
   materials: string[];
@@ -17,8 +24,10 @@ interface Event {
   event_type: string;
   start_date: string;
   end_date: string;
+  organizer: string; // Added to match EventFormPage interface
   venue: string;
   sessions: Session[];
+  participants?: string[]; // Added to match EventFormPage interface
 }
 
 interface CreateEventFormProps {
@@ -32,16 +41,60 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     event_type: "",
     start_date: "",
     end_date: "",
+    organizer: localStorage.getItem("user_id") || "", // Initialize with user_id
     venue: "",
     sessions: [],
+    participants: [], // Initialize empty array
   });
 
   const [sessionTitle, setSessionTitle] = useState("");
   const [sessionDescription, setSessionDescription] = useState("");
   const [speaker, setSpeaker] = useState("");
+  const [speakerId, setSpeakerId] = useState("");
   const [sessionStartTime, setSessionStartTime] = useState("");
   const [sessionEndTime, setSessionEndTime] = useState("");
   const [sessionMaterials, setSessionMaterials] = useState<string[]>([]);
+  const [speakers, setSpeakers] = useState<Speaker[]>([]);
+  const [loadingSpeakers, setLoadingSpeakers] = useState(true);
+
+  const router = useRouter();
+
+  // Fetch speakers for the dropdown
+  useEffect(() => {
+    const fetchSpeakers = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:8000/users/speakers", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSpeakers(data.speakers || []);
+        } else {
+          console.error("Failed to fetch speakers");
+        }
+      } catch (error) {
+        console.error("Error fetching speakers:", error);
+      } finally {
+        setLoadingSpeakers(false);
+      }
+    };
+
+    fetchSpeakers();
+  }, []);
+
+  // Check authorization
+  useEffect(() => {
+    let role = localStorage.getItem("role");
+    if (role !== "organizer" && role !== "admin") {
+      alert("Unauthorized");
+      router.push("/");
+      return;
+    }
+  }, [router]);
 
   const addMaterial = (material: string) => {
     if (material && !sessionMaterials.includes(material)) {
@@ -65,6 +118,21 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     return `${hours.padStart(2, "0")}:${minutes}`;
   };
 
+  // Handle speaker selection
+  const handleSpeakerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    const selectedSpeaker = speakers.find((s) => s.id === selectedId);
+
+    if (selectedSpeaker) {
+      setSpeakerId(selectedId);
+      // Use name if available, otherwise use email
+      setSpeaker(selectedSpeaker.name || selectedSpeaker.email);
+    } else {
+      setSpeakerId("");
+      setSpeaker("");
+    }
+  };
+
   // Add a new session to the event
   const addSession = () => {
     if (
@@ -78,6 +146,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         title: sessionTitle,
         description: sessionDescription,
         speaker: speaker,
+        speaker_id: speakerId, // Include speaker_id
         startTime: sessionStartTime,
         endTime: sessionEndTime,
         materials: sessionMaterials,
@@ -87,6 +156,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       setSessionTitle("");
       setSessionDescription("");
       setSpeaker("");
+      setSpeakerId("");
       setSessionStartTime("");
       setSessionEndTime("");
       setSessionMaterials([]);
@@ -109,82 +179,9 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       end_date: event.end_date || currentDate,
     };
 
-    try {
-      // First, create the event
-      const eventRes = await fetch(
-        "http://localhost:8000/events/create_event",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...finalEvent,
-            organizer: localStorage.getItem("user_id") || "",
-            participants: [],
-            is_virtual: false,
-            capacity: 100,
-            virtual_meeting_url: "",
-          }),
-        }
-      );
-
-      const eventData = await eventRes.json();
-
-      if (eventData.event_id !== undefined) {
-        // If event creation is successful, create sessions
-        const sessionPromises = finalEvent.sessions.map((session) =>
-          fetch("http://localhost:8000/sessions/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              event_id: eventData.event_id,
-              title: session.title,
-              speaker: session.speaker,
-              startTime: convertTo24HourFormat(session.startTime),
-              endTime: convertTo24HourFormat(session.endTime),
-            }),
-          })
-        );
-
-        // Wait for all session creation requests to complete
-        const sessionResponses = await Promise.all(sessionPromises);
-        const sessionData = await Promise.all(
-          sessionResponses.map((res) => res.json())
-        );
-
-        alert("Successfully created an event and its sessions.");
-
-        // Reset form
-        setEvent({
-          name: "",
-          description: "",
-          event_type: "",
-          start_date: "",
-          end_date: "",
-          venue: "",
-          sessions: [],
-        });
-      } else {
-        alert("Failed to create event. Please contact an administrator.");
-      }
-    } catch (error) {
-      console.error("Event creation error:", error);
-      alert("An error occurred while creating the event");
-    }
+    // Call the onSubmit prop function provided by the parent component
+    onSubmit(finalEvent);
   };
-  const router = useRouter();
-
-  useEffect(() => {
-    let role = localStorage.getItem("role");
-    if (role !== "organizer" && role !== "admin") {
-      alert("Unauthorized");
-      router.push("/");
-      return;
-    }
-  }, []);
 
   return (
     <form
@@ -253,7 +250,10 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
           className="p-2 border rounded mt-2 focus:ring-1 focus:ring-orange-500"
         >
           <p>
-            {session.title} from {session.startTime} to {session.endTime}
+            {session.title} - Speaker: {session.speaker}
+          </p>
+          <p className="text-sm text-gray-600">
+            {session.startTime} to {session.endTime}
           </p>
         </div>
       ))}
@@ -273,13 +273,31 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         value={sessionDescription}
         onChange={(e) => setSessionDescription(e.target.value)}
       />
-      <input
-        type="text"
-        placeholder="Speaker"
-        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
-        value={speaker}
-        onChange={(e) => setSpeaker(e.target.value)}
-      />
+
+      {/* Speaker dropdown */}
+      <div>
+        <label htmlFor="speaker" className="block text-sm font-semibold">
+          Speaker
+        </label>
+        <select
+          id="speaker"
+          className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
+          value={speakerId}
+          onChange={handleSpeakerChange}
+        >
+          <option value="">Select a Speaker</option>
+          {loadingSpeakers ? (
+            <option disabled>Loading speakers...</option>
+          ) : (
+            speakers.map((speaker) => (
+              <option key={speaker.id} value={speaker.id}>
+                {speaker.name || speaker.email}
+              </option>
+            ))
+          )}
+        </select>
+      </div>
+
       <div>
         <label htmlFor="start-time" className="block text-sm font-semibold">
           Start Time
@@ -354,8 +372,11 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
           className="bg-orange-300 text-xs text-white p-2 rounded-3xl cursor-pointer active:bg-orange-100"
           onClick={() =>
             addMaterial(
-              (document.querySelector("input[type='text']") as HTMLInputElement)
-                .value
+              (
+                document.querySelector(
+                  "input[placeholder='Material']"
+                ) as HTMLInputElement
+              ).value
             )
           }
         >
