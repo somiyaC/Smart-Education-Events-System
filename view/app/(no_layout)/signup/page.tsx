@@ -4,7 +4,18 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import Link from "next/link";
-import { useAppContext } from "../StateContext";
+import { useAppContext } from "../../StateContext";
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  SelectChangeEvent,
+} from '@mui/material';
 
 const Signup = () => {
   const router = useRouter();
@@ -45,59 +56,125 @@ const Signup = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-      <div className="flex flex-col justify-start items-center px-8 lg:px-24 bg-white">
-        <h1 className="text-3xl mb-4 text-gray-900">Create an account</h1>
-        {error && <p className="text-red-500">{error}</p>}
-        <form className="space-y-4" onSubmit={handleSignup}>
-          <input
-            type="email"
-            placeholder="Email address"
-            className="block w-full p-3 border border-gray-300 rounded-full"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="block w-full p-3 border border-gray-300 rounded-full"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <select
-            className="block w-full p-3 border border-gray-300 rounded-full"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          >
-            <option value="attendee">Attendee</option>
-            <option value="organizer">Organizer</option>
-            <option value="speaker">Speaker</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button
-            type="submit"
-            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium cursor-pointer active:bg-orange-600"
-          >
-            Sign Up
-          </button>
-        </form>
-        <p className="text-center mt-6 text-sm text-gray-500">
-          Already have an account?{" "}
-          <Link href="/login" className="text-black font-bold hover:underline">
-            Log in
-          </Link>
-        </p>
-      </div>
-      <div className="hidden lg:block">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        minHeight: '100vh',
+      }}
+    >
+      {/* Left: Form */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#fff',
+          px: { xs: 4, md: 12 },
+          py: 8,
+        }}
+      >
+        <Container maxWidth="sm">
+          <Typography
+                variant="h1" // Use h1 for large text size
+                component="div" // Optional: can be used to change the HTML tag (e.g., h1, div)
+                sx={{
+                  fontWeight: 'bold', // Ensures the text is bold
+                  fontSize: '4rem', // Large font size, you can adjust as needed
+                  color: 'black', // Adjust text color if needed
+                  textAlign: 'center', // Center the text if needed
+                  margin: '20px 0', // Adjust margin as needed
+                }}
+              >
+                Smart Education Event System
+              </Typography>
+          <Typography variant="h4" gutterBottom>
+            Create an account
+          </Typography>
+
+          {error && (
+            <Typography color="error" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
+
+          <Box component="form" onSubmit={handleSignup} noValidate>
+            <TextField
+              label="Email Address"
+              type="email"
+              fullWidth
+              required
+              margin="normal"
+              variant="outlined"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              required
+              margin="normal"
+              variant="outlined"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Select
+              fullWidth
+              value={role}
+              onChange={(e: SelectChangeEvent) => setRole(e.target.value)}
+              displayEmpty
+              sx={{ mt: 2 }}
+            >
+              <MenuItem value="attendee">Attendee</MenuItem>
+              <MenuItem value="organizer">Organizer</MenuItem>
+              <MenuItem value="speaker">Speaker</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                backgroundColor: 'orange',
+                ':hover': { backgroundColor: 'darkorange' },
+                borderRadius: 5,
+                p: 1.5,
+              }}
+            >
+              Sign Up
+            </Button>
+          </Box>
+
+          <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+            Already have an account?{' '}
+            <Link href="/login" passHref>
+              <Typography component="span" sx={{ fontWeight: 'bold', cursor: 'pointer', color: 'black' }}>
+                Log in
+              </Typography>
+            </Link>
+          </Typography>
+        </Container>
+      </Box>
+
+      {/* Right: Image */}
+      <Box
+        sx={{
+          flex: 1,
+          position: 'relative',
+          display: { xs: 'none', md: 'block' },
+        }}
+      >
         <img
           src="/images/signup.jpg"
           alt="Signup Illustration"
-          className="w-full max-h-[400px] object-cover rounded-3xl"
+          style={{ objectFit: 'cover' }}
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

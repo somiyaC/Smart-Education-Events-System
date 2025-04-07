@@ -112,7 +112,7 @@ const Login = () => {
         margin: '20px 0', // Adjust margin as needed
       }}
     >
-      Smart Education Events System
+      Smart Education Event System
     </Typography>
         <Typography variant="h4" color="black" gutterBottom>
           Login to you account!
@@ -137,6 +137,7 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           {error && <p className="text-red-500">{error}</p>}
+          <a href="/signup">Dont have an account? Register here!</a>
           <Button
             type="submit"
             variant="contained"
