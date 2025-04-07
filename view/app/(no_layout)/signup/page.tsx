@@ -3,8 +3,44 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { useAppContext } from "../../StateContext";
 import Link from "next/link";
-import { useAppContext } from "../StateContext";
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { createTheme, PaletteColorOptions } from "@mui/material/styles";
+
+declare module "@mui/material/styles" {
+  interface CustomPalette {
+    sees: PaletteColorOptions;
+  }
+  interface Palette extends CustomPalette {}
+  interface PaletteOptions extends CustomPalette {}
+}
+
+declare module "@mui/material/Button" {
+  interface ButtonPropsColorOverrides {
+    sees: true;
+  }
+}
+
+const { palette } = createTheme();
+const { augmentColor } = palette;
+const createColor = (mainColor: string) =>
+  augmentColor({ color: { main: mainColor } });
+const theme = createTheme({
+  palette: {
+    sees: createColor("#f17126"),
+  },
+});
 
 const Signup = () => {
   const router = useRouter();
@@ -16,6 +52,7 @@ const Signup = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/signup", {
         method: "POST",
@@ -23,12 +60,13 @@ const Signup = () => {
         body: JSON.stringify({
           email,
           password,
-          role: role, // Change role if needed
+          role: role,
         }),
       });
 
       const data = await response.json();
       console.log(data);
+
       if (data.status === true) {
         setUserId(data.user_id);
         console.log("stored id", data.user_id);
@@ -36,68 +74,131 @@ const Signup = () => {
         alert("Signup successful!");
         router.push("/login");
       } else {
-        alert(`Signup failed: ${data.detail}`);
+        setError(`Signup failed: ${data.detail}`);
       }
     } catch (error) {
       console.error("Signup error:", error);
-      alert("Signup failed. Check console for details.");
+      setError("Signup failed. Check console for details.");
     }
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
-      <div className="flex flex-col justify-start items-center px-8 lg:px-24 bg-white">
-        <h1 className="text-3xl mb-4 text-gray-900">Create an account</h1>
-        {error && <p className="text-red-500">{error}</p>}
-        <form className="space-y-4" onSubmit={handleSignup}>
-          <input
-            type="email"
-            placeholder="Email address"
-            className="block w-full p-3 border border-gray-300 rounded-full"
+    <Box
+      sx={{
+        display: "flex",
+        height: "100vh",
+        backgroundColor: "white",
+      }}
+    >
+      {/* Left Side: Signup Form */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "50%",
+          padding: 3,
+        }}
+      >
+        <Typography
+          variant="h1"
+          component="div"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "4rem",
+            color: "black",
+            textAlign: "center",
+            margin: "20px 0",
+          }}
+        >
+          Smart Education Events System
+        </Typography>
+        <Typography variant="h4" color="black" gutterBottom>
+          Create an account
+        </Typography>
+        <form onSubmit={handleSignup}>
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <input
+          <TextField
+            label="Password"
             type="password"
-            placeholder="Password"
-            className="block w-full p-3 border border-gray-300 rounded-full"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <select
-            className="block w-full p-3 border border-gray-300 rounded-full"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          >
-            <option value="attendee">Attendee</option>
-            <option value="organizer">Organizer</option>
-            <option value="speaker">Speaker</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="role-select-label">Role</InputLabel>
+            <Select
+              labelId="role-select-label"
+              value={role}
+              label="Role"
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <MenuItem value="attendee">Attendee</MenuItem>
+              <MenuItem value="organizer">Organizer</MenuItem>
+              <MenuItem value="speaker">Speaker</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+          </FormControl>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          <Button
             type="submit"
-            className="w-full p-3 bg-orange-500 text-white rounded-full font-medium cursor-pointer active:bg-orange-600"
+            variant="contained"
+            fullWidth
+            color="primary"
+            sx={{
+              marginTop: 2,
+              input: {
+                color: "white",
+              },
+              "& .MuiInputBase-input": {
+                color: "white",
+              },
+            }}
           >
             Sign Up
-          </button>
+          </Button>
+          <Box sx={{ textAlign: "center", marginTop: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                style={{ color: "black", fontWeight: "bold" }}
+              >
+                Log in
+              </Link>
+            </Typography>
+          </Box>
         </form>
-        <p className="text-center mt-6 text-sm text-gray-500">
-          Already have an account?{" "}
-          <Link href="/login" className="text-black font-bold hover:underline">
-            Log in
-          </Link>
-        </p>
-      </div>
-      <div className="hidden lg:block">
+      </Box>
+
+      {/* Right Side: Image */}
+      <Box
+        sx={{
+          width: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <img
           src="/images/signup.jpg"
           alt="Signup Illustration"
-          className="w-full max-h-[400px] object-cover rounded-3xl"
+          className="w-full h-full p-10 object-cover rounded-3xl"
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 
