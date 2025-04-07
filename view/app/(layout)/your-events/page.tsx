@@ -163,7 +163,7 @@ const YourEvents: React.FC = () => {
   // Ensure events is an array before checking length
   if (!Array.isArray(events) || events.length === 0)
     return (
-      <p className="text-center text-gray-600">
+      <p className="flex items-center justify-center w-full h-full text-center text-gray-600">
         {isSpeaker
           ? "You are not scheduled to speak at any events."
           : "You are not signed up for any events."}
@@ -171,7 +171,7 @@ const YourEvents: React.FC = () => {
     );
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="flex items-center justify-center p-6 max-w-5xl mx-auto">
       <h2 className="text-3xl font-bold text-black mb-6">
         {isSpeaker ? "Events Where You're Speaking" : "Your Events"}
       </h2>

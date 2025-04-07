@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -57,20 +58,22 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <div className="max-w-screen-xl w-full my-0 mx-auto">
-      <nav className="flex justify-between items-center py-3 bg-white">
-        {/* Logo */}
-        <Link href="/">
-          <div className="text-5xl font-semibold text-gray-800 p-5">
-            Smart Education Events System
-          </div>
-        </Link>
+    <AppBar position="sticky" color="primary" className="bg-orange-500">
+      <Toolbar className="flex justify-between items-center">
+        <Container className="flex items-center space-x-4">
+          {/* Logo or Title Section */}
+          <Link href="/">
+            <div className="text-5xl font-semibold text-white p-5">
+              Smart Education Events System
+            </div>
+          </Link>
+        </Container>
 
-        {/* Right Side */}
-        <div className="flex items-center gap-4">
+        {/* Conditional Rendering for Logged-in User */}
+        <div className="flex items-center space-x-4">
           {isLoggedIn ? (
             <div className="flex flex-row justify-around items-center">
-              <p className="mr-2">Welcome Back {email}!</p>
+              <p className="mr-2 text-white">Welcome Back {email}!</p>
               <button
                 onClick={handleLogout}
                 className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition"
@@ -80,12 +83,12 @@ const Navbar: React.FC = () => {
             </div>
           ) : (
             <>
-              <Link href="/login">
+              <Link href="/login" passHref>
                 <button className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition">
                   Log in
                 </button>
               </Link>
-              <Link href="/signup">
+              <Link href="/signup" passHref>
                 <button className="border rounded-3xl px-4 py-1 text-sm font-medium text-white bg-orange-400 hover:bg-orange-300 transition">
                   Sign Up
                 </button>
@@ -93,8 +96,8 @@ const Navbar: React.FC = () => {
             </>
           )}
         </div>
-      </nav>
-    </div>
+      </Toolbar>
+    </AppBar>
   );
 };
 

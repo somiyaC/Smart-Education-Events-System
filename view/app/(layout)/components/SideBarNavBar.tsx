@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../StateContext";
+import { Drawer, List, ListItem, ListItemText, Divider } from '@mui/material';
 
 const SideBarNavBar: React.FC = () => {
   const { isAdmin, isOrganizer, userRole } = useAppContext();
@@ -29,115 +30,138 @@ const SideBarNavBar: React.FC = () => {
 
   return (
     <div className="w-50 h-screen bg-white text-white p-2 h-full">
-      <ul className="space-y-0.5">
-        {/* Links for all users */}
-        <li>
-          <Link
-            href="/"
-            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/your-events"
-            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Your Events
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/calendar"
-            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Calendar
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/networking"
-            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Networking & Engagement
-          </Link>
-        </li>
+      {/* Sidebar below the header */}
+      <Drawer
+        sx={{
+          width: 250,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: 250,
+            boxSizing: 'border-box',
+            backgroundColor: '#f17126', // Dark background color for the sidebar
+            color: 'white', // White text color
+          },
+        }}
+        variant="permanent"
+        anchor="left"
+        open={open}
+      >
+        <div className="flex flex-col h-full">
 
-        {/* Links for speakers */}
-        {(isSpeaker || isOrganizer) && (
-          <li>
-            <Link
-              href="/messages"
-              className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-            >
-              Messages
-            </Link>
-          </li>
-        )}
+          <List>
+            {/* Links for all users */}
+            <ListItem button>
+              <Link
+                href="/"
+                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+              >
+                <ListItemText primary="Home" />
+              </Link>
+            </ListItem>
+            <ListItem button>
+              <Link
+                href="/your-events"
+                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+              >
+                <ListItemText primary="Your Events" />
+              </Link>
+            </ListItem>
+            <ListItem button>
+              <Link
+                href="/calendar"
+                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+              >
+                <ListItemText primary="Calendar" />
+              </Link>
+            </ListItem>
+            <ListItem button>
+              <Link
+                href="/networking"
+                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+              >
+                <ListItemText primary="Networking & Engagement" />
+              </Link>
+            </ListItem>
 
-        {/* Links for organizers and admins */}
-        {(isOrganizer || isAdmin) && (
-          <>
-            <li>
-              <Link
-                href="/create-edit-events"
-                className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-              >
-                Create/Edit Events
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/event-management"
-                className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-              >
-                Event Information and Management
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/event-promotion"
-                className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-              >
-                Event Promotion
-              </Link>
-            </li>
-          </>
-        )}
 
-        {/* Links for admins only */}
-        {isAdmin && (
-          <>
-            <li>
-              <Link
-                href="/system-maintenance"
-                className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-              >
-                System Maintenance
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/create-user"
-                className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-              >
-                Create User
-              </Link>
-            </li>
-          </>
-        )}
+            {/* Links for speakers */}
+            {(isSpeaker || isOrganizer) && (
+              <ListItem button>
+                <Link
+                  href="/messages"
+                  className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+                >
+                  <ListItemText primary="Messages" />
+                </Link>
+              </ListItem>
+            )}
 
-        {/* Profile link for all users */}
-        <li>
-          <Link
-            href="/profile"
-            className="bg-orange-400 text-sm rounded-2xl p-2 block hover:bg-orange-300 transition"
-          >
-            Profile
-          </Link>
-        </li>
-      </ul>
+            {/* Links for organizers and admins */}
+            {(isOrganizer || isAdmin) && (
+              <>
+                <ListItem button>
+                  <Link
+                    href="/create-edit-events"
+                    className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+                  >
+                    <ListItemText primary="Create/Edit Events" />
+                  </Link>
+                </ListItem>
+                <ListItem button>
+                  <Link
+                    href="/event-management"
+                    className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+                  >
+                    <ListItemText primary="Event Information and Management" />
+                  </Link>
+                </ListItem>
+                <ListItem button>
+                  <Link
+                    href="/event-promotion"
+                    className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+                  >
+                    <ListItemText primary="Event Promotion" />
+                  </Link>
+                </ListItem>
+              </>
+            )}
+
+
+            {/* Links for admins only */}
+            {isAdmin && (
+              <>
+                <ListItem button>
+                  <Link
+                    href="/system-maintenance"
+                    className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+                  >
+                    <ListItemText primary="System Maintenance" />
+                  </Link>
+                </ListItem>
+                <ListItem button>
+                  <Link
+                    href="/create-user"
+                    className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+                  >
+                    <ListItemText primary="Create User" />
+                  </Link>
+                </ListItem>
+              </>
+            )}
+
+
+            {/* Profile link for all users */}
+            <ListItem button>
+              <Link
+                href="/profile"
+                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+              >
+                <ListItemText primary="Profile" />
+              </Link>
+            </ListItem>
+          </List>
+        </div>
+      </Drawer>
     </div>
   );
 };

@@ -101,8 +101,21 @@ const Login = () => {
           padding: 3,
         }}
       >
-        <Typography variant="h4" color="white" gutterBottom>
-          Login
+         <Typography
+      variant="h1" // Use h1 for large text size
+      component="div" // Optional: can be used to change the HTML tag (e.g., h1, div)
+      sx={{
+        fontWeight: 'bold', // Ensures the text is bold
+        fontSize: '4rem', // Large font size, you can adjust as needed
+        color: 'black', // Adjust text color if needed
+        textAlign: 'center', // Center the text if needed
+        margin: '20px 0', // Adjust margin as needed
+      }}
+    >
+      Smart Education Events System
+    </Typography>
+        <Typography variant="h4" color="black" gutterBottom>
+          Login to you account!
         </Typography>
         <form onSubmit={handleLogin} >
           <TextField
