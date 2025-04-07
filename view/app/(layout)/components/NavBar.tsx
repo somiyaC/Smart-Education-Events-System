@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
     setEmail("");
     // Dispatch custom event to notify other components
     window.dispatchEvent(new Event("authStateChanged"));
-    // router.push("/login");
+    router.push("/login");
   };
 
   return (
