@@ -27,7 +27,7 @@ interface Event {
 
 const AllEvents: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
-  const { userId, setUserId } = useAppContext();
+  const { userId, setUserId, isAdmin } = useAppContext();
   const searchParams = useSearchParams();
   const search = searchParams.get("q");
   console.log("param", search);
@@ -73,6 +73,16 @@ const AllEvents: React.FC = () => {
     );
   };
 
+  // New function to handle event editing
+  const handleEditEvent = (eventId: string) => {
+    router.push(`/edit-event/${eventId}`);
+  };
+
+  // Check if the current user can edit events - only admins
+  const canEditEvent = () => {
+    return isAdmin;
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {events.length === 0 ? (
@@ -107,19 +117,31 @@ const AllEvents: React.FC = () => {
                   <strong className="font-medium">Venue:</strong> {event.venue}
                 </p>
               </div>
-              {!isRegistered(event) ? (
-                <button
-                  type="submit"
-                  onClick={() => handleSignUp(event)}
-                  className="bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-3xl px-4 py-2 mt-4 w-full active:bg-orange-700 transition-all duration-200 ease-in-out"
-                >
-                  Sign Up
-                </button>
-              ) : (
-                <div className="flex justify-center text-orange-500 text-sm mt-4 font-bold">
-                  You're Registered!
-                </div>
-              )}
+              <div className="flex space-x-2 mt-4">
+                {!isRegistered(event) ? (
+                  <button
+                    type="submit"
+                    onClick={() => handleSignUp(event)}
+                    className="bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-3xl px-4 py-2 flex-grow active:bg-orange-700 transition-all duration-200 ease-in-out"
+                  >
+                    Sign Up
+                  </button>
+                ) : (
+                  <div className="flex justify-center text-orange-500 text-sm flex-grow font-bold py-2">
+                    You're Registered!
+                  </div>
+                )}
+
+                {/* Edit button - only visible to admins */}
+                {canEditEvent() && (
+                  <button
+                    onClick={() => handleEditEvent(event.id)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-3xl px-4 py-2 active:bg-blue-700 transition-all duration-200 ease-in-out"
+                  >
+                    Edit Event
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
