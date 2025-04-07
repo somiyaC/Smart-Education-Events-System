@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { useAppContext } from "../StateContext";
+import { useAppContext } from "../../StateContext";
 
 const SideBarNavBar: React.FC = () => {
   const { isAdmin, isOrganizer, userRole } = useAppContext();

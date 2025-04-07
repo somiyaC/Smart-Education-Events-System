@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAppContext } from "../StateContext";
+import { useAppContext } from "../../StateContext";
 
 interface Material {
   title: string;
