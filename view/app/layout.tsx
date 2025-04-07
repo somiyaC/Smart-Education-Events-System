@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/app/components/NavBar";
-import SearchBar from "@/app/components/SearchBar";
-import SideBarNavBar from "@/app/components/SideBarNavBar";
-import Footer from "@/app/components/Footer";
 import { AppProvider } from "./StateContext";
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { ThemeProvider } from "@mui/material/styles";
+import theme from './theme';
 
 export const metadata: Metadata = {
   title: "SEES",
@@ -18,13 +17,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppProvider>
-          <Navbar />
-          <SearchBar />
-          <div className="flex flex-grow">
-            <SideBarNavBar />
-            <main className="flex-grow p-6">{children}</main>
-          </div>
-          <Footer />
+          <AppRouterCacheProvider>
+            <ThemeProvider theme={theme}>
+              {children}
+            </ThemeProvider>
+          </AppRouterCacheProvider>
         </AppProvider>
       </body>
     </html>

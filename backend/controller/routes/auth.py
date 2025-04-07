@@ -53,8 +53,7 @@ async def login(user: LoginRequest):
     if not db_user or not bcrypt.verify(user.password, db_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     print(db_user)
-    token = jwt.encode({"email": user.email, "role": db_user["role"]}, SECRET_KEY, algorithm="HS256")
-    return {"token": token, "email":user.email, "role": db_user["role"], "user_id": str(db_user['_id'])}
+    return {"token": "", "email":user.email, "role": db_user["role"], "user_id": str(db_user['_id'])}
 
 @router.post("/user")
 async def user(user_data: UserData):

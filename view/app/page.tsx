@@ -1,12 +1,16 @@
 "use client";
-import AllEvents from "./eventList";
+import { useEffect } from "react";
+import AllEvents from "./(layout)/events/eventList";
+import {redirect} from "next/navigation";
 
 const EventsPage: React.FC = () => {
+
+  useEffect(() =>{
+    redirect("/events");
+  },[])
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4 ml-5">Events</h1>
-      <AllEvents />
-    </div>
+    <></>
   );
 };
 
