@@ -15,14 +15,23 @@ export default function WithLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-        <>
-          <Navbar />
-          <SearchBar />
-          <div className="flex flex-grow">
-            <SideBarNavBar />
-            {children}
-          </div>
-          <Footer />
-        </>
+    <div className="flex flex-col min-h-screen">
+      {/* Fixed header section */}
+      <header>
+        <Navbar />
+        <SearchBar />
+      </header>
+
+      {/* Main content with sidebar */}
+      <div className="flex flex-grow">
+        <aside className="w-64 flex-shrink-0">
+          <SideBarNavBar />
+        </aside>
+        <main className="flex-grow p-4">{children}</main>
+      </div>
+
+      {/* Footer at the bottom */}
+      <Footer />
+    </div>
   );
 }

@@ -2,9 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-from database import db
-import uuid
-
+from controller.database import db_instance as db
 router = APIRouter()
 
 payments_collection = db["payments"]

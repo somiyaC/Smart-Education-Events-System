@@ -18,7 +18,7 @@ const SearchBar: React.FC = () => {
     <div className="flex items-center justify-center mb-6 w-full max-w-2xl mx-auto mt-6">
       <form
         onSubmit={handleSearchSubmit}
-        className="flex items-center border border-orange-400 rounded-full w-1/2 px-4 py-2"
+        className="flex items-center border border-orange-400 rounded-full w-8/9 px-4 py-2"
       >
         <FaSearch className="text-gray-500 mr-2" />
         <input

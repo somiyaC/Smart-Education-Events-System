@@ -1,24 +1,14 @@
 "use client";
-
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../StateContext";
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  ListItemButton,
-} from "@mui/material";
+import { List, ListItemText, ListItemButton } from "@mui/material";
 
 const SideBarNavBar: React.FC = () => {
   const { isAdmin, isOrganizer, userRole } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
   const [permissionsVerified, setPermissionsVerified] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(false);
-
-  const [open, setOpen] = useState(true); // Set initial value as true (open by default)
 
   useEffect(() => {
     // Check if role exists in localStorage
@@ -38,61 +28,45 @@ const SideBarNavBar: React.FC = () => {
   }, [userRole]);
 
   return (
-    <div className="w-50 h-screen bg-white text-white p-2 h-full">
-      {/* Sidebar below the header */}
-      <Drawer
-        sx={{
-          width: 250,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: 250,
-            boxSizing: "border-box",
-            backgroundColor: "#f17126", // Dark background color for the sidebar
-            color: "white", // White text color
-          },
-        }}
-        variant="permanent"
-        anchor="left"
-        open={open}
-      >
-        <div className="flex flex-col h-full">
-          <List>
-            {/* Links for all users */}
-            <ListItemButton>
-              <Link
-                href="/"
-                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
-              >
-                <ListItemText primary="Home" />
-              </Link>
-            </ListItemButton>
-            <ListItemButton>
-              <Link
-                href="/your-events"
-                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
-              >
-                <ListItemText primary="Your Events" />
-              </Link>
-            </ListItemButton>
-            <ListItemButton>
-              <Link
-                href="/calendar"
-                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
-              >
-                <ListItemText primary="Calendar" />
-              </Link>
-            </ListItemButton>
-            <ListItemButton>
-              <Link
-                href="/networking"
-                className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
-              >
-                <ListItemText primary="Networking & Engagement" />
-              </Link>
-            </ListItemButton>
-          </List>
-        </div>
-      </Drawer>
+    <div className="h-full bg-orange-500 text-white fixed left-0 top-0 pt-32 w-64">
+      {/* Removed Drawer component and keeping just the content */}
+      <div className="flex flex-col h-full">
+        <List>
+          {/* Links for all users */}
+          <ListItemButton>
+            <Link
+              href="/"
+              className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+            >
+              <ListItemText primary="Home" />
+            </Link>
+          </ListItemButton>
+          <ListItemButton>
+            <Link
+              href="/your-events"
+              className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+            >
+              <ListItemText primary="Your Events" />
+            </Link>
+          </ListItemButton>
+          <ListItemButton>
+            <Link
+              href="/calendar"
+              className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+            >
+              <ListItemText primary="Calendar" />
+            </Link>
+          </ListItemButton>
+          <ListItemButton>
+            <Link
+              href="/networking"
+              className="bg-orange-400 text-white text-sm rounded-2xl p-2 block hover:bg-orange-300 transition w-full"
+            >
+              <ListItemText primary="Networking & Engagement" />
+            </Link>
+          </ListItemButton>
+        </List>
+      </div>
     </div>
   );
 };

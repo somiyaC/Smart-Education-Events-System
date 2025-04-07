@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Container } from "@mui/material";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -76,7 +76,7 @@ const Navbar: React.FC = () => {
               <p className="mr-2 text-white">Welcome Back {email}!</p>
               <button
                 onClick={handleLogout}
-                className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition"
+                className="border rounded-3xl px-4 py-1 text-sm font-medium text-gray-800 hover:bg-gray-100 transition whitespace-nowrap"
               >
                 Log Out
               </button>
