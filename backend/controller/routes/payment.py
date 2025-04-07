@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-from controller.database import get_db
+from controller.database import db_instance as db
 from controller.payment_model import (
     create_payment,
     calculate_event_revenue,

@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { FaSearch } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const SearchBar: React.FC = () => {
@@ -15,18 +14,32 @@ const SearchBar: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center mb-6 w-full max-w-2xl mx-auto mt-6">
+    <div className="flex items-center justify-center w-full max-w-2xl mx-auto mt-4 mb-6">
       <form
         onSubmit={handleSearchSubmit}
-        className="flex items-center border border-orange-400 rounded-full w-1/2 px-4 py-2"
+        className="flex items-center border border-orange-300 rounded-full w-full px-4 py-2 bg-white shadow-md transition-all focus-within:shadow-lg focus-within:border-orange-400"
       >
-        <FaSearch className="text-gray-500 mr-2" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-orange-400 mr-3"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
         <input
           type="text"
           placeholder="Search Events"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full outline-none text-gray-700"
+          className="w-full outline-none text-gray-700 placeholder-gray-400"
         />
       </form>
     </div>

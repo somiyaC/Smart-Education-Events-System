@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from database import tickets_collection, feedback_collection
+from controller.database import tickets_collection, feedback_collection
 from bson import ObjectId
 
 router = APIRouter()

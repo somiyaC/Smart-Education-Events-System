@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import { useAppContext } from "../../StateContext";
 import Link from "next/link";
-import { Box, Button, Container, TextField, Typography } from '@mui/material';
-import {createTheme, PaletteColorOptions} from "@mui/material/styles";
+import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import { createTheme, PaletteColorOptions } from "@mui/material/styles";
 
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface CustomPalette {
     sees: PaletteColorOptions;
   }
@@ -16,7 +16,7 @@ declare module '@mui/material/styles' {
   interface PaletteOptions extends CustomPalette {}
 }
 
-declare module '@mui/material/Button' {
+declare module "@mui/material/Button" {
   interface ButtonPropsColorOverrides {
     sees: true;
   }
@@ -24,10 +24,11 @@ declare module '@mui/material/Button' {
 
 const { palette } = createTheme();
 const { augmentColor } = palette;
-const createColor = (mainColor: string) => augmentColor({ color: { main: mainColor } });
+const createColor = (mainColor: string) =>
+  augmentColor({ color: { main: mainColor } });
 const theme = createTheme({
   palette: {
-    sees: createColor('#f17126'),
+    sees: createColor("#f17126"),
   },
 });
 
@@ -85,39 +86,39 @@ const Login = () => {
   return (
     <Box
       sx={{
-        display: 'flex',
-        height: '100vh',
-        backgroundColor: 'white',
+        display: "flex",
+        height: "100vh",
+        backgroundColor: "white",
       }}
     >
       {/* Left Side: Login Form */}
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: '50%',
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "50%",
           padding: 3,
         }}
       >
-         <Typography
-      variant="h1" // Use h1 for large text size
-      component="div" // Optional: can be used to change the HTML tag (e.g., h1, div)
-      sx={{
-        fontWeight: 'bold', // Ensures the text is bold
-        fontSize: '4rem', // Large font size, you can adjust as needed
-        color: 'black', // Adjust text color if needed
-        textAlign: 'center', // Center the text if needed
-        margin: '20px 0', // Adjust margin as needed
-      }}
-    >
-      Smart Education Events System
-    </Typography>
-        <Typography variant="h4" color="black" gutterBottom>
-          Login to you account!
+        <Typography
+          variant="h1" // Use h1 for large text size
+          component="div" // Optional: can be used to change the HTML tag (e.g., h1, div)
+          sx={{
+            fontWeight: "bold", // Ensures the text is bold
+            fontSize: "4rem", // Large font size, you can adjust as needed
+            color: "black", // Adjust text color if needed
+            textAlign: "center", // Center the text if needed
+            margin: "20px 0", // Adjust margin as needed
+          }}
+        >
+          Smart Education Events System
         </Typography>
-        <form onSubmit={handleLogin} >
+        <Typography variant="h4" color="black" gutterBottom>
+          Login to your account!
+        </Typography>
+        <form onSubmit={handleLogin}>
           <TextField
             label="Email"
             variant="outlined"
@@ -142,35 +143,47 @@ const Login = () => {
             variant="contained"
             fullWidth
             color="primary"
-            className="p-4"
-            sx={{ marginTop: 2,
-              input: {
+            sx={{
+              marginTop: 2,
+              boxShadow: "none", // remove any extra shadow
+              "&:hover": {
+                boxShadow: "none", // remove shadow on hover too
+              },
+              "& .MuiInputBase-input": {
                 color: "white",
               },
-              '& .MuiInputBase-input': {
-              color: 'white', // Set text color to white
-            },
             }}
           >
             Login
           </Button>
+
+          <Box sx={{ textAlign: "center", marginTop: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Dont have an account?{" "}
+              <Link
+                href="/signup"
+                style={{ color: "black", fontWeight: "bold" }}
+              >
+                Sign up
+              </Link>
+            </Typography>
+          </Box>
         </form>
       </Box>
-
       {/* Right Side: Image */}
       <Box
         sx={{
-          width: '50%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          width: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
-      <img
-        src="/images/signup.jpg"
-        alt="Signup Illustration"
-        className="w-full h-full p-10 object-cover rounded-3xl"
-      />
+        <img
+          src="/images/signup.jpg"
+          alt="Signup Illustration"
+          className="w-full h-full p-10 object-cover rounded-3xl"
+        />
       </Box>
     </Box>
   );
