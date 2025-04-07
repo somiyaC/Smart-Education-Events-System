@@ -11,9 +11,7 @@ from models.user_model import UserModel
 
 router = APIRouter(prefix="/promotion", tags=["Event Promotion"])
 
-# --------------------------------
-# 1) Email Campaigns
-# --------------------------------
+
 class EmailCampaignCreate(BaseModel):
     subject: str
     body: str

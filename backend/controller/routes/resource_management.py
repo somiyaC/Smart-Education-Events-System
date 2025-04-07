@@ -20,13 +20,13 @@ class Resource(BaseModel):
 # In-memory "database"
 resources_db: List[Resource] = []
 
-@router.post("/resources/upload")
+@router.post("/resource_management/upload")
 def upload_resource(resource: Resource):
     resource.id = str(uuid.uuid4())
     resource.uploaded_at = datetime.now()
     resources_db.append(resource)
     return {"status": True, "msg": "Resource uploaded", "resource_id": resource.id}
 
-@router.get("/resources/{event_id}")
+@router.get("/resource_management/{event_id}")
 def get_resources(event_id: str):
     return [r for r in resources_db if r.event_id == event_id]
