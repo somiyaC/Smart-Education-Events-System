@@ -54,9 +54,7 @@ const AllEvents: React.FC = () => {
   }, [search]);
 
   const isRegistered = (event: Event) => {
-    console.log(event.participants);
     let userId = localStorage.getItem("user_id");
-    console.log(userId);
     if (userId && event.participants.includes(userId)) {
       return true;
     }
@@ -80,43 +78,45 @@ const AllEvents: React.FC = () => {
       {events.length === 0 ? (
         <p className="text-center text-gray-600">No events available.</p>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {events.map((event, index) => (
-            <div key={index} className="p-6 rounded-lg shadow-lg bg-[#FFFAF0]">
+            <div
+              key={index}
+              className="p-6 rounded-lg shadow-xl bg-orange-50 hover:shadow-2xl transition-shadow duration-300 ease-in-out"
+            >
               {/* Event Header */}
-              <h2 className="text-2xl font-bold text-orange-400">
+              <h2 className="text-2xl font-semibold text-orange-600 hover:text-orange-700">
                 {event.name}
               </h2>
-              <p className="text-gray-700 mt-2">{event.description}</p>
-
+              <p className="text-gray-600 mt-2">{event.description}</p>
               {/* Event Details */}
               <div className="mt-4 text-gray-700 space-y-2">
                 <p>
-                  <strong>Type:</strong> {event.event_type}
+                  <strong className="font-medium">Type:</strong>{" "}
+                  {event.event_type}
                 </p>
                 <p>
-                  <strong>Dates:</strong> {event.start_date} - {event.end_date}
+                  <strong className="font-medium">Dates:</strong>{" "}
+                  {event.start_date} - {event.end_date}
                 </p>
                 <p>
-                  <strong>Organizer:</strong> {event.organizer}
+                  <strong className="font-medium">Organizer:</strong>{" "}
+                  {event.organizer}
                 </p>
                 <p>
-                  <strong>Venue:</strong> {event.venue}
+                  <strong className="font-medium">Venue:</strong> {event.venue}
                 </p>
               </div>
-
-              {/* Sessions section commented out in original code */}
-
               {!isRegistered(event) ? (
                 <button
                   type="submit"
                   onClick={() => handleSignUp(event)}
-                  className="bg-orange-400 text-white text-sm rounded-3xl px-3 py-1.5 my-2 ml-auto block cursor-pointer active:bg-orange-500"
+                  className="bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-3xl px-4 py-2 mt-4 w-full active:bg-orange-700 transition-all duration-200 ease-in-out"
                 >
                   Sign Up
                 </button>
               ) : (
-                <div className="flex justify-end text-orange-400 text-sm mt-10 font-bold block">
+                <div className="flex justify-center text-orange-500 text-sm mt-4 font-bold">
                   You're Registered!
                 </div>
               )}
