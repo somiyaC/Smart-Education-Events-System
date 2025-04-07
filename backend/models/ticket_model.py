@@ -7,6 +7,9 @@ from datetime import datetime, timezone
 from bson import ObjectId
 import uuid
 import json
+import base64
+import io
+import qrcode
 
 from .base_model import BaseModel
 
@@ -56,14 +59,14 @@ class TicketModel(BaseModel):
             ticket_data["payment_reference"] = payment_reference
         
         # Store validation data for ticket verification
-        validation_data = {
+        qr_data = {
             "ticket_number": ticket_number,
             "event_id": event_id,
             "user_id": user_id
         }
         
         # Store the validation data as a JSON string
-        ticket_data["validation_data"] = json.dumps(validation_data)
+        ticket_data["qr_code"] = cls._generate_qr_code(qr_data)
         
         ticket_id = await cls.insert_one(ticket_data)
         return str(ticket_id)
@@ -334,3 +337,35 @@ class TicketModel(BaseModel):
         # Remove the db parameter as it's not used with our BaseModel implementation
         deleted_count = await cls.delete_one({"_id": ObjectId(ticket_id)})
         return deleted_count
+    
+    @staticmethod
+    def _generate_qr_code(data: Dict) -> str:
+        """
+        Generate a QR code for a ticket.
+        
+        Args:
+            data: Data to encode in the QR code
+            
+        Returns:
+            str: Base64-encoded QR code image
+        """
+        # Create QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+
+        # Add data to QR code
+        qr.add_data(str(data))
+        qr.make(fit=True)
+
+        # Create image
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Convert to base64
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+
+        return f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('utf-8')}"

@@ -10,7 +10,7 @@ class TicketSchema(BaseModel):
     ticket_number: str
     ticket_id: str  # Added to match model
     price: float = 0.0  # Added ticket price
-    validation_data: Optional[str] = None  # Replaced qr_code with validation_data
+    qr_code: Optional[str] = None
     status: str = Field(default="active", regex="^(active|used|cancelled|refunded)$")
     checked_in: bool = False
     check_in_time: Optional[datetime] = None
