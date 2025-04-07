@@ -50,31 +50,8 @@ const EditEventPage: React.FC = () => {
     const fetchEventData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:8000/events/${eventId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch event: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setEvent(data.event);
-
-        // Populate form fields
-        setName(data.event.name);
-        setDescription(data.event.description);
-        setEventType(data.event.event_type);
-        setStartDate(data.event.start_date);
-        setEndDate(data.event.end_date);
-        setOrganizer(data.event.organizer);
-        setVenue(data.event.venue);
-
-        // Fetch sessions
-        const sessionsRes = await fetch(
-          `http://localhost:8000/sessions/event/${eventId}`,
+        const response = await fetch(
+          `http://localhost:8000/events/${eventId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -82,23 +59,60 @@ const EditEventPage: React.FC = () => {
           }
         );
 
-        if (!sessionsRes.ok) {
-          throw new Error(`Failed to fetch sessions: ${sessionsRes.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch event: ${response.status}`);
         }
 
-        const sessionsData = await sessionsRes.json();
-        const formattedSessions = sessionsData.sessions.map((session: any) => ({
-          id: session.id,
-          title: session.title,
-          description: session.description || "",
-          speaker: session.speaker,
-          speaker_id: session.speaker_id,
-          startTime: session.start_time,
-          endTime: session.end_time,
-          materials: session.materials ? session.materials.split(", ") : [],
-        }));
+        const eventData = await response.json();
+        setEvent(eventData); // Direct assignment, not data.event
 
-        setSessions(formattedSessions);
+        // Populate form fields
+        setName(eventData.name);
+        setDescription(eventData.description);
+        setEventType(eventData.event_type);
+        setStartDate(eventData.start_date);
+        setEndDate(eventData.end_date);
+        setOrganizer(eventData.organizer);
+        setVenue(eventData.venue);
+
+        // Try to fetch sessions but handle case where endpoint might not exist yet
+        try {
+          const sessionsRes = await fetch(
+            `http://localhost:8000/sessions/event/${eventId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (sessionsRes.ok) {
+            const sessionsData = await sessionsRes.json();
+            const formattedSessions = sessionsData.sessions.map(
+              (session: any) => ({
+                id: session.id,
+                title: session.title,
+                description: session.description || "",
+                speaker: session.speaker,
+                speaker_id: session.speaker_id,
+                startTime: session.start_time,
+                endTime: session.end_time,
+                materials: session.materials
+                  ? session.materials.split(", ")
+                  : [],
+              })
+            );
+            setSessions(formattedSessions);
+          } else {
+            console.warn(
+              `Sessions endpoint returned ${sessionsRes.status}. Using empty sessions.`
+            );
+            setSessions([]);
+          }
+        } catch (sessionErr) {
+          console.error("Error fetching sessions:", sessionErr);
+          setSessions([]);
+        }
       } catch (err) {
         console.error("Error fetching event:", err);
         setError(
