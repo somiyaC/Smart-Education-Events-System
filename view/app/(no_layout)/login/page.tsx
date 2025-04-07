@@ -116,7 +116,7 @@ const Login = () => {
           Smart Education Events System
         </Typography>
         <Typography variant="h4" color="black" gutterBottom>
-          Login to you account!
+          Login to your account!
         </Typography>
         <form onSubmit={handleLogin}>
           <TextField
@@ -143,19 +143,20 @@ const Login = () => {
             variant="contained"
             fullWidth
             color="primary"
-            className="p-4"
             sx={{
               marginTop: 2,
-              input: {
-                color: "white",
+              boxShadow: "none", // remove any extra shadow
+              "&:hover": {
+                boxShadow: "none", // remove shadow on hover too
               },
               "& .MuiInputBase-input": {
-                color: "white", // Set text color to white
+                color: "white",
               },
             }}
           >
             Login
           </Button>
+
           <Box sx={{ textAlign: "center", marginTop: 2 }}>
             <Typography variant="body2" color="text.secondary">
               Dont have an account?{" "}

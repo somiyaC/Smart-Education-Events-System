@@ -159,8 +159,9 @@ const Signup = () => {
             color="primary"
             sx={{
               marginTop: 2,
-              input: {
-                color: "white",
+              boxShadow: "none", // remove any extra shadow
+              "&:hover": {
+                boxShadow: "none", // remove shadow on hover too
               },
               "& .MuiInputBase-input": {
                 color: "white",
