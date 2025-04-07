@@ -10,7 +10,7 @@ class UserSchema(BaseModel):
     last_name: str
 
      # User role
-    role: str = Field(default="attendee", regex="^(attendee|stakeholder|organizer|admin)$")
+    role: str = Field(default="attendee", regex="^(attendee|stakeholder|organizer|admin|speaker)$")
 
     # Profile fields
     bio: Optional[str] = None
