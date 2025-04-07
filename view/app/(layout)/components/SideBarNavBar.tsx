@@ -26,8 +26,22 @@ const SideBarNavBar: React.FC = () => {
   }, [userRole]);
 
   return (
-    <div className="h-full bg-gradient-to-b from-orange-500 to-orange-400 text-white fixed left-0 top-0 pt-32 w-64 shadow-lg z-50">
-      <div className="flex flex-col h-full p-4 space-y-2">
+    <div
+      className="h-full fixed left-0 top-0 pt-24 w-64 z-10"
+      style={{
+        backgroundColor: "#ffffff",
+        backgroundImage: "none",
+        boxShadow: "none",
+        maxHeight: "calc(100vh - 60px)", // Adjust the 60px value based on your footer height
+      }}
+    >
+      <div
+        className="flex flex-col h-full p-3 space-y-1.5"
+        style={{
+          backgroundColor: "#ffffff",
+          backgroundImage: "none",
+        }}
+      >
         {/* Base Nav Items */}
         <NavItem
           href="/"
@@ -129,7 +143,7 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <Link
       href={href}
-      className="text-white bg-orange-700/40 hover:bg-orange-600/40 shadow-md hover:shadow-lg shadow-orange-900/30 hover:shadow-orange-600/40 rounded-2xl p-3 flex items-center space-x-3 font-medium transition-all duration-200 ease-in-out"
+      className="text-white bg-orange-500/90 hover:bg-orange-800/90 shadow-md hover:shadow-lg shadow-orange-400/30 hover:shadow-orange-800/40 rounded-2xl p-3 flex items-center space-x-3 font-medium transition-all duration-200 ease-in-out"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

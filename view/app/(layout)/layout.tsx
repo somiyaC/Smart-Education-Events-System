@@ -23,15 +23,17 @@ export default function WithLayout({
       </header>
 
       {/* Main content with sidebar */}
-      <div className="flex flex-grow">
+      <div className="flex flex-grow relative">
         <aside className="w-64 flex-shrink-0">
           <SideBarNavBar />
         </aside>
         <main className="flex-grow p-4">{children}</main>
       </div>
 
-      {/* Footer at the bottom */}
-      <Footer />
+      {/* Footer at the bottom with higher z-index */}
+      <div className="relative z-20">
+        <Footer />
+      </div>
     </div>
   );
 }
