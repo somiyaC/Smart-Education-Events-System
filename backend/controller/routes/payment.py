@@ -2,11 +2,11 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-from database import db
+#from database import db
 import uuid
 
 router = APIRouter()
-
+db = {"payments":1,"sponsors":2}
 payments_collection = db["payments"]
 sponsors_collection = db["sponsors"]
 

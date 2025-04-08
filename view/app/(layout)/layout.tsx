@@ -18,7 +18,7 @@ export default function WithLayout({
         <>
           <Navbar />
           <SearchBar />
-          <div className="flex flex-grow">
+          <div className="flex items-center justify-center flex-grow ">
             <SideBarNavBar />
             {children}
           </div>

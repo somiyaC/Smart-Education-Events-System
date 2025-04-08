@@ -29,7 +29,7 @@ const SideBarNavBar: React.FC = () => {
   }, [userRole]);
 
   return (
-    <div className="w-50 h-screen bg-white text-white p-2 h-full">
+    <div className="w-1/12 bg-white text-white p-2">
       {/* Sidebar below the header */}
       <Drawer
         sx={{
