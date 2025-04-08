@@ -16,7 +16,6 @@ class Session(BaseModel):
     startTime: str
     endTime: str
     materials: List[str]
-    
 
 class Event(BaseModel):
     name: str
@@ -52,6 +51,9 @@ class EventSearch(BaseModel):
 class OrganizerData(BaseModel):
     organizer_id: str
 
+class SessionsUpdate(BaseModel):
+    sessions: List[Session]
+
 def document_to_dict(doc):
     if doc and '_id' in doc.keys():
         doc['_id'] = str(doc['_id'])
@@ -78,8 +80,6 @@ async def organizer_event(org_data: OrganizerData):
     
     return organizer_events
 
-    
-
 @router.post("/user_events")
 async def user_events(user_data: UserData):
     user_id = user_data.user_id
@@ -95,7 +95,6 @@ async def user_events(user_data: UserData):
     
     return {"events":[document_to_dict(event) for event in user_events] }    
 
-
 @router.post("/create_event")
 async def create_event(event: Event):
     """
@@ -103,16 +102,19 @@ async def create_event(event: Event):
     """
     sessions = event.sessions
     event = event.dict()
-
+    
+    # Remove id field if present (for creation)
+    event.pop('id', None)
 
     event_id = await EventModel.create_event(event['name'], event['description'], event['event_type'], datetime.strptime(event['start_date'], "%Y-%m-%d"),datetime.strptime(event['end_date'],"%Y-%m-%d"),event['is_virtual'],event['virtual_meeting_url'],event['organizer'],event['venue'],event['capacity'],event['participants'])
 
     for session in sessions:
-        session = session.dict()
-        await SessionModel.create_session(event_id, session['title'],session['startTime'],session['endTime'],"Conference",session['description'],None,"Mezzanine",event['capacity'],"Laptop",event['participants'])
+        session_dict = session.dict()
+        # Remove id field if present (for creation)
+        session_dict.pop('id', None)
+        await SessionModel.create_session(event_id, session_dict['title'],session_dict['startTime'],session_dict['endTime'],"Conference",session_dict['description'],None,"Mezzanine",event['capacity'],"Laptop",event['participants'])
 
     return {"event_id":event_id}
-
 
 @router.post("/event_signup")
 async def create_event(event_signup_data: EventSignupData):
@@ -169,10 +171,10 @@ async def get_upcoming_events(user_upcoming_event: EventUserData):
     return {"tickets":user_tickets}
 
 @router.get("/{event_id}")
-def get_event(event_id: str):
-    event = events_collection.find_one({"_id": event_id})
+async def get_event(event_id: str):
+    event = await EventModel.get_event_by_id(event_id)
     if not event:
-        raise HTTPException(status_code=404, detail="Event not found")
+        raise HTTPException(status_code=404, detail="Event not found")    
     return event
 
 @router.post("/event_search")
@@ -180,7 +182,6 @@ async def event_search(query: EventSearch):
     query = query.dict()['query']
     results = await EventModel.search_events(query=query)
     return {"events":[document_to_dict(event) for event in results] }
-
 
 @router.post("/")
 async def get_all_events(search: SearchData):
@@ -215,3 +216,151 @@ async def get_all_events(search: SearchData):
             event['venue'] = 'Mezzanine'
 
     return {"events": [document_to_dict(event) for event in all_events]}
+
+# ROUTES FOR EDITING EVENTS
+
+@router.put("/update_event")
+async def update_event(event: Event):
+    """
+    Update an existing event details.
+    This matches the frontend expectation where event.id is in the body.
+    """
+    try:
+        # Extract event data
+        event_dict = event.dict()
+        event_id = event_dict.pop("id")
+        
+        if not event_id:
+            raise HTTPException(status_code=400, detail="Event ID is required")
+        
+        # Check if event exists
+        existing_event = await EventModel.get_event_by_id(event_id)
+        if not existing_event:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        # Remove sessions - they will be updated separately
+        event_dict.pop("sessions", None)
+        
+        # Update event details
+        updated_event = await EventModel.update_event(event_id, event_dict)
+        
+        return {
+            "status": "success",
+            "message": "Event updated successfully"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update event: {str(e)}")
+
+@router.put("/sessions/update_sessions/{event_id}")
+async def update_event_sessions(event_id: str, data: SessionsUpdate):
+    """
+    Update sessions for an event.
+    Creates new sessions, updates existing ones, and removes deleted ones.
+    Matches the frontend's payload format of { sessions: [...] }
+    """
+    try:
+        # Check if event exists
+        existing_event = await EventModel.get_event_by_id(event_id)
+        if not existing_event:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        # Get existing sessions for this event
+        existing_sessions = await SessionModel.get_event_sessions(event_id)
+        existing_session_ids = {s.get("id"): s for s in existing_sessions if s.get("id")}
+        
+        updated_sessions = []
+        retained_session_ids = set()
+        
+        # Process each session
+        for session in data.sessions:
+            session_dict = session.dict()
+            session_id = session_dict.pop("id", None)
+            
+            # Prepare session data for database
+            session_data = {
+                "title": session_dict.get("title"),
+                "description": session_dict.get("description", ""),
+                "start_time": session_dict.get("startTime"),
+                "end_time": session_dict.get("endTime"),
+                "session_type": "Conference",  # Default value
+                "materials": ", ".join(session_dict.get("materials", [])),
+            }
+            
+            # Update existing session or create new one
+            if session_id and session_id in existing_session_ids:
+                # Update existing session
+                updated_session = await SessionModel.update_session(session_id, session_data)
+                updated_sessions.append(updated_session)
+                retained_session_ids.add(session_id)
+            else:
+                # Create new session
+                new_session_id = await SessionModel.create_session(
+                    event_id=event_id,
+                    title=session_data["title"],
+                    start_time=session_data["start_time"],
+                    end_time=session_data["end_time"],
+                    session_type=session_data["session_type"],
+                    description=session_data["description"],
+                    speaker_id=None,
+                    location="Mezzanine",  # Default value
+                    capacity=existing_event.get("capacity", 100),  # Use event capacity
+                    materials=session_data["materials"],
+                    attendees_ids=existing_event.get("participants", [])  # Use event participants
+                )
+                if new_session_id:
+                    new_session = await SessionModel.get_session_by_id(new_session_id)
+                    updated_sessions.append(new_session)
+        
+        # Delete sessions that weren't included in the update
+        sessions_to_delete = set(existing_session_ids.keys()) - retained_session_ids
+        for session_id in sessions_to_delete:
+            await SessionModel.delete_session(session_id)
+        
+        return {
+            "status": "success", 
+            "message": f"Updated {len(updated_sessions)} sessions, deleted {len(sessions_to_delete)} sessions"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update sessions: {str(e)}")
+        
+@router.get("/sessions/event/{event_id}")
+async def get_event_sessions(event_id: str):
+    """
+    Get all sessions for a specific event.
+    """
+    try:
+        # Check if event exists
+        event = await EventModel.get_event_by_id(event_id)
+        if not event:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        # Get sessions for this event
+        sessions = await SessionModel.get_event_sessions(event_id)
+        
+        # Format sessions to match frontend expectations
+        formatted_sessions = []
+        for session in sessions:
+            # Format materials
+            materials = []
+            if "materials" in session and session["materials"]:
+                if isinstance(session["materials"], str):
+                    materials = [m.strip() for m in session["materials"].split(",") if m.strip()]
+                elif isinstance(session["materials"], list):
+                    materials = session["materials"]
+            
+            formatted_session = {
+                "id": session.get("id"),
+                "title": session.get("title", ""),
+                "description": session.get("description", ""),
+                "speaker": session.get("speaker", ""),
+                "speaker_id": session.get("speaker_id", ""),
+                "start_time": session.get("start_time", ""),
+                "end_time": session.get("end_time", ""),
+                "materials": materials
+            }
+            formatted_sessions.append(formatted_session)
+        
+        return {"sessions": formatted_sessions}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get sessions: {str(e)}")
