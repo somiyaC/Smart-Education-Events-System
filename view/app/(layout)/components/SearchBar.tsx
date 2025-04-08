@@ -17,7 +17,7 @@ const SearchBar: React.FC = () => {
     <div className="flex items-center justify-center w-full max-w-2xl mx-auto mt-4 mb-6">
       <form
         onSubmit={handleSearchSubmit}
-        className="flex items-center border border-orange-300 rounded-full w-full px-4 py-2 bg-white shadow-md transition-all focus-within:shadow-lg focus-within:border-orange-400"
+        className="flex items-center border border-orange-300 rounded-full w-full px-4 py-2 bg-white transition-all focus-within:border-orange-400"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -27,7 +27,7 @@ const SideBarNavBar: React.FC = () => {
 
   return (
     <div
-      className="h-full fixed left-0 top-0 pt-24 w-64 z-10"
+      className="h-full fixed left-0 top-0 pt-24 w-58 z-10"
       style={{
         backgroundColor: "#ffffff",
         backgroundImage: "none",
@@ -36,7 +36,7 @@ const SideBarNavBar: React.FC = () => {
       }}
     >
       <div
-        className="flex flex-col h-full p-3 space-y-1.5"
+        className="flex flex-col h-full p-3 space-y-0.5"
         style={{
           backgroundColor: "#ffffff",
           backgroundImage: "none",
