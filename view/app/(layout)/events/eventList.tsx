@@ -95,7 +95,7 @@ const AllEvents: React.FC = () => {
               className="p-6 rounded-lg shadow-xl bg-orange-50 hover:shadow-2xl transition-shadow duration-300 ease-in-out"
             >
               {/* Event Header */}
-              <h2 className="text-2xl font-semibold text-orange-600 hover:text-orange-700">
+              <h2 className="text-2xl font-semibold text-orange-500 hover:text-orange-700">
                 {event.name}
               </h2>
               <p className="text-gray-600 mt-2">{event.description}</p>

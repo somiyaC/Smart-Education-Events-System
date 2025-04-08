@@ -50,16 +50,13 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <AppBar
-      position="sticky"
-      className="bg-gradient-to-r from-orange-500 to-orange-400 shadow-md py-3"
-    >
+    <AppBar position="sticky" className="bg-orange-500 py-3" elevation={0}>
       <Toolbar className="flex justify-between items-center py-2">
         <Container className="flex items-center">
           {/* Logo Section */}
           <Link href="/">
             <div className="flex items-center space-x-4">
-              <div className="bg-white rounded-full p-2 shadow-md">
+              <div className="bg-white rounded-full p-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="40"
@@ -96,7 +93,7 @@ const Navbar: React.FC = () => {
               </p>
               <button
                 onClick={handleLogout}
-                className="bg-white text-orange-500 rounded-full px-4 py-2 text-sm font-medium hover:bg-orange-100 transition shadow-md min-w-[100px]"
+                className="bg-white text-orange-500 rounded-full px-4 py-2 text-sm font-medium hover:bg-orange-100 transition min-w-[100px]"
               >
                 Log Out
               </button>
@@ -104,12 +101,12 @@ const Navbar: React.FC = () => {
           ) : (
             <div className="flex space-x-4">
               <Link href="/login" passHref>
-                <button className="bg-white text-orange-500 rounded-full px-4 py-2 text-sm font-medium hover:bg-orange-100 transition shadow-md min-w-[100px]">
+                <button className="bg-white text-orange-500 rounded-full px-4 py-2 text-sm font-medium hover:bg-orange-100 transition min-w-[100px]">
                   Log in
                 </button>
               </Link>
               <Link href="/signup" passHref>
-                <button className="bg-orange-600 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-orange-700 transition shadow-md min-w-[100px]">
+                <button className="bg-orange-600 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-orange-700 transition min-w-[100px]">
                   Sign Up
                 </button>
               </Link>

@@ -36,7 +36,7 @@ const SideBarNavBar: React.FC = () => {
       }}
     >
       <div
-        className="flex flex-col h-full p-3 space-y-1.5"
+        className="flex flex-col h-full p-3 space-y-0.5"
         style={{
           backgroundColor: "#ffffff",
           backgroundImage: "none",

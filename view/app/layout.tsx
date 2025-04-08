@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppProvider } from "./StateContext";
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
-import theme from './theme';
+import theme from "./theme";
 
 export const metadata: Metadata = {
   title: "SEES",
@@ -18,9 +18,7 @@ export default function RootLayout({
       <body>
         <AppProvider>
           <AppRouterCacheProvider>
-            <ThemeProvider theme={theme}>
-              {children}
-            </ThemeProvider>
+            <ThemeProvider theme={theme}>{children}</ThemeProvider>
           </AppRouterCacheProvider>
         </AppProvider>
       </body>
