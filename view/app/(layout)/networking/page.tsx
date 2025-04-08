@@ -14,32 +14,40 @@ export default function NetworkingDashboard() {
       <h1 className="text-4xl font-bold mb-6">Networking & Engagement</h1>
 
       {!activeSection && (
-        <div className="grid grid-cols-2 gap-6">
-          <button
-            onClick={() => setActiveSection("poll")}
-            className="border p-6 rounded-xl shadow hover:shadow-xl hover:bg-orange-400 text-xl bg-white"
-          >
-            Start Live Poll
-          </button>
-          <button
-            onClick={() => setActiveSection("qna")}
-            className="border p-6 rounded-xl shadow hover:shadow-xl hover:bg-orange-400 text-xl bg-white"
-          >
-            Q&A Section
-          </button>
-          <button
-            onClick={() => setActiveSection("matchmaking")}
-            className="border p-6 rounded-xl shadow hover:shadow-xl hover:bg-orange-400 text-xl bg-white"
-          >
-            Find Matches
-          </button>
-          <button
-            onClick={() => setActiveSection("chat")}
-            className="border p-6 rounded-xl shadow hover:shadow-xl hover:bg-orange-400 text-xl bg-white"
-          >
-            Chatroom
-          </button>
-        </div>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <button
+    onClick={() => setActiveSection("poll")}
+    className="bg-gradient-to-r from-orange-400 to-yellow-300 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition transform flex flex-col items-center justify-center space-y-2"
+  >
+    📊
+    <span className="text-lg font-semibold">Start Live Poll</span>
+  </button>
+
+  <button
+    onClick={() => setActiveSection("qna")}
+    className="bg-gradient-to-r from-blue-500 to-indigo-400 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition transform flex flex-col items-center justify-center space-y-2"
+  >
+    ❓
+    <span className="text-lg font-semibold">Q&A Section</span>
+  </button>
+
+  <button
+    onClick={() => setActiveSection("matchmaking")}
+    className="bg-gradient-to-r from-green-500 to-emerald-400 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition transform flex flex-col items-center justify-center space-y-2"
+  >
+    🤝
+    <span className="text-lg font-semibold">Find Matches</span>
+  </button>
+
+  <button
+    onClick={() => setActiveSection("chat")}
+    className="bg-gradient-to-r from-purple-500 to-pink-400 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition transform flex flex-col items-center justify-center space-y-2"
+  >
+    💬
+    <span className="text-lg font-semibold">Chatroom</span>
+  </button>
+</div>
+
       )}
 
       {activeSection === "poll" && <LivePoll onBack={() => setActiveSection("")} />}
