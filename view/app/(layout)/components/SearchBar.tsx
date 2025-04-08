@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { FaSearch } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Box, InputBase, Paper, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -17,39 +16,35 @@ const SearchBar: React.FC = () => {
   };
 
   return (
-    <Box
-    sx={{
-      width: '100%',
-      maxWidth: 500,
-      mx: 'auto',
-      mt: 4,
-      px: 2,
-    }}
-  >
-    <Paper
-      component="form"
-      onSubmit={handleSearchSubmit}
-      elevation={3}
-      sx={{
-        p: '4px 8px',
-        display: 'flex',
-        alignItems: 'center',
-        borderRadius: '30px',
-        backgroundColor: '#f5f5f5',
-      }}
-    >
-      <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
-        <SearchIcon />
-      </IconButton>
-      <InputBase
-        sx={{ ml: 1, flex: 1 }}
-        placeholder="Search anything..."
-        inputProps={{ 'aria-label': 'search anything' }}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
-    </Paper>
-  </Box>
+    <div className="flex items-center justify-center w-full max-w-2xl mx-auto mt-4 mb-6">
+      <form
+        onSubmit={handleSearchSubmit}
+        className="flex items-center border border-orange-300 rounded-full w-full px-4 py-2 bg-white transition-all focus-within:border-orange-400"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-orange-400 mr-3"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search Events"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full outline-none text-gray-700 placeholder-gray-400"
+        />
+      </form>
+    </div>
   );
 };
 

@@ -6,9 +6,10 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 from bson import ObjectId
 import uuid
-import qrcode
-import io
+import json
 import base64
+import io
+import qrcode
 
 from .base_model import BaseModel
 
@@ -22,6 +23,7 @@ class TicketModel(BaseModel):
     
     @classmethod
     async def create_ticket(cls, user_id: str, event_id: str, 
+                            price: float = 0.0,
                             payment_reference: Optional[str] = None) -> str:
         """
         Create a new ticket for an event.
@@ -29,6 +31,7 @@ class TicketModel(BaseModel):
         Args:
             user_id: ID of the ticket holder
             event_id: ID of the event
+            price: Price of the ticket
             payment_reference: Optional payment reference
             
         Returns:
@@ -39,13 +42,14 @@ class TicketModel(BaseModel):
         # Generate a unique ticket number
         ticket_number = cls._generate_ticket_number(event_id, user_id)
         
-        # Include ticket_number as ticket_id to satisfy the unique index constraint
+        # Create ticket data
         ticket_data = {
             "user_id": user_id,
             "event_id": event_id,
             "purchase_date": now,
             "ticket_number": ticket_number,
             "ticket_id": ticket_number,  # Set a unique value here
+            "price": price,
             "status": "active",
             "checked_in": False,
             "check_in_time": None
@@ -53,13 +57,15 @@ class TicketModel(BaseModel):
         
         if payment_reference:
             ticket_data["payment_reference"] = payment_reference
-            
-        # Generate QR code
+        
+        # Store validation data for ticket verification
         qr_data = {
             "ticket_number": ticket_number,
             "event_id": event_id,
             "user_id": user_id
         }
+        
+        # Store the validation data as a JSON string
         ticket_data["qr_code"] = cls._generate_qr_code(qr_data)
         
         ticket_id = await cls.insert_one(ticket_data)
@@ -212,7 +218,8 @@ class TicketModel(BaseModel):
             "valid": True,
             "message": "Ticket is valid",
             "ticket_id": str(ticket["_id"]),
-            "user_id": ticket["user_id"]
+            "user_id": ticket["user_id"],
+            "price": ticket.get("price", 0.0)
         }
     
     @classmethod
@@ -231,6 +238,8 @@ class TicketModel(BaseModel):
             {"$group": {
                 "_id": None,
                 "total_tickets": {"$sum": 1},
+                "total_revenue": {"$sum": "$price"},
+                "avg_ticket_price": {"$avg": "$price"},
                 "checked_in": {"$sum": {"$cond": ["$checked_in", 1, 0]}},
                 "active": {"$sum": {"$cond": [{"$eq": ["$status", "active"]}, 1, 0]}},
                 "used": {"$sum": {"$cond": [{"$eq": ["$status", "used"]}, 1, 0]}},
@@ -245,6 +254,8 @@ class TicketModel(BaseModel):
             # Return empty stats if no tickets
             return {
                 "total_tickets": 0,
+                "total_revenue": 0.0,
+                "avg_ticket_price": 0.0,
                 "checked_in": 0,
                 "check_in_rate": 0,
                 "status_breakdown": {
@@ -295,6 +306,38 @@ class TicketModel(BaseModel):
         
         return f"TCK-{event_prefix}-{user_prefix}-{random_suffix}"
     
+    @classmethod
+    async def update_ticket(cls, db, ticket_id: str, update_data: Dict) -> Optional[Dict]:
+        """
+        Update ticket fields for a given ticket.
+        
+        Args:
+            db: The database connection (not used, maintained for compatibility)
+            ticket_id: Ticket ID.
+            update_data: Dictionary of fields to update.
+        
+        Returns:
+            Dict: The updated ticket document, or None if not found.
+        """
+        # Remove the db parameter as it's not used with our BaseModel implementation
+        return await cls.update_one({"_id": ObjectId(ticket_id)}, {"$set": update_data})
+
+    @classmethod
+    async def delete_ticket(cls, db, ticket_id: str) -> int:
+        """
+        Delete a ticket by ID.
+        
+        Args:
+            db: The database connection (not used, maintained for compatibility)
+            ticket_id: Ticket ID.
+            
+        Returns:
+            int: The number of documents deleted (should be 1 if successful).
+        """
+        # Remove the db parameter as it's not used with our BaseModel implementation
+        deleted_count = await cls.delete_one({"_id": ObjectId(ticket_id)})
+        return deleted_count
+    
     @staticmethod
     def _generate_qr_code(data: Dict) -> str:
         """
@@ -313,142 +356,16 @@ class TicketModel(BaseModel):
             box_size=10,
             border=4,
         )
-        
+
         # Add data to QR code
         qr.add_data(str(data))
         qr.make(fit=True)
-        
+
         # Create image
         img = qr.make_image(fill_color="black", back_color="white")
-        
+
         # Convert to base64
         buffer = io.BytesIO()
         img.save(buffer, format="PNG")
-        
+
         return f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('utf-8')}"
-    
-    @classmethod
-    async def create_ticket_with_discount(cls, user_id: str, event_id: str, 
-                                    discount_code: Optional[str] = None,
-                                    payment_reference: Optional[str] = None) -> Dict:
-        """
-        Create a new ticket with optional discount.
-        
-        Args:
-            user_id: ID of the ticket holder
-            event_id: ID of the event
-            discount_code: Optional discount code
-            payment_reference: Optional payment reference
-            
-        Returns:
-            Dict: Dictionary with ticket ID and applied discount info
-        """
-        discount_info = {
-            "applied": False,
-            "code": None,
-            "percentage": 0,
-            "amount": 0
-        }
-        
-        # Check if discount code is valid (implementation would need to be added)
-        if discount_code:
-            # This would validate the discount code against a discount_codes collection
-            # For now, just simulate a successful discount
-            discount_info = {
-                "applied": True,
-                "code": discount_code,
-                "percentage": 15,  # Example: 15% discount
-                "amount": 0        # This would be calculated based on ticket price
-            }
-        
-        # Create the ticket
-        ticket_id = await cls.create_ticket(user_id, event_id, payment_reference)
-        
-        return {
-            "ticket_id": ticket_id,
-            "discount": discount_info
-        }
-    
-    @classmethod
-    async def bulk_create_tickets(cls, event_id: str, user_ids: List[str]) -> Dict:
-        """
-        Create tickets for multiple users at once.
-        
-        Args:
-            event_id: Event ID
-            user_ids: List of User IDs
-            
-        Returns:
-            Dict: Summary of ticket creation results
-        """
-        results = {
-            "success": 0,
-            "failed": 0,
-            "ticket_ids": []
-        }
-        
-        for user_id in user_ids:
-            try:
-                ticket_id = await cls.create_ticket(user_id, event_id)
-                results["ticket_ids"].append(ticket_id)
-                results["success"] += 1
-            except Exception:
-                results["failed"] += 1
-        
-        return results
-
-    @classmethod
-    async def get_check_in_timeline(cls, event_id: str) -> List[Dict]:
-        """
-        Get a timeline of check-ins for an event.
-        
-        Args:
-            event_id: Event ID
-            
-        Returns:
-            List[Dict]: List of check-in data points with timestamps
-        """
-        tickets = await cls.find_many(
-            {"event_id": event_id, "checked_in": True},
-            sort=[("check_in_time", 1)]
-        )
-        
-        timeline = []
-        for ticket in tickets:
-            timeline.append({
-                "ticket_id": str(ticket["_id"]),
-                "user_id": ticket["user_id"],
-                "check_in_time": ticket["check_in_time"]
-            })
-        
-        return timeline
-        
-    @classmethod
-    async def update_ticket(cls, db, ticket_id: str, update_data: Dict) -> Optional[Dict]:
-        """
-        Update ticket fields for a given ticket.
-        
-        Args:
-            db: The database connection.
-            ticket_id: Ticket ID.
-            update_data: Dictionary of fields to update.
-        
-        Returns:
-            Dict: The updated ticket document, or None if not found.
-        """
-        return await cls.update_one({"_id": ObjectId(ticket_id)}, {"$set": update_data})
-
-    @classmethod
-    async def delete_ticket(cls, db, ticket_id: str) -> int:
-        """
-        Delete a ticket by ID.
-        
-        Args:
-            db: The database connection.
-            ticket_id: Ticket ID.
-            
-        Returns:
-            int: The number of documents deleted (should be 1 if successful).
-        """
-        from bson import ObjectId  # Ensure ObjectId is imported
-        return await cls.delete_one({"_id": ObjectId(ticket_id)})

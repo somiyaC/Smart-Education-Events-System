@@ -3,19 +3,44 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
-import Link from "next/link";
 import { useAppContext } from "../../StateContext";
+import Link from "next/link";
 import {
   Box,
   Button,
   Container,
-  Grid,
-  MenuItem,
-  Select,
   TextField,
   Typography,
-  SelectChangeEvent,
-} from '@mui/material';
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { createTheme, PaletteColorOptions } from "@mui/material/styles";
+
+declare module "@mui/material/styles" {
+  interface CustomPalette {
+    sees: PaletteColorOptions;
+  }
+  interface Palette extends CustomPalette {}
+  interface PaletteOptions extends CustomPalette {}
+}
+
+declare module "@mui/material/Button" {
+  interface ButtonPropsColorOverrides {
+    sees: true;
+  }
+}
+
+const { palette } = createTheme();
+const { augmentColor } = palette;
+const createColor = (mainColor: string) =>
+  augmentColor({ color: { main: mainColor } });
+const theme = createTheme({
+  palette: {
+    sees: createColor("#f17126"),
+  },
+});
 
 const Signup = () => {
   const router = useRouter();
@@ -27,6 +52,7 @@ const Signup = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       const response = await fetch("http://127.0.0.1:8000/auth/signup", {
         method: "POST",
@@ -34,12 +60,13 @@ const Signup = () => {
         body: JSON.stringify({
           email,
           password,
-          role: role, // Change role if needed
+          role: role,
         }),
       });
 
       const data = await response.json();
       console.log(data);
+
       if (data.status === true) {
         setUserId(data.user_id);
         console.log("stored id", data.user_id);
@@ -47,131 +74,128 @@ const Signup = () => {
         alert("Signup successful!");
         router.push("/login");
       } else {
-        alert(`Signup failed: ${data.detail}`);
+        setError(`Signup failed: ${data.detail}`);
       }
     } catch (error) {
       console.error("Signup error:", error);
-      alert("Signup failed. Check console for details.");
+      setError("Signup failed. Check console for details.");
     }
   };
 
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-        minHeight: '100vh',
+        display: "flex",
+        height: "100vh",
+        backgroundColor: "white",
       }}
     >
-      {/* Left: Form */}
+      {/* Left Side: Signup Form */}
       <Box
         sx={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#fff',
-          px: { xs: 4, md: 12 },
-          py: 8,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "50%",
+          padding: 3,
         }}
       >
-        <Container maxWidth="sm">
-          <Typography
-                variant="h1" // Use h1 for large text size
-                component="div" // Optional: can be used to change the HTML tag (e.g., h1, div)
-                sx={{
-                  fontWeight: 'bold', // Ensures the text is bold
-                  fontSize: '4rem', // Large font size, you can adjust as needed
-                  color: 'black', // Adjust text color if needed
-                  textAlign: 'center', // Center the text if needed
-                  margin: '20px 0', // Adjust margin as needed
-                }}
-              >
-                Smart Education Event System
-              </Typography>
-          <Typography variant="h4" gutterBottom>
-            Create an account
-          </Typography>
-
-          {error && (
-            <Typography color="error" sx={{ mb: 2 }}>
-              {error}
-            </Typography>
-          )}
-
-          <Box component="form" onSubmit={handleSignup} noValidate>
-            <TextField
-              label="Email Address"
-              type="email"
-              fullWidth
-              required
-              margin="normal"
-              variant="outlined"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              label="Password"
-              type="password"
-              fullWidth
-              required
-              margin="normal"
-              variant="outlined"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+        <Typography
+          variant="h1"
+          component="div"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "4rem",
+            color: "black",
+            textAlign: "center",
+            margin: "20px 0",
+          }}
+        >
+          Smart Education Events System
+        </Typography>
+        <Typography variant="h4" color="black" gutterBottom>
+          Create an account
+        </Typography>
+        <form onSubmit={handleSignup}>
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <TextField
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="role-select-label">Role</InputLabel>
             <Select
-              fullWidth
+              labelId="role-select-label"
               value={role}
-              onChange={(e: SelectChangeEvent) => setRole(e.target.value)}
-              displayEmpty
-              sx={{ mt: 2 }}
+              label="Role"
+              onChange={(e) => setRole(e.target.value)}
             >
               <MenuItem value="attendee">Attendee</MenuItem>
               <MenuItem value="organizer">Organizer</MenuItem>
               <MenuItem value="speaker">Speaker</MenuItem>
               <MenuItem value="admin">Admin</MenuItem>
             </Select>
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{
-                mt: 3,
-                backgroundColor: 'orange',
-                ':hover': { backgroundColor: 'darkorange' },
-                borderRadius: 5,
-                p: 1.5,
-              }}
-            >
-              Sign Up
-            </Button>
-          </Box>
-
-          <Typography variant="body2" align="center" sx={{ mt: 3 }}>
-            Already have an account?{' '}
-            <Link href="/login" passHref>
-              <Typography component="span" sx={{ fontWeight: 'bold', cursor: 'pointer', color: 'black' }}>
+          </FormControl>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            color="primary"
+            sx={{
+              marginTop: 2,
+              boxShadow: "none",
+              "&:hover": {
+                boxShadow: "none",
+              },
+              color: "white",
+              fontWeight: "bold",
+            }}
+          >
+            Sign Up
+          </Button>
+          <Box sx={{ textAlign: "center", marginTop: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                style={{ color: "black", fontWeight: "bold" }}
+              >
                 Log in
-              </Typography>
-            </Link>
-          </Typography>
-        </Container>
+              </Link>
+            </Typography>
+          </Box>
+        </form>
       </Box>
 
-      {/* Right: Image */}
+      {/* Right Side: Image */}
       <Box
         sx={{
-          flex: 1,
-          position: 'relative',
-          display: { xs: 'none', md: 'block' },
+          width: "50%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
         <img
           src="/images/signup.jpg"
           alt="Signup Illustration"
-          style={{ objectFit: 'cover' }}
+          className="w-full h-full p-10 object-cover rounded-3xl"
         />
       </Box>
     </Box>

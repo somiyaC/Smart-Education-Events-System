@@ -84,11 +84,12 @@ const AnalyticsPage = () => {
       <Typography variant="h4" color="black" gutterBottom>
           Your Created Events.
         </Typography>
-
+        <div className="w-full flex items-center justify-center">
+      <div className="flex flex-row w-5/6 justify-center items-center">
       {events.map((event) => (
         <div
           key={event.id}
-          className="w-full sm:w-1/2 md:w-1/3 flex justify-center"
+          className="w-full sm:w-1/2 md:w-1/3 flex flex-row justify-center m-4"
         >
           <EventCard
             event_name={event.name}
@@ -97,6 +98,8 @@ const AnalyticsPage = () => {
           />
         </div>
       ))}
+      </div>
+      </div>
     </div>
   );
 };

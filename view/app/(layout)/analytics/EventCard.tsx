@@ -19,7 +19,7 @@ export default function EventCard({event_name, event_description, event_id}: Eve
   }
   
     return (
-        <Card className='w-2/6 bg-blue-500' >
+        <Card className='w-2/6' >
       <CardMedia
         sx={{ height: 140 }}
         image="/images/signup.jpg"
