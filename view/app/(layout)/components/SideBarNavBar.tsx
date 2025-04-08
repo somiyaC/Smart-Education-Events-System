@@ -27,7 +27,7 @@ const SideBarNavBar: React.FC = () => {
 
   return (
     <div
-      className="h-full fixed left-0 top-0 pt-24 w-58 z-10"
+      className="h-full w-64"
       style={{
         backgroundColor: "#ffffff",
         backgroundImage: "none",
