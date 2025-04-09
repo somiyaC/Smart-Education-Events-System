@@ -20,8 +20,7 @@ interface Event {
   event_type: string;
   start_date: string;
   end_date: string;
-  organizer: string;
-  venue: string;
+  venue: string; // venue is the venue name directly
   sessions: Session[];
   participants?: string[];
 }
@@ -41,7 +40,6 @@ const EditEventPage: React.FC = () => {
   const [eventType, setEventType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [organizer, setOrganizer] = useState("");
   const [venue, setVenue] = useState("");
   const [sessions, setSessions] = useState<Session[]>([]);
 
@@ -64,7 +62,7 @@ const EditEventPage: React.FC = () => {
         }
 
         const eventData = await response.json();
-        setEvent(eventData); // Direct assignment, not data.event
+        setEvent(eventData);
 
         // Populate form fields
         setName(eventData.name);
@@ -72,8 +70,7 @@ const EditEventPage: React.FC = () => {
         setEventType(eventData.event_type);
         setStartDate(eventData.start_date);
         setEndDate(eventData.end_date);
-        setOrganizer(eventData.organizer);
-        setVenue(eventData.venue);
+        setVenue(eventData.venue); // venue is already the venue name
 
         // Try to fetch sessions but handle case where endpoint might not exist yet
         try {
@@ -201,8 +198,7 @@ const EditEventPage: React.FC = () => {
         event_type: eventType,
         start_date: startDate,
         end_date: endDate,
-        organizer,
-        venue,
+        venue, // venue is already the venue name
         sessions,
       };
 
@@ -339,19 +335,6 @@ const EditEventPage: React.FC = () => {
                   required
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Organizer
-              </label>
-              <input
-                type="text"
-                value={organizer}
-                onChange={(e) => setOrganizer(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                required
-              />
             </div>
 
             <div>
