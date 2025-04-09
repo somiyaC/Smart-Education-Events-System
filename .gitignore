@@ -24,6 +24,8 @@ view/node_modules
 # production
 /build
 
+venv/
+
 # misc
 .DS_Store
 *.pem
