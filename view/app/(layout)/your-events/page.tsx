@@ -172,9 +172,6 @@ const YourEvents: React.FC = () => {
 
   return (
     <div className="flex items-center justify-center p-6 max-w-5xl mx-auto">
-      <h2 className="text-3xl font-bold text-black mb-6">
-        {isSpeaker ? "Events Where You're Speaking" : "Your Events"}
-      </h2>
       <div className="space-y-6">
         {events.map((event) => (
           <div key={event.id} className="p-6 rounded-lg shadow-lg bg-[#FFFAF0]">

@@ -67,37 +67,41 @@ const EditEventPage: React.FC = () => {
         }
 
         const eventData = await response.json();
-        
+
         // Adapt MongoDB _id to id for frontend use
         const adaptedEventData = {
           ...eventData,
-          id: eventData._id || eventData.id || eventId
+          id: eventData._id || eventData.id || eventId,
         };
-        
+
         setEvent(adaptedEventData);
 
         // Populate form fields
         setName(adaptedEventData.name || "");
         setDescription(adaptedEventData.description || "");
         setEventType(adaptedEventData.event_type || "");
-        
+
         // Format dates for form inputs
         if (adaptedEventData.start_date) {
           // Handle ISO date format or string date
-          const startDate = typeof adaptedEventData.start_date === 'string'
-            ? adaptedEventData.start_date.split('T')[0]
-            : new Date(adaptedEventData.start_date).toISOString().split('T')[0];
+          const startDate =
+            typeof adaptedEventData.start_date === "string"
+              ? adaptedEventData.start_date.split("T")[0]
+              : new Date(adaptedEventData.start_date)
+                  .toISOString()
+                  .split("T")[0];
           setStartDate(startDate);
         }
-        
+
         if (adaptedEventData.end_date) {
           // Handle ISO date format or string date
-          const endDate = typeof adaptedEventData.end_date === 'string'
-            ? adaptedEventData.end_date.split('T')[0]
-            : new Date(adaptedEventData.end_date).toISOString().split('T')[0];
+          const endDate =
+            typeof adaptedEventData.end_date === "string"
+              ? adaptedEventData.end_date.split("T")[0]
+              : new Date(adaptedEventData.end_date).toISOString().split("T")[0];
           setEndDate(endDate);
         }
-        
+
         setOrganizer(adaptedEventData.organizer || "");
         setVenue(adaptedEventData.venue || "");
 
@@ -123,11 +127,11 @@ const EditEventPage: React.FC = () => {
                 speaker_id: session.speaker_id || "",
                 startTime: session.startTime || "",
                 endTime: session.endTime || "",
-                materials: Array.isArray(session.materials) 
-                  ? session.materials 
-                  : (typeof session.materials === 'string' && session.materials 
-                      ? session.materials.split(", ") 
-                      : []),
+                materials: Array.isArray(session.materials)
+                  ? session.materials
+                  : typeof session.materials === "string" && session.materials
+                  ? session.materials.split(", ")
+                  : [],
               })
             );
             setSessions(formattedSessions);
@@ -219,10 +223,10 @@ const EditEventPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
       const token = localStorage.getItem("token");
-      
+
       // Create payload without ID field since it will be in the URL
       const updatedEvent = {
         name,
@@ -238,29 +242,31 @@ const EditEventPage: React.FC = () => {
         participants: event?.participants ?? [],
         sessions: [], // Include empty sessions array to satisfy Pydantic validation
       };
-  
+
       console.log("Submitting updated event:", updatedEvent);
-  
+
       // Update the event - Include eventId in the URL path as expected by the backend
       const eventResponse = await fetch(
-        `http://localhost:8000/events/update_event/${eventId}`,  // Now correctly includes the event ID
+        `http://localhost:8000/events/update_event/${eventId}`, // Now correctly includes the event ID
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(updatedEvent),  // No need to include ID in body
+          body: JSON.stringify(updatedEvent), // No need to include ID in body
         }
       );
-  
+
       // Check status and get response text for debugging
       if (!eventResponse.ok) {
         const errorText = await eventResponse.text();
         console.error("Error response:", errorText);
-        throw new Error(`Failed to update event: ${eventResponse.status} - ${errorText}`);
+        throw new Error(
+          `Failed to update event: ${eventResponse.status} - ${errorText}`
+        );
       }
-  
+
       // Now update sessions separately
       const sessionsResponse = await fetch(
         `http://localhost:8000/events/sessions/update_sessions/${eventId}`,
@@ -273,7 +279,7 @@ const EditEventPage: React.FC = () => {
           body: JSON.stringify({ sessions }),
         }
       );
-  
+
       if (!sessionsResponse.ok) {
         const errorText = await sessionsResponse.text();
         console.error("Error response:", errorText);
@@ -281,7 +287,7 @@ const EditEventPage: React.FC = () => {
           `Failed to update sessions: ${sessionsResponse.status} - ${errorText}`
         );
       }
-  
+
       alert("Event and sessions updated successfully!");
       router.push("/events"); // Redirect back to events page
     } catch (err) {
@@ -416,7 +422,7 @@ const EditEventPage: React.FC = () => {
             <button
               type="button"
               onClick={addSession}
-              className="bg-green-500 hover:bg-green-600 text-white text-sm rounded-full px-3 py-1"
+              className="bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-full px-3 py-1"
             >
               + Add Session
             </button>
