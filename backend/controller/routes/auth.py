@@ -35,8 +35,10 @@ class AdminCreateUser(BaseModel):
     email: EmailStr
     password: str
     role: Literal["attendee", "organizer", "speaker", "admin"]
-    first_name: str
-    last_name: str
+
+class AdminCreateUserPayload(BaseModel):
+    admin_user_id: str
+    new_user: AdminCreateUser
 
 @router.post("/signup")
 async def signup(user: SignupRequest):
@@ -109,9 +111,12 @@ async def update_password(password_data: PasswordUpdateData):
         return {"status": False, "message": "An error occurred while updating password"}
 
 @router.post("/admin/create_user")
-async def admin_create_user(new_user: AdminCreateUser, admin_data: UserData):
+async def admin_create_user(payload: AdminCreateUserPayload):
+    admin_id = payload.admin_user_id
+    new_user = payload.new_user
+
     # Check permission
-    is_admin = await UserModel.check_permission(admin_data.user_id, "admin")
+    is_admin = await UserModel.check_permission(admin_id, "admin")
     if not is_admin:
         raise HTTPException(status_code=403, detail="Only admins can create new users.")
 
@@ -125,8 +130,6 @@ async def admin_create_user(new_user: AdminCreateUser, admin_data: UserData):
         "email": new_user.email,
         "password": hashed_password,
         "role": new_user.role,
-        "first_name": new_user.first_name,
-        "last_name": new_user.last_name,
         "created_at": datetime.utcnow(),
     }
 
