@@ -391,19 +391,47 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         }}
       />
 
+      <div className="mt-2">
+        {sessionMaterials.length > 0 && (
+          <div>
+            <p className="text-sm font-semibold">Added Materials:</p>
+            <div className="flex flex-wrap gap-2">
+              {sessionMaterials.map((material, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-100 px-2 py-1 rounded text-sm flex items-center"
+                >
+                  {material}
+                  <button
+                    type="button"
+                    className="ml-2 text-gray-500 hover:text-red-500"
+                    onClick={() =>
+                      setSessionMaterials(
+                        sessionMaterials.filter((_, i) => i !== index)
+                      )
+                    }
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex space-x-2 mt-3">
         <button
           type="button"
           className="bg-blue-500 text-white text-sm rounded-full px-3 py-1 cursor-pointer active:bg-blue-400"
-          onClick={() =>
-            addMaterial(
-              (
-                document.querySelector(
-                  "input[placeholder='Material']"
-                ) as HTMLInputElement
-              ).value
-            )
-          }
+          onClick={() => {
+            const materialInput = document.querySelector(
+              "input[placeholder='Material']"
+            ) as HTMLInputElement;
+
+            addMaterial(materialInput.value);
+            materialInput.value = ""; // Clear the input after adding
+          }}
         >
           + Add Material
         </button>

@@ -17,6 +17,7 @@ const ProfilePage: React.FC = () => {
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -34,31 +35,37 @@ const ProfilePage: React.FC = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/auth/admin/create_user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          admin_user_id: localStorage.getItem("user_id"), // admin verification
-          new_user: {
-            email: newUser.email,
-            password: newUser.password,
-            role: newUser.role,
+      const response = await fetch(
+        "http://localhost:8000/auth/admin/create_user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        }),
-      });
+          body: JSON.stringify({
+            admin_user_id: localStorage.getItem("user_id"), // admin verification
+            new_user: {
+              email: newUser.email,
+              password: newUser.password,
+              role: newUser.role,
+            },
+          }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
-        alert("User created successfully!");
+        setSuccessMessage("User created successfully!");
+        setError(null); // clear previous error
         setNewUser({
           email: "",
           password: "",
           role: "attendee",
         });
       } else {
-        setError(data.detail || "Failed to create user. Please check form inputs.");
+        setError(
+          data.detail || "Failed to create user. Please check form inputs."
+        );
       }
     } catch (error) {
       console.error("Error creating user:", error);
@@ -71,6 +78,11 @@ const ProfilePage: React.FC = () => {
       <h2 className="text-2xl font-bold text-center text-black mb-6">
         Create New User
       </h2>
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {successMessage}
+        </div>
+      )}
       <div className="space-y-4">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
