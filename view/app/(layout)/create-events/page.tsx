@@ -27,6 +27,7 @@ interface Event {
 const EventFormPage: React.FC = () => {
   const [error, setError] = useState("");
   const [event, setEvent] = useState<Event | null>(null); // Optional to keep
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleCreateEvent = async (eventData: Event) => {
     if (!eventData) {
@@ -57,7 +58,7 @@ const EventFormPage: React.FC = () => {
       }
 
       const data = await res.json();
-      alert("Event created successfully!");
+      setSuccessMessage("Event created successfully!");
       setEvent(null);
     } catch (error) {
       console.error("Error creating event:", error);
@@ -71,6 +72,7 @@ const EventFormPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      {successMessage && <p className="text-blue-500 mb-4">{successMessage}</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       <CreateEventForm
