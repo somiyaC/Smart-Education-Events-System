@@ -76,7 +76,7 @@ async def organizer_event(org_data: OrganizerData):
                 continue
             event['participants_email'].append(user['email'])
     
-    return organizer_events
+    return {"events":organizer_events}
 
     
 
