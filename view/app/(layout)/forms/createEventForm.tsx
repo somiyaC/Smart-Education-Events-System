@@ -394,7 +394,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
       <div className="flex space-x-2 mt-3">
         <button
           type="button"
-          className="bg-orange-300 text-xs text-white p-2 rounded-3xl cursor-pointer active:bg-orange-100"
+          className="bg-blue-500 text-white text-sm rounded-full px-3 py-1 cursor-pointer active:bg-blue-400"
           onClick={() =>
             addMaterial(
               (
@@ -410,7 +410,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
 
         <button
           type="button"
-          className="bg-orange-300 text-xs text-white p-2 rounded-3xl cursor-pointer active:bg-orange-100"
+          className="bg-blue-500 text-white text-sm rounded-full px-3 py-1 cursor-pointer active:bg-blue-400"
           onClick={addSession}
         >
           + Add Session
