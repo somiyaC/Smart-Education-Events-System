@@ -26,15 +26,15 @@ interface Event {
 
 const EventFormPage: React.FC = () => {
   const [error, setError] = useState("");
-  const [event, setEvent] = useState<Event | null>(null);
+  const [event, setEvent] = useState<Event | null>(null); // Optional to keep
 
-  const handleCreateEvent = async () => {
-    if (!event) {
+  const handleCreateEvent = async (eventData: Event) => {
+    if (!eventData) {
       setError("No event data to create.");
       return;
     }
 
-    console.log(event);
+    console.log("Submitting event to backend:", eventData);
 
     try {
       const token = localStorage.getItem("token");
@@ -45,8 +45,10 @@ const EventFormPage: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...event,
-          ...{ participants: [], is_virtual: false, capacity: 100 },
+          ...eventData,
+          participants: [],
+          is_virtual: false,
+          capacity: 100,
         }),
       });
 
@@ -73,8 +75,8 @@ const EventFormPage: React.FC = () => {
 
       <CreateEventForm
         onSubmit={(newEvent: Event) => {
-          setEvent(newEvent);
-          handleCreateEvent();
+          setEvent(newEvent); // Optional: keep if you use the state elsewhere
+          handleCreateEvent(newEvent);
         }}
       />
     </div>

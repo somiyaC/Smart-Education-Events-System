@@ -24,16 +24,17 @@ interface Event {
   event_type: string;
   start_date: string;
   end_date: string;
-  organizer: string; // Added to match EventFormPage interface
+  organizer: string;
   venue: string;
+  virtual_meeting_url: string;
+  is_virtual: boolean;
   sessions: Session[];
-  participants?: string[]; // Added to match EventFormPage interface
+  participants?: string[];
 }
 
 interface CreateEventFormProps {
   onSubmit: (event: Event) => void;
 }
-
 const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
   const [event, setEvent] = useState<Event>({
     name: "",
@@ -41,10 +42,12 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     event_type: "",
     start_date: "",
     end_date: "",
-    organizer: localStorage.getItem("user_id") || "", // Initialize with user_id
+    organizer: localStorage.getItem("user_id") || "",
     venue: "",
+    virtual_meeting_url: "",
+    is_virtual: false,
     sessions: [],
-    participants: [], // Initialize empty array
+    participants: [],
   });
 
   const [sessionTitle, setSessionTitle] = useState("");
@@ -64,7 +67,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     const fetchSpeakers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:8000/users/speakers", {
+        const response = await fetch("http://localhost:8000/auth/speakers", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -242,6 +245,28 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         value={event.venue}
         onChange={(e) => setEvent({ ...event, venue: e.target.value })}
       />
+      <input
+        type="text"
+        placeholder="Virtual Meeting URL"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
+        value={event.virtual_meeting_url}
+        onChange={(e) =>
+          setEvent({ ...event, virtual_meeting_url: e.target.value })
+        }
+      />
+
+      <div className="flex items-center mt-2">
+        <input
+          id="is_virtual"
+          type="checkbox"
+          checked={event.is_virtual}
+          onChange={(e) => setEvent({ ...event, is_virtual: e.target.checked })}
+          className="mr-2"
+        />
+        <label htmlFor="is_virtual" className="text-sm font-semibold">
+          Virtual Event?
+        </label>
+      </div>
 
       <h3 className="mt-4 font-semibold">Sessions</h3>
       {event.sessions.map((session, index) => (
