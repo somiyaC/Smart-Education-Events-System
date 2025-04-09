@@ -133,7 +133,7 @@ const ProfilePage: React.FC = () => {
             name="currentPassword"
             value={passwordUpdate.currentPassword}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 block w-full border border-orange-400 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
           />
         </div>
 
@@ -151,7 +151,7 @@ const ProfilePage: React.FC = () => {
             name="newPassword"
             value={passwordUpdate.newPassword}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 block w-full border border-orange-400 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
           />
         </div>
 
@@ -159,7 +159,7 @@ const ProfilePage: React.FC = () => {
         <div className="flex justify-center">
           <button
             onClick={handlePasswordUpdate}
-            className="bg-orange-400 text-white text-sm rounded-3xl px-4 py-2 mt-4 cursor-pointer active:bg-orange-400"
+            className="bg-orange-400 text-white text-sm rounded-3xl px-4 py-2 mt-4 cursor-pointer active:bg-orange-300"
           >
             Update Password
           </button>

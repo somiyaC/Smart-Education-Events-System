@@ -309,13 +309,11 @@ const EditEventPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold text-orange-600 mb-6">
-        Edit Event
-      </h1>
+      <h1 className="text-2xl font-semibold text-black mb-6">Edit Event</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-medium text-gray-800 mb-4">
+          <h2 className="text-xl font-medium text-orange-500 mb-4">
             Event Details
           </h2>
 
@@ -328,7 +326,7 @@ const EditEventPage: React.FC = () => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 required
               />
             </div>
@@ -340,7 +338,7 @@ const EditEventPage: React.FC = () => {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 rows={3}
                 required
               />
@@ -354,7 +352,7 @@ const EditEventPage: React.FC = () => {
                 type="text"
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 required
               />
             </div>
@@ -368,7 +366,7 @@ const EditEventPage: React.FC = () => {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                  className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                   required
                 />
               </div>
@@ -381,7 +379,7 @@ const EditEventPage: React.FC = () => {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                  className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                   required
                 />
               </div>
@@ -395,7 +393,7 @@ const EditEventPage: React.FC = () => {
                 type="text"
                 value={organizer}
                 onChange={(e) => setOrganizer(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 required
               />
             </div>
@@ -408,7 +406,7 @@ const EditEventPage: React.FC = () => {
                 type="text"
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 required
               />
             </div>
@@ -418,11 +416,11 @@ const EditEventPage: React.FC = () => {
         {/* Sessions Section */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-medium text-gray-800">Sessions</h2>
+            <h2 className="text-xl font-medium text-orange-500">Sessions</h2>
             <button
               type="button"
               onClick={addSession}
-              className="bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-full px-3 py-1"
+              className="bg-blue-500 text-white text-sm rounded-full px-3 py-1 cursor-pointer active:bg-blue-400"
             >
               + Add Session
             </button>
@@ -460,7 +458,7 @@ const EditEventPage: React.FC = () => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                         required
                       />
                     </div>
@@ -479,7 +477,7 @@ const EditEventPage: React.FC = () => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                         required
                       />
                     </div>
@@ -498,7 +496,7 @@ const EditEventPage: React.FC = () => {
                           e.target.value
                         )
                       }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                      className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                       rows={2}
                     />
                   </div>
@@ -518,7 +516,7 @@ const EditEventPage: React.FC = () => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                         required
                       />
                     </div>
@@ -537,7 +535,7 @@ const EditEventPage: React.FC = () => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                         required
                       />
                     </div>
@@ -579,7 +577,7 @@ const EditEventPage: React.FC = () => {
                                   e.target.value
                                 )
                               }
-                              className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm"
+                              className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                               placeholder="Material link or resource"
                             />
                             <button
@@ -606,13 +604,13 @@ const EditEventPage: React.FC = () => {
           <button
             type="button"
             onClick={() => router.push("/events")}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm rounded-3xl px-4 py-2"
+            className="bg-gray-200 text-gray-800 text-sm rounded-3xl px-4 py-2 cursor-pointer active:bg-gray-100"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-3xl px-4 py-2"
+            className="bg-orange-500 text-white text-sm rounded-3xl px-4 py-2 cursor-pointer active:bg-orange-400"
           >
             Save Changes
           </button>

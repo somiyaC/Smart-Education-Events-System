@@ -96,7 +96,7 @@ const ProfilePage: React.FC = () => {
             name="email"
             value={newUser.email}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 block w-full border border-orange-400 rounded-md p-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
             required
           />
         </div>
@@ -115,7 +115,7 @@ const ProfilePage: React.FC = () => {
             name="password"
             value={newUser.password}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 block w-full border border-orange-400 rounded-md p-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
             required
           />
         </div>
@@ -133,7 +133,7 @@ const ProfilePage: React.FC = () => {
             name="role"
             value={newUser.role}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 block w-full border border-orange-400 rounded-md p-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
           >
             <option value="user">Attendee</option>
             <option value="organizer">Organizer</option>
@@ -145,7 +145,7 @@ const ProfilePage: React.FC = () => {
         <div className="flex justify-center">
           <button
             onClick={handleCreateUser}
-            className="bg-orange-400 text-white text-sm rounded-3xl px-4 py-2 mt-4 cursor-pointer active:bg-orange-400"
+            className="bg-orange-400 text-white text-sm rounded-3xl px-4 py-2 mt-4 cursor-pointer active:bg-orange-300"
           >
             Create User
           </button>

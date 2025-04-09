@@ -95,7 +95,7 @@ const AllEvents: React.FC = () => {
               className="p-6 rounded-lg shadow-xl bg-orange-50 hover:shadow-2xl transition-shadow duration-300 ease-in-out"
             >
               {/* Event Header */}
-              <h2 className="text-2xl font-semibold text-orange-500 hover:text-orange-700">
+              <h2 className="text-2xl font-semibold text-orange-500">
                 {event.name}
               </h2>
               <p className="text-gray-600 mt-2">{event.description}</p>
@@ -122,7 +122,7 @@ const AllEvents: React.FC = () => {
                   <button
                     type="submit"
                     onClick={() => handleSignUp(event)}
-                    className="bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-3xl px-4 py-2 flex-grow active:bg-orange-700 transition-all duration-200 ease-in-out"
+                    className="bg-orange-500 text-white text-sm rounded-3xl px-4 py-2 flex-grow acursor-pointer active:bg-orange-400"
                   >
                     Sign Up
                   </button>
@@ -136,7 +136,7 @@ const AllEvents: React.FC = () => {
                 {canEditEvent() && (
                   <button
                     onClick={() => handleEditEvent(event.id)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-3xl px-4 py-2 active:bg-blue-700 transition-all duration-200 ease-in-out"
+                    className="bg-blue-500 text-white text-sm rounded-3xl px-4 py-2 cursor-pointer active:bg-blue-400"
                   >
                     Edit Event
                   </button>
