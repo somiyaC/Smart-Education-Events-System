@@ -419,3 +419,21 @@ class UserModel(BaseModel):
             "company_matches": company_matches,
             "total_potential_connections": len(participant_details)
         }
+    
+    @classmethod
+    async def get_all_speakers(cls) -> List[Dict]:
+        try:
+            collection = await cls.get_collection()
+            cursor = collection.find({"role": "speaker"})
+            speakers = await cursor.to_list(length=None)
+            return [
+                {
+                    "id": str(speaker["_id"]),
+                    "email": speaker["email"],
+                    "name": f"{speaker.get('first_name', '')} {speaker.get('last_name', '')}".strip() or speaker["email"]
+                }
+                for speaker in speakers
+            ]
+        except Exception as e:
+            print(f"[UserModel.get_all_speakers ERROR] {e}")
+            raise
