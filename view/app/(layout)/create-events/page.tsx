@@ -72,8 +72,16 @@ const EventFormPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      {successMessage && <p className="text-blue-500 mb-4">{successMessage}</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {successMessage && (
+        <p className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {successMessage}
+        </p>
+      )}
+      {error && (
+        <p className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </p>
+      )}
 
       <CreateEventForm
         onSubmit={(newEvent: Event) => {
