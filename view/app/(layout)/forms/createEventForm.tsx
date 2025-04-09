@@ -24,16 +24,17 @@ interface Event {
   event_type: string;
   start_date: string;
   end_date: string;
-  organizer: string; // Added to match EventFormPage interface
+  organizer: string;
   venue: string;
+  virtual_meeting_url: string;
+  is_virtual: boolean;
   sessions: Session[];
-  participants?: string[]; // Added to match EventFormPage interface
+  participants?: string[];
 }
 
 interface CreateEventFormProps {
   onSubmit: (event: Event) => void;
 }
-
 const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
   const [event, setEvent] = useState<Event>({
     name: "",
@@ -41,10 +42,12 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     event_type: "",
     start_date: "",
     end_date: "",
-    organizer: localStorage.getItem("user_id") || "", // Initialize with user_id
+    organizer: localStorage.getItem("user_id") || "",
     venue: "",
+    virtual_meeting_url: "",
+    is_virtual: false,
     sessions: [],
-    participants: [], // Initialize empty array
+    participants: [],
   });
 
   const [sessionTitle, setSessionTitle] = useState("");
@@ -64,7 +67,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
     const fetchSpeakers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:8000/users/speakers", {
+        const response = await fetch("http://localhost:8000/auth/speakers", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -242,6 +245,28 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         value={event.venue}
         onChange={(e) => setEvent({ ...event, venue: e.target.value })}
       />
+      <input
+        type="text"
+        placeholder="Virtual Meeting URL"
+        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
+        value={event.virtual_meeting_url}
+        onChange={(e) =>
+          setEvent({ ...event, virtual_meeting_url: e.target.value })
+        }
+      />
+
+      <div className="flex items-center mt-2">
+        <input
+          id="is_virtual"
+          type="checkbox"
+          checked={event.is_virtual}
+          onChange={(e) => setEvent({ ...event, is_virtual: e.target.checked })}
+          className="mr-2"
+        />
+        <label htmlFor="is_virtual" className="text-sm font-semibold">
+          Virtual Event?
+        </label>
+      </div>
 
       <h3 className="mt-4 font-semibold">Sessions</h3>
       {event.sessions.map((session, index) => (
@@ -366,26 +391,54 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSubmit }) => {
         }}
       />
 
+      <div className="mt-2">
+        {sessionMaterials.length > 0 && (
+          <div>
+            <p className="text-sm font-semibold">Added Materials:</p>
+            <div className="flex flex-wrap gap-2">
+              {sessionMaterials.map((material, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-100 px-2 py-1 rounded text-sm flex items-center"
+                >
+                  {material}
+                  <button
+                    type="button"
+                    className="ml-2 text-gray-500 hover:text-red-500"
+                    onClick={() =>
+                      setSessionMaterials(
+                        sessionMaterials.filter((_, i) => i !== index)
+                      )
+                    }
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex space-x-2 mt-3">
         <button
           type="button"
-          className="bg-orange-300 text-xs text-white p-2 rounded-3xl cursor-pointer active:bg-orange-100"
-          onClick={() =>
-            addMaterial(
-              (
-                document.querySelector(
-                  "input[placeholder='Material']"
-                ) as HTMLInputElement
-              ).value
-            )
-          }
+          className="bg-blue-500 text-white text-sm rounded-full px-3 py-1 cursor-pointer active:bg-blue-400"
+          onClick={() => {
+            const materialInput = document.querySelector(
+              "input[placeholder='Material']"
+            ) as HTMLInputElement;
+
+            addMaterial(materialInput.value);
+            materialInput.value = ""; // Clear the input after adding
+          }}
         >
           + Add Material
         </button>
 
         <button
           type="button"
-          className="bg-orange-300 text-xs text-white p-2 rounded-3xl cursor-pointer active:bg-orange-100"
+          className="bg-blue-500 text-white text-sm rounded-full px-3 py-1 cursor-pointer active:bg-blue-400"
           onClick={addSession}
         >
           + Add Session

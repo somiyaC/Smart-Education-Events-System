@@ -8,7 +8,7 @@ interface Event {
   start_date: string;
   end_date: string;
   organizer_id: string;
-  participants: [string]
+  participants: [string];
 }
 
 interface User {
@@ -30,16 +30,14 @@ export default function PromotionSection({
 
   // Fetch organizer details on load
   useEffect(() => {
-    console.log(event.participants)
+    console.log(event.participants);
     const fetchOrganizer = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/auth/user`,
-          {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({user_id:localStorage.getItem("user_id")})
-          }
-        );
+        const res = await fetch(`http://localhost:8000/auth/user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: localStorage.getItem("user_id") }),
+        });
         if (!res.ok) throw new Error("Failed to fetch organizer info");
         const data = await res.json();
         setOrganizer(data);
@@ -60,38 +58,40 @@ export default function PromotionSection({
 
     setStatus("Sending...");
     try {
-      const res = await fetch("http://localhost:8000/promotion/email-campaign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          event_id: event.id,
-          subject: `Join us for ${event.name}`,
-          body: emailContent,
-          recipients: event.participants
-        }),
-      })
-      .then((res) => res.json())
-      .then(data => {
-        if (data.status === true) {
-        } else {
+      const res = await fetch(
+        "http://localhost:8000/promotion/email-campaign",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event_id: event.id,
+            subject: `Join us for ${event.name}`,
+            body: emailContent,
+            recipients: event.participants,
+          }),
         }
-      })
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === true) {
+          } else {
+          }
+        });
 
-
-      setStatus("✅ Email campaign sent successfully!");
+      setStatus("Email campaign sent successfully!");
     } catch (error) {
       console.error(error);
-      setStatus("❌ Failed to send campaign.");
+      setStatus("Failed to send campaign.");
     }
   };
 
   return (
-    <div className="border p-4 rounded-xl shadow-md">
-      <button onClick={onBack} className="text-blue-600 underline mb-4">
-        ← Back to Event List
+    <div className="p-6 rounded-lg shadow-xl bg-orange-50 hover:shadow-2xl transition-shadow duration-300 ease-in-out">
+      <button onClick={onBack} className="text-black mb-4">
+        ←
       </button>
-      <h2 className="text-2xl font-bold mb-2">{event.name}</h2>
-      <p className="text-gray-600 mb-2">
+      <h2 className="text-2xl text-orange-500 font-bold mb-2">{event.name}</h2>
+      <p className="text-gray-700 mb-2">
         Date: {new Date(event.start_date).toLocaleDateString()}
       </p>
 
@@ -99,19 +99,19 @@ export default function PromotionSection({
         placeholder="Write email content..."
         value={emailContent}
         onChange={(e) => setEmailContent(e.target.value)}
-        className="w-full p-2 border rounded-xl mb-4 h-32"
+        className="w-full p-2 border border-orange-200 rounded-xl mb-4 h-32"
       />
 
       <div className="flex gap-4 mb-4">
         <button
           onClick={() => handleSend("attendees")}
-          className="px-4 py-2 bg-orange-400 text-white rounded-xl hover:bg-orange-600 w-full"
+          className="px-1 py-2 bg-orange-400 text-white rounded-full cursor-pointer active:bg-orange-300 w-full"
         >
           Send to Attendees
         </button>
         <button
           onClick={() => handleSend("all")}
-          className="px-4 py-2 bg-orange-400 text-white rounded-xl hover:bg-orange-600 w-full"
+          className="px-1 py-2 bg-orange-400 text-white rounded-full cursor-pointer active:bg-orange-300 w-full"
         >
           Send to All Emails
         </button>

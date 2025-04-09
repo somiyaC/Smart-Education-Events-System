@@ -26,15 +26,16 @@ interface Event {
 
 const EventFormPage: React.FC = () => {
   const [error, setError] = useState("");
-  const [event, setEvent] = useState<Event | null>(null);
+  const [event, setEvent] = useState<Event | null>(null); // Optional to keep
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const handleCreateEvent = async () => {
-    if (!event) {
+  const handleCreateEvent = async (eventData: Event) => {
+    if (!eventData) {
       setError("No event data to create.");
       return;
     }
 
-    console.log(event);
+    console.log("Submitting event to backend:", eventData);
 
     try {
       const token = localStorage.getItem("token");
@@ -45,8 +46,10 @@ const EventFormPage: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...event,
-          ...{ participants: [], is_virtual: false, capacity: 100 },
+          ...eventData,
+          participants: [],
+          is_virtual: false,
+          capacity: 100,
         }),
       });
 
@@ -55,7 +58,7 @@ const EventFormPage: React.FC = () => {
       }
 
       const data = await res.json();
-      alert("Event created successfully!");
+      setSuccessMessage("Event created successfully!");
       setEvent(null);
     } catch (error) {
       console.error("Error creating event:", error);
@@ -69,12 +72,21 @@ const EventFormPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      {error && <p className="text-red-500">{error}</p>}
+      {successMessage && (
+        <p className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {successMessage}
+        </p>
+      )}
+      {error && (
+        <p className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </p>
+      )}
 
       <CreateEventForm
         onSubmit={(newEvent: Event) => {
-          setEvent(newEvent);
-          handleCreateEvent();
+          setEvent(newEvent); // Optional: keep if you use the state elsewhere
+          handleCreateEvent(newEvent);
         }}
       />
     </div>

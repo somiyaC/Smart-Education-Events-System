@@ -1,23 +1,19 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from controller.database import users_collection
 from passlib.hash import bcrypt
 from models.user_model import UserModel
-import jwt
-import os
 from bson import ObjectId
+from datetime import datetime
+from typing import Literal, Optional
 
 router = APIRouter()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-
-#Signup Model
 class SignupRequest(BaseModel):
     email: str
     password: str
     role: str  # Required only for signup
 
-#Login Model
 class LoginRequest(BaseModel):
     email: str
     password: str
@@ -35,68 +31,76 @@ class PasswordUpdateData(BaseModel):
     new_password: str
     user_id: str
 
+class AdminCreateUser(BaseModel):
+    email: EmailStr
+    password: str
+    role: Literal["attendee", "organizer", "speaker", "admin"]
+
+class AdminCreateUserPayload(BaseModel):
+    admin_user_id: str
+    new_user: AdminCreateUser
+
 @router.post("/signup")
 async def signup(user: SignupRequest):
     existing_user = users_collection.find_one({"email": user.email})
     if existing_user:
-        print("email exists")
-        return {"status": False}
+        return {"status": False, "message": "Email already exists"}
 
     hashed_password = bcrypt.hash(user.password)
-    print(hashed_password)
-    _id = users_collection.insert_one({"email": user.email, "password": hashed_password, "role": user.role})
-    return {"status": True, "first_name":"john doe","user_id":str(_id)}
+    _id = users_collection.insert_one({
+        "email": user.email,
+        "password": hashed_password,
+        "role": user.role,
+        "created_at": datetime.utcnow()
+    })
+    return {"status": True, "first_name": "john doe", "user_id": str(_id.inserted_id)}
 
 @router.post("/login")
 async def login(user: LoginRequest): 
     db_user = users_collection.find_one({"email": user.email})
     if not db_user or not bcrypt.verify(user.password, db_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    print(db_user)
-    return {"token": "", "email":user.email, "role": db_user["role"], "user_id": str(db_user['_id'])}
+    return {
+        "token": "",  # Token handling can be added later
+        "email": user.email,
+        "role": db_user["role"],
+        "user_id": str(db_user['_id'])
+    }
 
 @router.post("/user")
 async def user(user_data: UserData):
     user = await UserModel.get_user_by_id(user_data.user_id)
-
-    return {"user":user}
+    return {"user": user}
 
 @router.post("/update_user")
 async def update_user(user_data: UserUpdateData):
-    email = user_data.email
-    password = user_data.password
-    user_id = user_data.user_id
-    hashed_password = bcrypt.hash(password)
+    hashed_password = bcrypt.hash(user_data.password)
     update_data = {}
-    if email != "":
-        update_data['email'] = email
-    if password != "":
+
+    if user_data.email:
+        update_data['email'] = user_data.email
+    if user_data.password:
         update_data['password'] = hashed_password
 
-    user_id = await UserModel.update_user(user_id, update_data)
-    return {"status":True}
+    await UserModel.update_user(user_data.user_id, update_data)
+    return {"status": True}
 
 @router.post("/update_password")
 async def update_password(password_data: PasswordUpdateData):
     try:
-        # Get the user from database
         user = users_collection.find_one({"_id": ObjectId(password_data.user_id)})
         if not user:
             return {"status": False, "message": "User not found"}
         
-        # Verify current password
         if not bcrypt.verify(password_data.current_password, user["password"]):
             return {"status": False, "message": "Current password is incorrect"}
         
-        # Hash the new password
         hashed_password = bcrypt.hash(password_data.new_password)
-        
-        # Update the password in database
         result = users_collection.update_one(
             {"_id": ObjectId(password_data.user_id)},
             {"$set": {"password": hashed_password}}
         )
-        
+
         if result.modified_count == 0:
             return {"status": False, "message": "Failed to update password"}
         
@@ -105,3 +109,38 @@ async def update_password(password_data: PasswordUpdateData):
     except Exception as e:
         print(f"Error updating password: {str(e)}")
         return {"status": False, "message": "An error occurred while updating password"}
+
+@router.post("/admin/create_user")
+async def admin_create_user(payload: AdminCreateUserPayload):
+    admin_id = payload.admin_user_id
+    new_user = payload.new_user
+
+    # Check permission
+    is_admin = await UserModel.check_permission(admin_id, "admin")
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Only admins can create new users.")
+
+    existing = users_collection.find_one({"email": new_user.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="User with this email already exists.")
+
+    hashed_password = bcrypt.hash(new_user.password)
+
+    user_doc = {
+        "email": new_user.email,
+        "password": hashed_password,
+        "role": new_user.role,
+        "created_at": datetime.utcnow(),
+    }
+
+    result = users_collection.insert_one(user_doc)
+    return {"status": True, "user_id": str(result.inserted_id)}
+
+#To get all speakers. This routes file imports usermodel properly hence this is placed here.
+@router.get("/speakers")
+async def get_speakers():
+    try:
+        speakers = await UserModel.get_all_speakers()
+        return {"speakers": speakers}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching speakers: {str(e)}")

@@ -7,16 +7,17 @@ interface User {
   email: string;
   password: string;
   role: string;
-  // Add other fields here as necessary
 }
 
 const ProfilePage: React.FC = () => {
   const [newUser, setNewUser] = useState<Omit<User, "id">>({
     email: "",
     password: "",
-    role: "user", // Default role
+    role: "attendee", // Valid default role
   });
+
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -26,41 +27,44 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleCreateUser = async () => {
-    // Reset any previous errors
     setError(null);
 
-    // Basic validation
     if (!newUser.email || !newUser.password) {
       setError("Email and password are required");
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:8000/auth/create_user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: newUser.email,
-          password: newUser.password,
-          role: newUser.role,
-          admin_id: localStorage.getItem("user_id"), // For verification
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:8000/auth/admin/create_user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            admin_user_id: localStorage.getItem("user_id"), // admin verification
+            new_user: {
+              email: newUser.email,
+              password: newUser.password,
+              role: newUser.role,
+            },
+          }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
-        alert("User created successfully!");
-        // Reset the form
+        setSuccessMessage("User created successfully!");
+        setError(null); // clear previous error
         setNewUser({
           email: "",
           password: "",
-          role: "user",
+          role: "attendee",
         });
       } else {
         setError(
-          data.message || "Failed to create user. Please check the form inputs."
+          data.detail || "Failed to create user. Please check form inputs."
         );
       }
     } catch (error) {
@@ -74,15 +78,18 @@ const ProfilePage: React.FC = () => {
       <h2 className="text-2xl font-bold text-center text-black mb-6">
         Create New User
       </h2>
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {successMessage}
+        </div>
+      )}
       <div className="space-y-4">
-        {/* Error Message Display */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
           </div>
         )}
 
-        {/* Email */}
         <div>
           <label
             htmlFor="email"
@@ -96,12 +103,11 @@ const ProfilePage: React.FC = () => {
             name="email"
             value={newUser.email}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 block w-full border border-orange-400 rounded-md p-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
             required
           />
         </div>
 
-        {/* Password */}
         <div>
           <label
             htmlFor="password"
@@ -115,12 +121,11 @@ const ProfilePage: React.FC = () => {
             name="password"
             value={newUser.password}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 block w-full border border-orange-400 rounded-md p-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
             required
           />
         </div>
 
-        {/* Role Selection */}
         <div>
           <label
             htmlFor="role"
@@ -133,19 +138,19 @@ const ProfilePage: React.FC = () => {
             name="role"
             value={newUser.role}
             onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="mt-1 block w-full border border-orange-400 rounded-md p-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
           >
-            <option value="user">Attendee</option>
+            <option value="attendee">Attendee</option>
             <option value="organizer">Organizer</option>
+            <option value="speaker">Speaker</option>
             <option value="admin">Admin</option>
           </select>
         </div>
 
-        {/* Create User Button */}
         <div className="flex justify-center">
           <button
             onClick={handleCreateUser}
-            className="bg-orange-400 text-white text-sm rounded-3xl px-4 py-2 mt-4 cursor-pointer active:bg-orange-400"
+            className="bg-orange-400 text-white text-sm rounded-3xl px-4 py-2 mt-4 cursor-pointer active:bg-orange-300"
           >
             Create User
           </button>

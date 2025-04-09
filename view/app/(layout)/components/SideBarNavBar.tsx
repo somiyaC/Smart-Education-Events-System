@@ -83,7 +83,7 @@ const SideBarNavBar: React.FC = () => {
           <>
             <NavItem
               href="/create-events"
-              label="Create/Edit Events"
+              label="Create Events"
               iconPath="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
             />
 
@@ -108,11 +108,6 @@ const SideBarNavBar: React.FC = () => {
         {/* Admin Only */}
         {isAdmin && (
           <>
-            <NavItem
-              href="/system-maintenance"
-              label="System Maintenance"
-              iconPath="M12 1v2 M12 21v2 M4.22 4.22l1.42 1.42 M18.36 18.36l1.42 1.42 M1 12h2 M21 12h2 M4.22 19.78l1.42-1.42 M18.36 5.64l1.42-1.42 M12 7a5 5 0 1 1 0 10a5 5 0 0 1 0-10z"
-            />
             <NavItem
               href="/create-user"
               label="Create User"

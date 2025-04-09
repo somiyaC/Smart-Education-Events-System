@@ -14,7 +14,7 @@ interface Session {
 }
 
 interface Event {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   event_type: string;
@@ -22,6 +22,9 @@ interface Event {
   end_date: string;
   organizer: string;
   venue: string;
+  is_virtual: boolean;
+  virtual_meeting_url: string;
+  capacity: number;
   sessions: Session[];
   participants?: string[];
 }
@@ -64,21 +67,48 @@ const EditEventPage: React.FC = () => {
         }
 
         const eventData = await response.json();
-        setEvent(eventData); // Direct assignment, not data.event
+
+        // Adapt MongoDB _id to id for frontend use
+        const adaptedEventData = {
+          ...eventData,
+          id: eventData._id || eventData.id || eventId,
+        };
+
+        setEvent(adaptedEventData);
 
         // Populate form fields
-        setName(eventData.name);
-        setDescription(eventData.description);
-        setEventType(eventData.event_type);
-        setStartDate(eventData.start_date);
-        setEndDate(eventData.end_date);
-        setOrganizer(eventData.organizer);
-        setVenue(eventData.venue);
+        setName(adaptedEventData.name || "");
+        setDescription(adaptedEventData.description || "");
+        setEventType(adaptedEventData.event_type || "");
 
-        // Try to fetch sessions but handle case where endpoint might not exist yet
+        // Format dates for form inputs
+        if (adaptedEventData.start_date) {
+          // Handle ISO date format or string date
+          const startDate =
+            typeof adaptedEventData.start_date === "string"
+              ? adaptedEventData.start_date.split("T")[0]
+              : new Date(adaptedEventData.start_date)
+                  .toISOString()
+                  .split("T")[0];
+          setStartDate(startDate);
+        }
+
+        if (adaptedEventData.end_date) {
+          // Handle ISO date format or string date
+          const endDate =
+            typeof adaptedEventData.end_date === "string"
+              ? adaptedEventData.end_date.split("T")[0]
+              : new Date(adaptedEventData.end_date).toISOString().split("T")[0];
+          setEndDate(endDate);
+        }
+
+        setOrganizer(adaptedEventData.organizer || "");
+        setVenue(adaptedEventData.venue || "");
+
+        // Fetch sessions
         try {
           const sessionsRes = await fetch(
-            `http://localhost:8000/sessions/event/${eventId}`,
+            `http://localhost:8000/events/sessions/event/${eventId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -91,13 +121,15 @@ const EditEventPage: React.FC = () => {
             const formattedSessions = sessionsData.sessions.map(
               (session: any) => ({
                 id: session.id,
-                title: session.title,
+                title: session.title || "",
                 description: session.description || "",
-                speaker: session.speaker,
-                speaker_id: session.speaker_id,
-                startTime: session.start_time,
-                endTime: session.end_time,
-                materials: session.materials
+                speaker: session.speaker || "",
+                speaker_id: session.speaker_id || "",
+                startTime: session.startTime || "",
+                endTime: session.endTime || "",
+                materials: Array.isArray(session.materials)
+                  ? session.materials
+                  : typeof session.materials === "string" && session.materials
                   ? session.materials.split(", ")
                   : [],
               })
@@ -194,8 +226,9 @@ const EditEventPage: React.FC = () => {
 
     try {
       const token = localStorage.getItem("token");
+
+      // Create payload without ID field since it will be in the URL
       const updatedEvent = {
-        id: eventId,
         name,
         description,
         event_type: eventType,
@@ -203,29 +236,40 @@ const EditEventPage: React.FC = () => {
         end_date: endDate,
         organizer,
         venue,
-        sessions,
+        is_virtual: event?.is_virtual ?? false,
+        virtual_meeting_url: event?.virtual_meeting_url ?? "",
+        capacity: event?.capacity ?? 0,
+        participants: event?.participants ?? [],
+        sessions: [], // Include empty sessions array to satisfy Pydantic validation
       };
 
-      // Update the event
+      console.log("Submitting updated event:", updatedEvent);
+
+      // Update the event - Include eventId in the URL path as expected by the backend
       const eventResponse = await fetch(
-        "http://localhost:8000/events/update_event",
+        `http://localhost:8000/events/update_event/${eventId}`, // Now correctly includes the event ID
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(updatedEvent),
+          body: JSON.stringify(updatedEvent), // No need to include ID in body
         }
       );
 
+      // Check status and get response text for debugging
       if (!eventResponse.ok) {
-        throw new Error(`Failed to update event: ${eventResponse.status}`);
+        const errorText = await eventResponse.text();
+        console.error("Error response:", errorText);
+        throw new Error(
+          `Failed to update event: ${eventResponse.status} - ${errorText}`
+        );
       }
 
-      // Update sessions
+      // Now update sessions separately
       const sessionsResponse = await fetch(
-        `http://localhost:8000/sessions/update_sessions/${eventId}`,
+        `http://localhost:8000/events/sessions/update_sessions/${eventId}`,
         {
           method: "PUT",
           headers: {
@@ -237,8 +281,10 @@ const EditEventPage: React.FC = () => {
       );
 
       if (!sessionsResponse.ok) {
+        const errorText = await sessionsResponse.text();
+        console.error("Error response:", errorText);
         throw new Error(
-          `Failed to update sessions: ${sessionsResponse.status}`
+          `Failed to update sessions: ${sessionsResponse.status} - ${errorText}`
         );
       }
 
@@ -263,13 +309,11 @@ const EditEventPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold text-orange-600 mb-6">
-        Edit Event
-      </h1>
+      <h1 className="text-2xl font-semibold text-black mb-6">Edit Event</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-medium text-gray-800 mb-4">
+          <h2 className="text-xl font-medium text-orange-500 mb-4">
             Event Details
           </h2>
 
@@ -282,7 +326,7 @@ const EditEventPage: React.FC = () => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 required
               />
             </div>
@@ -294,7 +338,7 @@ const EditEventPage: React.FC = () => {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 rows={3}
                 required
               />
@@ -308,7 +352,7 @@ const EditEventPage: React.FC = () => {
                 type="text"
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 required
               />
             </div>
@@ -322,7 +366,7 @@ const EditEventPage: React.FC = () => {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                  className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                   required
                 />
               </div>
@@ -335,7 +379,7 @@ const EditEventPage: React.FC = () => {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                  className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                   required
                 />
               </div>
@@ -349,7 +393,7 @@ const EditEventPage: React.FC = () => {
                 type="text"
                 value={organizer}
                 onChange={(e) => setOrganizer(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 required
               />
             </div>
@@ -362,7 +406,7 @@ const EditEventPage: React.FC = () => {
                 type="text"
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                 required
               />
             </div>
@@ -372,11 +416,11 @@ const EditEventPage: React.FC = () => {
         {/* Sessions Section */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-medium text-gray-800">Sessions</h2>
+            <h2 className="text-xl font-medium text-orange-500">Sessions</h2>
             <button
               type="button"
               onClick={addSession}
-              className="bg-green-500 hover:bg-green-600 text-white text-sm rounded-full px-3 py-1"
+              className="bg-blue-500 text-white text-sm rounded-full px-3 py-1 cursor-pointer active:bg-blue-400"
             >
               + Add Session
             </button>
@@ -414,7 +458,7 @@ const EditEventPage: React.FC = () => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                         required
                       />
                     </div>
@@ -433,7 +477,7 @@ const EditEventPage: React.FC = () => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                         required
                       />
                     </div>
@@ -452,7 +496,7 @@ const EditEventPage: React.FC = () => {
                           e.target.value
                         )
                       }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                      className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                       rows={2}
                     />
                   </div>
@@ -472,7 +516,7 @@ const EditEventPage: React.FC = () => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                         required
                       />
                     </div>
@@ -491,7 +535,7 @@ const EditEventPage: React.FC = () => {
                             e.target.value
                           )
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                         required
                       />
                     </div>
@@ -533,7 +577,7 @@ const EditEventPage: React.FC = () => {
                                   e.target.value
                                 )
                               }
-                              className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm"
+                              className="border border-orange-400 rounded p-2 w-full mt-2 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-300"
                               placeholder="Material link or resource"
                             />
                             <button
@@ -560,13 +604,13 @@ const EditEventPage: React.FC = () => {
           <button
             type="button"
             onClick={() => router.push("/events")}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm rounded-3xl px-4 py-2"
+            className="bg-gray-200 text-gray-800 text-sm rounded-3xl px-4 py-2 cursor-pointer active:bg-gray-100"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-3xl px-4 py-2"
+            className="bg-orange-500 text-white text-sm rounded-3xl px-4 py-2 cursor-pointer active:bg-orange-400"
           >
             Save Changes
           </button>
