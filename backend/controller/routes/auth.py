@@ -105,3 +105,13 @@ async def update_password(password_data: PasswordUpdateData):
     except Exception as e:
         print(f"Error updating password: {str(e)}")
         return {"status": False, "message": "An error occurred while updating password"}
+
+
+#To get all speakers. This routes file imports usermodel properly hence this is placed here.
+@router.get("/speakers")
+async def get_speakers():
+    try:
+        speakers = await UserModel.get_all_speakers()
+        return {"speakers": speakers}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching speakers: {str(e)}")
