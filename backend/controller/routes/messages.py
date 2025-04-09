@@ -42,6 +42,9 @@ async def get_messages(sender: str, recipient: str, limit: int = 20):
         ) for message in messages
     ]
     
+    if len(message_list) == 0:
+        return {"messages":[]}
+    
     return ChatHistoryResponse(messages=message_list)
 
 @app.get("/contacts")
@@ -84,7 +87,7 @@ async def get_recipients(sender: str):
         })
 
     if not recipients:
-        raise HTTPException(status_code=404, detail="No recipients found")
+        {"contacts":[]}
 
     return {"contacts": contacts}
 
@@ -92,7 +95,7 @@ async def get_recipients(sender: str):
 async def get_single_message(message_id: str):
     message = get_message_by_id(message_id)
     if not message:
-        raise HTTPException(status_code=404, detail="Message not found")
+        return {}
     
     return MessageResponse(
         sender=message["sender"],
