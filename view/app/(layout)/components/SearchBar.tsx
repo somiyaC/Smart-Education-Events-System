@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Box, InputBase, Paper, IconButton } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 const SearchBar: React.FC = () => {
   const search = useSearchParams();

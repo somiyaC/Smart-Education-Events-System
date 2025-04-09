@@ -138,6 +138,7 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           {error && <p className="text-red-500">{error}</p>}
+          <a href="/signup">Dont have an account? Register here!</a>
           <Button
             type="submit"
             variant="contained"

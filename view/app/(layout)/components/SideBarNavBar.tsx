@@ -97,6 +97,11 @@ const SideBarNavBar: React.FC = () => {
               label="Event Promotion"
               iconPath="M12 3v13m0 3v1"
             />
+            <NavItem
+              href="/analytics"
+              label="Event Analytics"
+              iconPath="M12 3v13m0 3v1"
+            />
           </>
         )}
 
