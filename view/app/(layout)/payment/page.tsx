@@ -122,7 +122,8 @@ export default function Payment() {
       // First process the payment (simulated for now)
       // In a real app, you would call your payment API here
       const paymentResponse = await fetch(
-        "http://localhost:8000/payments/process",
+        "http://localhost:8000/payment/payments/process"
+,
         {
           method: "POST",
           headers: {
