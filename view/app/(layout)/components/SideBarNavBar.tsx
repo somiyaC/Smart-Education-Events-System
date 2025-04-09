@@ -109,11 +109,6 @@ const SideBarNavBar: React.FC = () => {
         {isAdmin && (
           <>
             <NavItem
-              href="/system-maintenance"
-              label="System Maintenance"
-              iconPath="M12 1v2 M12 21v2 M4.22 4.22l1.42 1.42 M18.36 18.36l1.42 1.42 M1 12h2 M21 12h2 M4.22 19.78l1.42-1.42 M18.36 5.64l1.42-1.42 M12 7a5 5 0 1 1 0 10a5 5 0 0 1 0-10z"
-            />
-            <NavItem
               href="/create-user"
               label="Create User"
               iconPath="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4s-4 1.79-4 4 1.79 4 4 4z M6 20v-2c0-2.21 3.58-4 6-4s6 1.79 6 4v2"
