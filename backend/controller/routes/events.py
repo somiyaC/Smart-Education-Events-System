@@ -219,27 +219,38 @@ async def get_all_events(search: SearchData):
 
 # ROUTES FOR EDITING EVENTS
 
-@router.put("/update_event")
-async def update_event(event: Event):
+@router.put("/update_event/{event_id}")
+async def update_event(event_id: str, event: Event):
     """
     Update an existing event details.
-    This matches the frontend expectation where event.id is in the body.
+    Receives event_id as a URL parameter instead of in the body.
     """
     try:
         # Extract event data
         event_dict = event.dict()
-        event_id = event_dict.pop("id")
         
-        if not event_id:
-            raise HTTPException(status_code=400, detail="Event ID is required")
+        # Remove sessions - they will be updated separately
+        event_dict.pop("sessions", None)
         
         # Check if event exists
         existing_event = await EventModel.get_event_by_id(event_id)
         if not existing_event:
             raise HTTPException(status_code=404, detail="Event not found")
         
-        # Remove sessions - they will be updated separately
-        event_dict.pop("sessions", None)
+        # Convert string dates to datetime objects for database
+        if "start_date" in event_dict:
+            try:
+                event_dict["start_date"] = datetime.strptime(event_dict["start_date"], "%Y-%m-%d")
+            except ValueError:
+                # If date is already in a different format, keep it as is
+                pass
+                
+        if "end_date" in event_dict:
+            try:
+                event_dict["end_date"] = datetime.strptime(event_dict["end_date"], "%Y-%m-%d")
+            except ValueError:
+                # If date is already in a different format, keep it as is
+                pass
         
         # Update event details
         updated_event = await EventModel.update_event(event_id, event_dict)

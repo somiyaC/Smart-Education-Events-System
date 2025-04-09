@@ -14,7 +14,7 @@ interface Session {
 }
 
 interface Event {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   event_type: string;
@@ -22,6 +22,9 @@ interface Event {
   end_date: string;
   organizer: string;
   venue: string;
+  is_virtual: boolean;
+  virtual_meeting_url: string;
+  capacity: number;
   sessions: Session[];
   participants?: string[];
 }
@@ -64,21 +67,44 @@ const EditEventPage: React.FC = () => {
         }
 
         const eventData = await response.json();
-        setEvent(eventData); // Direct assignment, not data.event
+        
+        // Adapt MongoDB _id to id for frontend use
+        const adaptedEventData = {
+          ...eventData,
+          id: eventData._id || eventData.id || eventId
+        };
+        
+        setEvent(adaptedEventData);
 
         // Populate form fields
-        setName(eventData.name);
-        setDescription(eventData.description);
-        setEventType(eventData.event_type);
-        setStartDate(eventData.start_date);
-        setEndDate(eventData.end_date);
-        setOrganizer(eventData.organizer);
-        setVenue(eventData.venue);
+        setName(adaptedEventData.name || "");
+        setDescription(adaptedEventData.description || "");
+        setEventType(adaptedEventData.event_type || "");
+        
+        // Format dates for form inputs
+        if (adaptedEventData.start_date) {
+          // Handle ISO date format or string date
+          const startDate = typeof adaptedEventData.start_date === 'string'
+            ? adaptedEventData.start_date.split('T')[0]
+            : new Date(adaptedEventData.start_date).toISOString().split('T')[0];
+          setStartDate(startDate);
+        }
+        
+        if (adaptedEventData.end_date) {
+          // Handle ISO date format or string date
+          const endDate = typeof adaptedEventData.end_date === 'string'
+            ? adaptedEventData.end_date.split('T')[0]
+            : new Date(adaptedEventData.end_date).toISOString().split('T')[0];
+          setEndDate(endDate);
+        }
+        
+        setOrganizer(adaptedEventData.organizer || "");
+        setVenue(adaptedEventData.venue || "");
 
-        // Try to fetch sessions but handle case where endpoint might not exist yet
+        // Fetch sessions
         try {
           const sessionsRes = await fetch(
-            `http://localhost:8000/sessions/event/${eventId}`,
+            `http://localhost:8000/events/sessions/event/${eventId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -91,15 +117,17 @@ const EditEventPage: React.FC = () => {
             const formattedSessions = sessionsData.sessions.map(
               (session: any) => ({
                 id: session.id,
-                title: session.title,
+                title: session.title || "",
                 description: session.description || "",
-                speaker: session.speaker,
-                speaker_id: session.speaker_id,
-                startTime: session.start_time,
-                endTime: session.end_time,
-                materials: session.materials
-                  ? session.materials.split(", ")
-                  : [],
+                speaker: session.speaker || "",
+                speaker_id: session.speaker_id || "",
+                startTime: session.startTime || "",
+                endTime: session.endTime || "",
+                materials: Array.isArray(session.materials) 
+                  ? session.materials 
+                  : (typeof session.materials === 'string' && session.materials 
+                      ? session.materials.split(", ") 
+                      : []),
               })
             );
             setSessions(formattedSessions);
@@ -191,11 +219,12 @@ const EditEventPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
       const token = localStorage.getItem("token");
+      
+      // Create payload without ID field since it will be in the URL
       const updatedEvent = {
-        id: eventId,
         name,
         description,
         event_type: eventType,
@@ -203,29 +232,38 @@ const EditEventPage: React.FC = () => {
         end_date: endDate,
         organizer,
         venue,
-        sessions,
+        is_virtual: event?.is_virtual ?? false,
+        virtual_meeting_url: event?.virtual_meeting_url ?? "",
+        capacity: event?.capacity ?? 0,
+        participants: event?.participants ?? [],
+        sessions: [], // Include empty sessions array to satisfy Pydantic validation
       };
-
-      // Update the event
+  
+      console.log("Submitting updated event:", updatedEvent);
+  
+      // Update the event - Include eventId in the URL path as expected by the backend
       const eventResponse = await fetch(
-        "http://localhost:8000/events/update_event",
+        `http://localhost:8000/events/update_event/${eventId}`,  // Now correctly includes the event ID
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(updatedEvent),
+          body: JSON.stringify(updatedEvent),  // No need to include ID in body
         }
       );
-
+  
+      // Check status and get response text for debugging
       if (!eventResponse.ok) {
-        throw new Error(`Failed to update event: ${eventResponse.status}`);
+        const errorText = await eventResponse.text();
+        console.error("Error response:", errorText);
+        throw new Error(`Failed to update event: ${eventResponse.status} - ${errorText}`);
       }
-
-      // Update sessions
+  
+      // Now update sessions separately
       const sessionsResponse = await fetch(
-        `http://localhost:8000/sessions/update_sessions/${eventId}`,
+        `http://localhost:8000/events/sessions/update_sessions/${eventId}`,
         {
           method: "PUT",
           headers: {
@@ -235,13 +273,15 @@ const EditEventPage: React.FC = () => {
           body: JSON.stringify({ sessions }),
         }
       );
-
+  
       if (!sessionsResponse.ok) {
+        const errorText = await sessionsResponse.text();
+        console.error("Error response:", errorText);
         throw new Error(
-          `Failed to update sessions: ${sessionsResponse.status}`
+          `Failed to update sessions: ${sessionsResponse.status} - ${errorText}`
         );
       }
-
+  
       alert("Event and sessions updated successfully!");
       router.push("/events"); // Redirect back to events page
     } catch (err) {
