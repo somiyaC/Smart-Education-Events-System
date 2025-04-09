@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from controller.database import tickets_collection, feedback_collection
 from models.event_model import EventModel
 from models.session_model import SessionModel
+from models.user_model import UserModel
 from bson import ObjectId
 
 router = APIRouter()
@@ -41,9 +42,14 @@ async def get_event_data(eventId: str):
     created_at = event['created_at']
     capacity = event['capacity']
     event_type = event['event_type']
+    attendees = []
+    for participant in event['participants']:
+        user = await UserModel.get_user_by_id(participant)
+        if user is None: continue
+        attendees.append({"email":user['email'],"type":user['role'],"is_registered":True})
     print(total_check_in)
     print(is_virtual)
-    return {"description":description, "name": name, "event_type": event_type,
+    return {"attendees":attendees,"description":description, "name": name, "event_type": event_type,
             "location":location, "is_virtual":is_virtual, "capacity": capacity,
             "total_check_in":total_check_in, "created_at": created_at}
 

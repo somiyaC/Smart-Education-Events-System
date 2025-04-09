@@ -6,16 +6,23 @@ import {
   Typography, 
   Card, 
   CardContent, 
-  Grid, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Divider, 
+  Stack,
   Paper,
-  Stack
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { Checkbox, FormControlLabel } from "@mui/material";
+
+interface AttendeeProp {
+  email: string,
+  type: string,
+  is_registered: boolean
+}
 
 interface EventDataProp {
   name: string;
@@ -26,6 +33,7 @@ interface EventDataProp {
   event_type: string;
   created_at: string;
   capacity: number;
+  attendees: [];
 }
 
 export default function EventAnalyticsPage () {
@@ -41,7 +49,8 @@ export default function EventAnalyticsPage () {
     is_virtual: false,
     total_check_in: 0,
     created_at: "",
-    capacity: 100
+    capacity: 100,
+    attendees: []
   });
 
   useEffect(() => {
@@ -56,7 +65,8 @@ export default function EventAnalyticsPage () {
         is_virtual: data.is_virtual,
         total_check_in: data.total_check_in,
         created_at: data.create_at,
-        capacity: data.capacity
+        capacity: data.capacity,
+        attendees: data.attendees
       });
     }
 
@@ -66,7 +76,7 @@ export default function EventAnalyticsPage () {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Event Analytics Dashboard
+        Event Analytics Dashboard - {eventData.name}
       </Typography>
 
       <Stack spacing={3} direction={{ xs: "column", md: "row" }}>
@@ -123,6 +133,55 @@ export default function EventAnalyticsPage () {
               width={400}
               height={200}
             />
+          </CardContent>
+        </Card>
+        <Card sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+          <CardContent>
+            <Typography variant="h5" gutterBottom>
+              Total Sales
+            </Typography>
+            <Typography variant="h3" color="primary">
+              {eventData.total_check_in * 25}$
+            </Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+          <CardContent>
+            <Typography variant="h5" gutterBottom>
+              Total Participants
+            </Typography>
+            <Typography variant="h3" color="primary">
+              {eventData.total_check_in}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Stack>
+      <Stack spacing={3} direction={{ xs: "column", md: "row" }}>
+        <Card sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+          <CardContent>
+            <Typography variant="h5" gutterBottom>
+              Participants Information
+            </Typography>
+            <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Role</TableCell>
+                  <TableCell>Registered</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {eventData.attendees.map((attendee: AttendeeProp, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{attendee.email}</TableCell>
+                    <TableCell>{attendee.type}</TableCell>
+                    <TableCell>{attendee.is_registered ? "Yes" : "No"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
           </CardContent>
         </Card>
       </Stack>
