@@ -135,3 +135,12 @@ async def admin_create_user(payload: AdminCreateUserPayload):
 
     result = users_collection.insert_one(user_doc)
     return {"status": True, "user_id": str(result.inserted_id)}
+
+#To get all speakers. This routes file imports usermodel properly hence this is placed here.
+@router.get("/speakers")
+async def get_speakers():
+    try:
+        speakers = await UserModel.get_all_speakers()
+        return {"speakers": speakers}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching speakers: {str(e)}")
