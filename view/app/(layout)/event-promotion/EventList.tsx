@@ -21,16 +21,21 @@ export default function EventList({ onSelectEvent }: EventListProps) {
   const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      const res = await fetch("http://localhost:8000/events", {
+    const fetchOrganizerEvents = async () => {
+      const organizerId = localStorage.getItem("user_id");
+      if (!organizerId) return;
+
+      const res = await fetch("http://localhost:8000/events/organizer_event", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: "" }),
+        body: JSON.stringify({ organizer_id: organizerId }),
       });
+
       const data = await res.json();
-      setEvents(data.events);
+      setEvents(data);
     };
-    fetchEvents();
+
+    fetchOrganizerEvents();
   }, []);
 
   return (
