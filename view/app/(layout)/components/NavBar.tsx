@@ -9,7 +9,6 @@ const Navbar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
 
-  // Function to check login status
   const checkLoginStatus = () => {
     const userId = localStorage.getItem("user_id");
     const storedEmail = localStorage.getItem("email");
@@ -23,15 +22,11 @@ const Navbar: React.FC = () => {
   };
 
   useEffect(() => {
-    // Check login status when component mounts
     checkLoginStatus();
-    // Set up an event listener for storage changes
     window.addEventListener("storage", checkLoginStatus);
-    // Custom event listener for login/logout actions
     const handleAuthEvent = () => checkLoginStatus();
     window.addEventListener("authStateChanged", handleAuthEvent);
     return () => {
-      // Clean up event listeners
       window.removeEventListener("storage", checkLoginStatus);
       window.removeEventListener("authStateChanged", handleAuthEvent);
     };
@@ -44,7 +39,6 @@ const Navbar: React.FC = () => {
     localStorage.removeItem("role");
     setIsLoggedIn(false);
     setEmail("");
-    // Dispatch custom event to notify other components
     window.dispatchEvent(new Event("authStateChanged"));
     router.push("/login");
   };
@@ -73,19 +67,20 @@ const Navbar: React.FC = () => {
                   <path d="M6 12v5c3 3 9 3 12 0v-5" />
                 </svg>
               </div>
-              <div className="text-4xl font-bold text-white">SEES</div>{" "}
-              {/* Increased text size */}
+              <div className="text-4xl font-bold text-white">SEES</div>
             </div>
           </Link>
 
-          {/* Title with reduced size and spacing */}
           <div className="hidden md:block ml-8 text-3xl font-medium text-white">
             Smart Education Events System
           </div>
         </Container>
 
-        {/* Conditional Rendering for Logged-in User */}
-        <div className="flex items-center">
+        {/* Right-side utilities: Language + Auth */}
+        <div className="flex items-center gap-4">
+          {/* Google Translate dropdown */}
+          <div id="google_translate_element" className="text-white"></div>
+
           {isLoggedIn ? (
             <div className="flex items-center">
               <p className="mr-4 text-white">
