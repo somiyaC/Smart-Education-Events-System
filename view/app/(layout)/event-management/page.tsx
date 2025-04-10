@@ -33,9 +33,12 @@ export default function EventManagement() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [materialText, setMaterialText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [successMessage, setSuccessMessage] = useState("");
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
+      console.log(event.target.files)
       setFiles(Array.from(event.target.files));
     }
   };
@@ -72,8 +75,57 @@ export default function EventManagement() {
   };
 
   const handleSubmitMaterial = () => {
-    console.log("Submitting material:", materialText, "for event:", selectedEventId);
-    // TODO: POST to backend
+    console.log(files.length)
+    if (files.length == 0) {
+      fetch("http://localhost:8000/materials/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          event_id: selectedEventId,
+          type: "text",
+          content: materialText
+         }),
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        setSuccessMessage("Successfully added material to event.")
+      })
+      .catch((error) => {
+      });
+    } else {
+      console.log(files)
+      const file = files[0]; // assuming files is a FileList
+
+      const reader = new FileReader();
+
+      reader.onload = async (event) => {
+        const content = event.target?.result;
+
+        const response = await fetch("http://localhost:8000/materials/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            event_id: selectedEventId,
+            type: "file",
+            file_name: file.name,
+            content: content, 
+          }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+      };
+
+      reader.onerror = () => {
+        console.error("Failed to read file");
+      };
+
+      reader.readAsDataURL(file); 
+    }
     setMaterialModalOpen(false);
     setMaterialText("");
     setSelectedEventId(null);
@@ -81,6 +133,11 @@ export default function EventManagement() {
 
   return (
     <Box sx={{ p: 4, maxWidth: "800px", mx: "auto" }}>
+      {successMessage && (
+        <p className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {successMessage}
+        </p>
+      )}
       <Typography variant="h4" gutterBottom>
         My Organized Events
       </Typography>

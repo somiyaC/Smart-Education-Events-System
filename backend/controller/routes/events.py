@@ -7,6 +7,7 @@ from models.user_model import UserModel
 from models.venue_model import VenueModel
 from models.session_model import SessionModel
 from typing import Dict, List, Optional, Any
+from controller.services.materials.database import get_materials_by_event
 router = APIRouter()
 
 class Session(BaseModel):
@@ -68,8 +69,8 @@ async def organizer_event(org_data: OrganizerData):
         if organizer_id == event['organizer_id']:
             organizer_events.append(event)
 
-    idx = 0
     for event in organizer_events:
+        idx = 0
         for participant_id in event['participants']:
             user = await UserModel.get_user_by_id(participant_id)
             if idx == 0:
@@ -91,6 +92,11 @@ async def user_events(user_data: UserData):
             sessions = await SessionModel.get_event_sessions(event['id'])            
             cleaned_sessions = [document_to_dict(session) for session in sessions]
             event['sessions'] = cleaned_sessions
+            materials = get_materials_by_event(event["id"])
+            print(event['id'])
+            print(materials)
+            for idx, session in enumerate(event['sessions']):
+                event['sessions'][idx]['materials'] = materials
             user_events.append(event)
     
     return {"events":[document_to_dict(event) for event in user_events] }    
