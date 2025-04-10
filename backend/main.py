@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controller.routes import messages,events, auth, venue, ticket, session, poll, feedback, chat, stakeholder_attendee, networking_engagement, promotion, resource_management, analytics, payment
+from controller.database import init_db
+from controller.routes import materials,messages,events, auth, venue, ticket, session, poll, feedback, chat, stakeholder_attendee, networking_engagement, promotion, resource_management, analytics, payment
 from models.base_model import Database
 
 
@@ -29,6 +30,7 @@ async def shutdown_event():
 #init_db()
 
 # Register routes
+app.include_router(materials.router, prefix="/materials", tags=["Materials"])
 app.include_router(messages.router, prefix="/messages", tags=["Messages"])
 app.include_router(events.router, prefix="/events", tags=["Events"])
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])

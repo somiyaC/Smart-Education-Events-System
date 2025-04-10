@@ -39,8 +39,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Update localStorage when values change
   useEffect(() => {
-    if (userId) localStorage.setItem("user_id", userId);
-    if (userRole) localStorage.setItem("role", userRole);
+    if (userId) {
+      localStorage.setItem("user_id", userId);
+      setUserId(userId);
+    }
+    if (userRole) {
+     localStorage.setItem("role", userRole);
+     setUserRole(userRole);
+    }
+
   }, [userId, userRole]);
 
   return (

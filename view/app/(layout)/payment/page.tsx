@@ -118,7 +118,7 @@ export default function Payment() {
       const finalPrice = appliedDiscount
         ? appliedDiscount.finalPrice
         : parseFloat(price || "0");
-
+      console.log("aa");
       // First process the payment (simulated for now)
       // In a real app, you would call your payment API here
       const paymentResponse = await fetch(
