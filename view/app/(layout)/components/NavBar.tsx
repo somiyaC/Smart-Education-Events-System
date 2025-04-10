@@ -95,6 +95,7 @@ const Navbar: React.FC = () => {
       new window.google.translate.TranslateElement(
         {
           pageLanguage: "en",
+          includedLanguages: "en,fr,es,ar,pt,de,zh-CN",
           layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
         },
         "google_translate_element"
