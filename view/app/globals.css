@@ -9,3 +9,53 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+#google_translate_element select {
+  background-color: white;
+  color: #f97316; /* Tailwind orange-500 */
+  border: 2px solid #f97316;
+  border-radius: 9999px; /* Fully rounded */
+  padding: 6px 14px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg fill='%23f97316' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1rem;
+}
+
+#google_translate_element select:hover {
+  background-color: #fff7ed; /* subtle orange-tint */
+  border-color: #fb923c; /* Tailwind orange-400 */
+}
+
+/* Style the outer container */
+#google_translate_element {
+  border: 2px solid #f97316;
+  border-radius: 9999px;
+  padding: 6px 12px;
+  background-color: white;
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-right: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional: hide the Google Translate badge */
+.goog-logo-link,
+.goog-te-gadget span {
+  display: none !important;
+}
+
+/* Optional: remove the dropdown arrow Google adds */
+.goog-te-gadget .goog-te-combo {
+  color: #f97316;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+}
