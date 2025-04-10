@@ -8,7 +8,13 @@ from controller.database import get_db
 from models.event_model import EventModel
 from models.email_model import EmailModel
 from models.user_model import UserModel
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 router = APIRouter(prefix="/promotion", tags=["Event Promotion"])
 
 
@@ -134,3 +140,21 @@ async def get_event_page(event_id: str, db=Depends(get_db)):
         "page_content": event.get("page_content", ""),
         "last_modified": event.get("last_modified")
     }
+
+class EmailModel:
+    @staticmethod
+    async def send_email(to: str, subject: str, body: str, db=None):
+        sender_email = os.getenv("EMAIL_SENDER")
+        password = os.getenv("EMAIL_PASSWORD")  # Use App Password if Gmail 2FA is on
+
+        message = MIMEMultipart("alternative")
+        message["Subject"] = subject
+        message["From"] = sender_email
+        message["To"] = to
+
+        part = MIMEText(body, "html")
+        message.attach(part)
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, to, message.as_string())
