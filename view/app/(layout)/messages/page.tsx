@@ -314,7 +314,7 @@ export default function Messages() {
         </h2>
         <button
           onClick={() => setShowNewMessageForm(!showNewMessageForm)}
-          className="bg-orange-400 text-white py-2 px-4 rounded-3xl hover:bg-orange-500"
+          className="bg-orange-400 text-white py-2 px-4 rounded-3xl cursor-pointer active:bg-orange-300"
         >
           {showNewMessageForm ? "Cancel" : "New Message"}
         </button>
@@ -374,7 +374,7 @@ export default function Messages() {
 
             <button
               type="submit"
-              className="bg-orange-400 text-white py-2 px-4 rounded-3xl hover:bg-orange-500"
+              className="bg-orange-400 text-white py-2 px-4 rounded-3xl cursor-pointer active:bg-orange-300"
             >
               Send Message
             </button>
