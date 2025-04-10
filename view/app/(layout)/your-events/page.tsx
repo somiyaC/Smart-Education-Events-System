@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useAppContext } from "../../StateContext";
+import Material from "./Material";
 
 interface Material {
-  title: string;
-  type: string; // e.g., "PDF", "Video", "Slides"
-  url: string;
+  event_id: string;
+  type: 'text' | 'file';
+  file_name: string;
+  content: string;
 }
 
 interface Session {
@@ -16,7 +18,7 @@ interface Session {
   speaker_id: string;
   start_time: string;
   end_time: string;
-  materials: string;
+  materials: [Material];
   event_id: string;
 }
 
@@ -236,16 +238,9 @@ const YourEvents: React.FC = () => {
                         <h5 className="text-sm font-semibold text-gray-800">
                           Materials:
                         </h5>
-                        <ul className="mt-2 space-y-2">
-                          <li className="text-sm">
-                            <p
-                              rel="noopener noreferrer"
-                              className="text-yellow-800 hover:underline"
-                            >
-                              {session.materials}
-                            </p>
-                          </li>
-                        </ul>
+                        {session.materials.map((value, idx) => {
+                          return (<Material event_id={value.event_id} type={value.type} file_name={value.file_name} content={value.content}/>)
+                        })}
                       </div>
                     )}
                   </li>
