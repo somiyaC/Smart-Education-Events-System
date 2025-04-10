@@ -1,12 +1,22 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { Event } from './types';
+import React, { useEffect, useState } from "react";
 import {
-  Card, CardContent, Typography, Grid, Box, CardActionArea
-} from '@mui/material';
-import { redirect } from 'next/navigation';
-import { useAppContext } from '@/app/StateContext';
-
+  Box,
+  Typography,
+  CircularProgress,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  Modal,
+  TextField,
+  IconButton,
+} from "@mui/material";
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CloseIcon from "@mui/icons-material/Close";
 
 interface Event {
   id: string;
@@ -19,6 +29,16 @@ export default function EventManagement() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [materialModalOpen, setMaterialModalOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [materialText, setMaterialText] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setFiles(Array.from(event.target.files));
+    }
+  };
 
   const userId = typeof window !== "undefined" ? localStorage.getItem("user_id") : null;
 
@@ -34,7 +54,7 @@ export default function EventManagement() {
         });
 
         const data = await res.json();
-        setEvents(data || []);
+        setEvents(data.events || []);
       } catch (error) {
         console.error("Failed to fetch organizer events:", error);
       } finally {
@@ -51,46 +71,160 @@ export default function EventManagement() {
     setExpandedEventId((prev) => (prev === eventId ? null : eventId));
   };
 
+  const handleSubmitMaterial = () => {
+    console.log("Submitting material:", materialText, "for event:", selectedEventId);
+    // TODO: POST to backend
+    setMaterialModalOpen(false);
+    setMaterialText("");
+    setSelectedEventId(null);
+  };
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">📅 My Organized Events</h1>
+    <Box sx={{ p: 4, maxWidth: "800px", mx: "auto" }}>
+      <Typography variant="h4" gutterBottom>
+        My Organized Events
+      </Typography>
 
       {loading ? (
-        <p>Loading events...</p>
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress />
+        </Box>
       ) : events.length === 0 ? (
-        <p>No events found.</p>
+        <Typography>No events found.</Typography>
       ) : (
-        <div className="space-y-4">
+        <Box display="flex" flexDirection="column" gap={2}>
           {events.map((event) => (
-            <div key={event.id} className="border p-4 rounded shadow">
-              <h2 className="text-xl font-semibold">{event.name}</h2>
-              <p className="text-sm text-gray-600 mb-2">{event.description}</p>
+            <Card key={event.id} variant="outlined">
+              <CardContent>
+                <Typography variant="h6">{event.name}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {event.description}
+                </Typography>
 
-              <button
-                onClick={() => toggleAttendees(event.id)}
-                className="text-blue-500 underline text-sm"
-              >
-                {expandedEventId === event.id ? "Hide" : "View"} Attendees
-              </button>
-
-              {expandedEventId === event.id && (
-                <div className="mt-3">
-                  <h3 className="font-medium text-gray-800">Attendees:</h3>
-                  {event.participants_email && event.participants_email.length > 0 ? (
-                    <ul className="list-disc list-inside text-sm mt-1">
-                      {event.participants_email.map((email, idx) => (
-                        <li key={idx}>{email}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-gray-500">No attendees registered yet.</p>
-                  )}
-                </div>
-              )}
-            </div>
+                {expandedEventId === event.id && (
+                  <>
+                    <Typography variant="subtitle1">Attendees:</Typography>
+                    {event.participants_email && event.participants_email.length > 0 ? (
+                      <List dense>
+                        {event.participants_email.map((email, idx) => (
+                          <ListItem key={idx} disablePadding>
+                            <ListItemText primary={email} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No attendees registered yet.
+                      </Typography>
+                    )}
+                  </>
+                )}
+              </CardContent>
+              <CardActions>
+                <Button size="small" onClick={() => toggleAttendees(event.id)}>
+                  {expandedEventId === event.id ? "Hide" : "View"} Attendees
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setSelectedEventId(event.id);
+                    setMaterialModalOpen(true);
+                  }}
+                >
+                  Add Material
+                </Button>
+              </CardActions>
+            </Card>
           ))}
-        </div>
+        </Box>
       )}
-    </div>
+
+      {/* Modal for adding material */}
+      <Modal
+        open={materialModalOpen}
+        onClose={() => setMaterialModalOpen(false)}
+        aria-labelledby="add-material-title"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <div className="flex flex-col"> 
+              <Typography id="add-material-title" variant="h6">
+                Add Material
+              </Typography>
+              <Typography id="add-title" variant="body2" fontWeight="normal" color="text.secondary">                Material will be shared with attendees
+              </Typography>
+            </div>
+           
+            <IconButton onClick={() => setMaterialModalOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          <TextField
+            fullWidth
+            label="Material (e.g. URL, notes)"
+            value={materialText}
+            onChange={(e) => setMaterialText(e.target.value)}
+            multiline
+            rows={3}
+            variant="outlined"
+            margin="normal"
+          />
+          <Typography variant="h6" gutterBottom>
+        Upload Materials
+      </Typography>
+
+      <input
+        accept="*"
+        style={{ display: 'none' }}
+        id="upload-button-file"
+        multiple
+        type="file"
+        onChange={handleFileChange}
+      />
+      <label htmlFor="upload-button-file" className="mr-4">
+        <Button
+          variant="contained"
+          component="span"
+          startIcon={<UploadFileIcon />}
+        >
+          Upload File(s)
+        </Button>
+      </label>
+
+      {files.length > 0 && (
+        <Box mt={2}>
+          <Typography variant="subtitle1">Selected Files:</Typography>
+          <List dense>
+            {files.map((file, index) => (
+              <ListItem key={index}>
+                <ListItemText primary={file.name} secondary={`${(file.size / 1024).toFixed(2)} KB`} />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      )}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitMaterial}
+          >
+            Submit
+          </Button>
+        </Box>
+      </Modal>
+    </Box>
   );
 }
