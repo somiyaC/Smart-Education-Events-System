@@ -62,46 +62,11 @@ const YourEvents: React.FC = () => {
           }
 
           const sessionsData = await sessionsResponse.json();
-          const speakerSessions = sessionsData.sessions || [];
+          const speakerSessions = sessionsData.events || [];
 
-          // Extract unique event IDs
-          const eventIds = [
-            ...new Set(
-              speakerSessions.map((session: Session) => session.event_id)
-            ),
-          ];
+          setEvents(speakerSessions);
+          setLoading(false);
 
-          if (eventIds.length === 0) {
-            setEvents([]);
-            setLoading(false);
-            return;
-          }
-
-          // Fetch details for each event
-          const speakerEventsPromises = eventIds.map((eventId) =>
-            fetch(`http://localhost:8000/events/${eventId}`, {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }).then((res) => res.json())
-          );
-
-          const speakerEvents = await Promise.all(speakerEventsPromises);
-
-          // Add session info to each event
-          const eventsWithSessions = speakerEvents.map((event) => {
-            // Filter sessions to only include ones where this user is speaking
-            const eventSessions = speakerSessions.filter(
-              (session: Session) =>
-                session.event_id === event.id && session.speaker_id === userId
-            );
-            return {
-              ...event,
-              sessions: eventSessions,
-            };
-          });
-
-          setEvents(eventsWithSessions);
         } else {
           // For regular attendees, fetch events they're registered for
           const response = await fetch(

@@ -14,6 +14,7 @@ class Session(BaseModel):
     title: str
     description: str
     speaker: str
+    speaker_id: str
     startTime: str
     endTime: str
     materials: List[str]
@@ -117,8 +118,9 @@ async def create_event(event: Event):
     for session in sessions:
         session_dict = session.dict()
         # Remove id field if present (for creation)
+        print(session_dict)
         session_dict.pop('id', None)
-        await SessionModel.create_session(event_id, session_dict['title'],session_dict['startTime'],session_dict['endTime'], session_dict.get('session_type', 'Conference'),session_dict['description'],None,"Mezzanine",event['capacity'],"Laptop",event['participants'])
+        await SessionModel.create_session(event_id, session_dict['title'],session_dict['startTime'],session_dict['endTime'], session_dict.get('session_type', 'Conference'),session_dict['description'],session_dict['speaker_id'],"Mezzanine",event['capacity'],"Laptop",event['participants'])
 
     return {"event_id":event_id}
 
