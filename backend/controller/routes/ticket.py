@@ -1,5 +1,3 @@
-# backend/controller/routes/ticket.py
-
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
 from typing import Optional
