@@ -9,7 +9,7 @@ interface QnASectionProps {
 interface Question {
   _id: string;
   question: string;
-  answers?: { user_id: string; text: string }[];
+  answer: string
 }
 
 interface EventOption {
@@ -19,6 +19,7 @@ interface EventOption {
 
 export default function QnASection({ onBack }: QnASectionProps) {
   const [questionText, setQuestionText] = useState("");
+  const [answerText, setAnswerText] = useState("");
   const [answerTexts, setAnswerTexts] = useState<Record<string, string>>({});
   const [questions, setQuestions] = useState<Question[]>([]);
   const [role, setRole] = useState<"organizer" | "attendee" | "">("");
@@ -68,7 +69,7 @@ export default function QnASection({ onBack }: QnASectionProps) {
 
   const fetchQuestions = async (eventId: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/questions/${eventId}`);
+      const res = await fetch(`http://localhost:8000/questions/`);
       if (res.ok) {
         const data = await res.json();
         setQuestions(data.questions || []);
@@ -87,13 +88,15 @@ export default function QnASection({ onBack }: QnASectionProps) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        session_id: selectedEventId,
+        event_id: selectedEventId,
         user_id: userId,
         question: questionText,
+        answer: answerText
       }),
     });
 
     setQuestionText("");
+    setAnswerText("");
     fetchQuestions(selectedEventId);
   };
 
@@ -136,7 +139,7 @@ export default function QnASection({ onBack }: QnASectionProps) {
           ← Back
         </button>
 
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">❓ Q&A Section</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">Q&A Section</h2>
 
         <select
           value={selectedEventId}
@@ -152,11 +155,17 @@ export default function QnASection({ onBack }: QnASectionProps) {
         </select>
 
         {role === "organizer" && selectedEventId && (
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
+          <div className="flex flex-col items-start md:items-center gap-4 mb-6">
             <input
               value={questionText}
               onChange={(e) => setQuestionText(e.target.value)}
-              placeholder="Ask a question..."
+              placeholder="Write a question"
+              className="flex-1 w-full p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+            <input
+              value={answerText}
+              onChange={(e) => setAnswerText(e.target.value)}
+              placeholder="Give an answer"
               className="flex-1 w-full p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
             <button
@@ -178,19 +187,17 @@ export default function QnASection({ onBack }: QnASectionProps) {
               key={q._id}
               className="bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm text-gray-800"
             >
-              <div className="font-medium mb-1">{q.question}</div>
 
-              {/* Answers Display */}
-              {(q.answers?.length ?? 0) > 0 && (
-  <ul className="ml-4 text-sm text-gray-600 space-y-1 mt-2">
-    {q.answers?.map((a, i) => (
-      <li key={i}>{a.text}</li>
-    ))}
-  </ul>
-)}
+            <div className="font-bold mb-1">Question:</div>
+            <div className="mb-1">{q.question}</div>
+
+            <div className="font-bold mb-1">Answer:</div>
+            <div className="mb-1">{q.answer}</div>
 
 
-              {/* Answer Input (Attendee Only) */}
+
+              {/* Aniss removed this for simplcity  */}
+              {/* Answer Input (Attendee Only)
               {role === "attendee" && (
                 <div className="mt-3 flex gap-2 items-center">
                   <input
@@ -212,7 +219,7 @@ export default function QnASection({ onBack }: QnASectionProps) {
                     Send
                   </button>
                 </div>
-              )}
+              )} */}
             </li>
           ))}
         </ul>
