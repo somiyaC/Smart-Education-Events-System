@@ -1,29 +1,60 @@
 "use client";
+import {Button
+  , Modal,
+  Box
+} from "@mui/material"
+import { useEffect, useState } from "react";
+import PollCard from "./PollCard";
+import { useAppContext } from "@/app/StateContext";
 
-import { useState } from "react";
+interface Options {
+  text: string;
+  stat: number;
+  count: number;
+}
+
+interface Answer {
+  user_id: string;
+  answer: string;
+}
+
+interface Poll {
+  id: string;
+  question: string;
+  options: [Options];
+  created_by: string;
+  status: boolean;
+  answers: [Answer];
+  total_count: number;
+}
 
 export default function LivePoll({ onBack }: { onBack: () => void }) {
   const [question, setQuestion] = useState("");
   const [option1, setOption1] = useState("");
   const [option2, setOption2] = useState("");
   const [status, setStatus] = useState("");
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [local, setLocal] = useState<boolean>(false);
+  const [createPollModalOpen, setCreatePollModalOpen] = useState(false);
+  const userId = localStorage.getItem("user_id");
+
+  const {isOrganizer} = useAppContext();
 
   const createPoll = async () => {
     const event_id = localStorage.getItem("event_id");
     const created_by = localStorage.getItem("user_id");
 
-    const res = await fetch("/polls", {
+    const res = await fetch("http://localhost:8000/polls", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        event_id,
         created_by,
         question,
         options: [{ text: option1 }, { text: option2 }],
-        is_multiple_choice: false,
         duration: 60,
-        status: "active",
-        ends_at: new Date(Date.now() + 60000).toISOString(),
+        status: true,
+        answers: [],
+        total_count: 0
       }),
     });
 
@@ -34,9 +65,35 @@ export default function LivePoll({ onBack }: { onBack: () => void }) {
     }
   };
 
+  useEffect(() => {
+    const fetchPolls = async () => {
+      const res = await fetch("http://localhost:8000/polls");
+      const resData = await res.json();
+      setPolls(resData.polls);
+    }
+    fetchPolls();
+  },[local])
+
+  const handlePollAnswer = async (poll_id: string, option: string) => {
+    const user_id = localStorage.getItem("user_id");
+    const res = await fetch("http://localhost:8000/polls/answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user_id,
+        answer: option,
+        poll_id: poll_id
+      }),
+    });
+  }
+
   return (
-    <div className="flex justify-center items-center min-h-[80vh] px-4">
-      <div className="bg-white border border-gray-300 rounded-2xl shadow-xl p-8 w-full max-w-xl">
+    <div className="flex flex-col justify-center items-center min-h-[80vh] px-4 w-full">
+      {isOrganizer && <Button sx={{color:"#ffffff"}} onClick={() => setCreatePollModalOpen(true)}  variant="contained">
+          Create Poll
+      </Button>}
+      <div className="bg-white mt-8 border border-gray-300 rounded-2xl shadow-xl p-8 w-full max-w-xl">
+
         <button
           onClick={onBack}
           className="text-blue-500 hover:text-blue-700 text-sm mb-6 flex items-center gap-1"
@@ -44,8 +101,28 @@ export default function LivePoll({ onBack }: { onBack: () => void }) {
           ← Back
         </button>
 
+        
+      <Modal
+        open={createPollModalOpen}
+        onClose={() => setCreatePollModalOpen(false)}
+        aria-labelledby="add-material-title"
+      >
+        <Box 
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 400,
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+        }}
+        >
+
         <h2 className="text-3xl font-bold text-gray-800 mb-8">
-          📊 Create a Live Poll
+          Create a Live Poll
         </h2>
 
         <input
@@ -76,10 +153,31 @@ export default function LivePoll({ onBack }: { onBack: () => void }) {
         >
           Create Poll
         </button>
+        </Box>
+      </Modal>
+      {polls.map((poll) => {
+        const userAnswer = poll.answers?.find(
+          (answer: { user_id: string }) => answer.user_id === userId
+        );
+
+        const hasAnswered = !!userAnswer;
+
+        return (
+          <PollCard
+            setLocal={setLocal}
+            completed={hasAnswered}
+            selectedAnswer={userAnswer?.answer || ''}
+            onAnswer={handlePollAnswer}
+            key={poll.id}
+            poll={poll}
+          />
+        );
+      })}
 
         {status && (
           <p className="mt-4 text-sm text-gray-700 font-medium">{status}</p>
         )}
+      
       </div>
     </div>
   );
