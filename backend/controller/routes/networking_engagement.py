@@ -6,8 +6,10 @@ from controller.database import get_db
 from models.poll_model import PollModel
 from models.chat_model import ChatRoomModel, ChatMessageModel
 from models.feedback_model import FeedbackModel
+from models.user_model import UserModel
+from bson import ObjectId
 
-router = APIRouter(prefix="/engagement", tags=["Networking & Engagement"])
+router = APIRouter(tags=["Networking & Engagement"])
 
 # --------------------- Polling Endpoints ---------------------
 class PollCreate(BaseModel):
@@ -127,22 +129,49 @@ async def answer_question_endpoint(question_id: str, answer: dict, db=Depends(ge
 # --------------------- Matchmaking and Itinerary Endpoints ---------------------
 @router.get("/matchmaking", status_code=status.HTTP_200_OK)
 async def matchmaking_endpoint(user_id: str, db=Depends(get_db)):
-    """
-    Dummy endpoint for matchmaking. 
-    Replace this logic with your actual matchmaking algorithm.
-    """
-    matches = [
-        {"user_id": "user1", "match_score": 0.85},
-        {"user_id": "user2", "match_score": 0.80},
-    ]
-    return {"matches": matches}
+    try:
+        print(f"🔍 Logged in user ID: {user_id}")
+        user = await UserModel.get_user_by_id(user_id)
+
+        if not user or "interests" not in user:
+            print("🚫 User not found or has no interests.")
+            return {"matches": []}
+
+        user_interests = set(user["interests"])
+        print(f"🔗 Logged in user's interests: {user_interests}")
+
+        # Fetch ALL users manually from DB
+        collection = await UserModel.get_collection()
+        cursor = collection.find({"interests": {"$exists": True, "$ne": []}})
+        all_users = await cursor.to_list(length=None)
+
+        matches = []
+        for other in all_users:
+            if str(other.get("_id")) == user_id:
+                continue  # Skip self
+
+            other_interests = set(other.get("interests", []))
+            if user_interests.intersection(other_interests):
+                print(f"✅ Match found with {other.get('email')}: {other_interests}")
+                matches.append({
+                    "user_id": str(other["_id"]),
+                    "first_name": other.get("first_name", ""),
+                    "last_name": other.get("last_name", ""),
+                    "email": other.get("email", ""),
+                    "company": other.get("company"),
+                    "job_title": other.get("job_title"),
+                    "interests": list(other_interests)
+                })
+
+        return {"matches": matches}
+
+    except Exception as e:
+        print(f"Matchmaking error: {str(e)}")
+        return JSONResponse(status_code=500, content={"error": "Server Error"})
+
 
 @router.get("/itinerary", status_code=status.HTTP_200_OK)
 async def personalized_itinerary_endpoint(user_id: str, event_id: str, db=Depends(get_db)):
-    """
-    Dummy endpoint for personalized itinerary.
-    Replace this logic with your actual itinerary generation algorithm.
-    """
     itinerary = {
         "event_id": event_id,
         "user_id": user_id,
@@ -152,3 +181,173 @@ async def personalized_itinerary_endpoint(user_id: str, event_id: str, db=Depend
         ]
     }
     return {"itinerary": itinerary}
+
+
+from fastapi import Body
+
+@router.post("/connect")
+async def connect_users(
+    data: dict = Body(...),
+    db=Depends(get_db)
+):
+    user_id = data.get("user_id")
+    target_user_id = data.get("target_user_id")
+
+    if not user_id or not target_user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id or target_user_id")
+
+    try:
+        result = db["connections"].insert_one({
+            "sender_id": user_id,
+            "receiver_id": target_user_id,
+            "status": "pending",
+            "created_at": datetime.utcnow()
+        })
+
+        return {
+            "status": True,
+            "message": "Connection request sent",
+            "id": str(result.inserted_id)
+        }
+
+    except Exception as e:
+        print("Error in connect_users:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+from fastapi.responses import JSONResponse
+
+@router.get("/connections/received")
+def get_received_requests(user_id: str, db=Depends(get_db)):
+    try:
+        collection = db["connections"]
+        cursor = collection.find({
+            "receiver_id": user_id,
+            "status": "pending"
+        })
+        connections = list(cursor)  # 🔄 No await here, just convert cursor to list
+
+        results = []
+        for conn in connections:
+            sender = UserModel.get_user_by_id_sync(conn["sender_id"])  # sync method
+            results.append({
+                "_id": str(conn["_id"]),
+                "sender_id": conn["sender_id"],
+                "sender_email": sender.get("email", "Unknown") if sender else "Unknown",
+                "status": conn["status"],
+                "created_at": str(conn.get("created_at", "")),
+            })
+
+        return {"requests": results}
+
+    except Exception as e:
+        print("Error fetching connections:", e)
+        return JSONResponse(status_code=500, content={"requests": []})
+
+
+
+
+@router.post("/connections/respond", status_code=200)
+async def respond_to_request(payload: dict, db=Depends(get_db)):
+    request_id = payload.get("request_id")
+    decision = payload.get("decision")  # "accepted" or "rejected"
+
+    if decision not in ["accepted", "rejected"]:
+        raise HTTPException(status_code=400, detail="Invalid decision")
+
+    connection = await db["connections"].find_one({"_id": ObjectId(request_id)})
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection request not found")
+
+    # Update the status
+    await db["connections"].update_one(
+        {"_id": ObjectId(request_id)},
+        {"$set": {"status": decision, "responded_at": datetime.utcnow()}}
+    )
+
+    if decision == "accepted":
+        sender_id = connection["sender_id"]
+        receiver_id = connection["receiver_id"]
+
+        # Add each user to the other's "connections" list
+        await db["users"].update_one(
+            {"_id": ObjectId(sender_id)},
+            {"$addToSet": {"connections": receiver_id}}
+        )
+        await db["users"].update_one(
+            {"_id": ObjectId(receiver_id)},
+            {"$addToSet": {"connections": sender_id}}
+        )
+
+    return {"status": "success", "message": f"Connection {decision}"}
+
+
+
+@router.get("/user_connections")
+def get_user_connections(user_id: str, db=Depends(get_db)):
+    try:
+        user = db["users"].find_one({"_id": ObjectId(user_id)})
+        if not user or "connections" not in user:
+            return {"connections": []}
+
+        connection_ids = user["connections"]
+
+        connected_users_cursor = db["users"].find({
+            "_id": {"$in": [ObjectId(uid) for uid in connection_ids]}
+        })
+
+        connected_users = list(connected_users_cursor)
+
+        emails = list({
+            user_doc.get("email")
+            for user_doc in connected_users
+            if str(user_doc["_id"]) != user_id
+        })
+
+        return {"connections": emails}
+
+    except Exception as e:
+        print("Error fetching user connections:", e)
+        return JSONResponse(status_code=500, content={"connections": []})
+
+
+
+
+@router.post("/connections/{request_id}/accept", status_code=200)
+async def accept_connection(request_id: str, db=Depends(get_db)):
+    connection = db["connections"].find_one({"_id": ObjectId(request_id)})
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection request not found")
+
+    # Update the connection status
+    db["connections"].update_one(
+        {"_id": ObjectId(request_id)},
+        {"$set": {"status": "accepted", "responded_at": datetime.utcnow()}}
+    )
+
+    # Add each user to the other's connections list
+    db["users"].update_one(
+        {"_id": ObjectId(connection["receiver_id"])},
+        {"$addToSet": {"connections": ObjectId(connection["sender_id"])}}
+    )
+    db["users"].update_one(
+        {"_id": ObjectId(connection["sender_id"])},
+        {"$addToSet": {"connections": ObjectId(connection["receiver_id"])}}
+    )
+
+    return {"status": "success", "message": "Connection accepted"}
+
+
+@router.post("/connections/{request_id}/reject", status_code=200)
+async def reject_connection(request_id: str, db=Depends(get_db)):
+    connection = await db["connections"].find_one({"_id": ObjectId(request_id)})
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection request not found")
+
+    await db["connections"].update_one(
+        {"_id": ObjectId(request_id)},
+        {"$set": {"status": "rejected", "responded_at": datetime.utcnow()}}
+    )
+
+    return {"status": "success", "message": "Connection rejected"}

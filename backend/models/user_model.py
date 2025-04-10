@@ -62,6 +62,7 @@ class UserModel(BaseModel):
             "updated_at": now
         }
         
+        
         # Add optional fields if provided
         if bio:
             user_data["bio"] = bio
@@ -419,6 +420,17 @@ class UserModel(BaseModel):
             "company_matches": company_matches,
             "total_potential_connections": len(participant_details)
         }
+
+    @classmethod
+    def get_sync_collection(cls):
+        from controller.database import db_instance
+        return db_instance[cls.collection_name]
+
+    @classmethod
+    def get_user_by_id_sync(cls, user_id: str) -> dict:
+        collection = cls.get_sync_collection()
+        return collection.find_one({"_id": ObjectId(user_id)})
+
     
     @classmethod
     async def get_all_speakers(cls) -> List[Dict]:
@@ -437,3 +449,14 @@ class UserModel(BaseModel):
         except Exception as e:
             print(f"[UserModel.get_all_speakers ERROR] {e}")
             raise
+
+    
+    @classmethod
+    async def get_all_users(cls) -> List[Dict]:
+        users = await cls.find_many({})
+        for user in users:
+            if "_id" in user:
+                user["id"] = str(user["_id"])
+        return users
+
+
