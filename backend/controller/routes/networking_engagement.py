@@ -109,10 +109,17 @@ class QuestionCreate(BaseModel):
 
 @router.post("/questions", status_code=status.HTTP_201_CREATED)
 async def create_question_endpoint(question: QuestionCreate, db=Depends(get_db)):
-    new_question_id = await FeedbackModel.create_question(db, question.user_id, question.session_id, question.question)
+    user = await UserModel.get_user_by_id(question.user_id)
+    if not user or user.get("role") != "organizer":
+        raise HTTPException(status_code=403, detail="Only organizers can post questions")
+
+    new_question_id = await FeedbackModel.create_question(
+        db, question.user_id, question.session_id, question.question
+    )
     if not new_question_id:
         raise HTTPException(status_code=400, detail="Failed to create question")
     return {"question_id": str(new_question_id)}
+
 
 @router.get("/questions/{session_id}", status_code=status.HTTP_200_OK)
 async def list_questions_endpoint(session_id: str, db=Depends(get_db)):
@@ -121,10 +128,16 @@ async def list_questions_endpoint(session_id: str, db=Depends(get_db)):
 
 @router.post("/questions/{question_id}/answer", status_code=status.HTTP_200_OK)
 async def answer_question_endpoint(question_id: str, answer: dict, db=Depends(get_db)):
-    updated_question = await FeedbackModel.answer_question(db, question_id, answer.get("answer_text"))
-    if not updated_question:
-        raise HTTPException(status_code=404, detail="Question not found or answer failed")
-    return updated_question
+    user = await UserModel.get_user_by_id(answer.get("user_id"))
+    if not user or user.get("role") != "attendee":
+        raise HTTPException(status_code=403, detail="Only attendees can answer questions")
+
+    result = await FeedbackModel.answer_question(
+        db, question_id, answer.get("user_id"), answer.get("answer_text")
+    )
+    if not result or result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Failed to add answer")
+    return {"status": "success", "message": "Answer added"}
 
 # --------------------- Matchmaking and Itinerary Endpoints ---------------------
 @router.get("/matchmaking", status_code=status.HTTP_200_OK)

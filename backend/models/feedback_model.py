@@ -74,28 +74,35 @@ class FeedbackModel(BaseModel):
         return str(feedback_id)
     
     @classmethod
-    async def create_question(cls, db, user_id: str, session_id: str, question_text: str) -> str:
-        """
-        Create a new question entry.
-        
-        Args:
-            db: Database session/connection reference.
-            user_id: ID of the user asking the question.
-            session_id: Session ID (or event ID) associated with the question.
-            question_text: The text of the question.
-        
-        Returns:
-            str: ID of the created question.
-        """
-        question_data = {
+    async def create_question(cls, db, user_id, session_id, question_text):
+        doc = {
             "user_id": user_id,
             "session_id": session_id,
             "question": question_text,
-            "created_at": datetime.now(timezone.utc),
-            "answer": None  # Initially unanswered
+            "answers": [],  # 👈 NEW
+            "created_at": datetime.utcnow()
         }
-        question_id = await cls.insert_one(question_data)
-        return str(question_id)
+        result = db["questions"].insert_one(doc)
+        return result.inserted_id
+
+    @classmethod
+    async def get_questions_for_session(cls, db, session_id):
+        return list(db["questions"].find({"session_id": session_id}))
+
+    @classmethod
+    async def answer_question(cls, db, question_id, user_id, answer_text):
+        return db["questions"].update_one(
+            {"_id": ObjectId(question_id)},
+            {
+                "$push": {
+                    "answers": {
+                        "user_id": user_id,
+                        "text": answer_text,
+                        "timestamp": datetime.utcnow()
+                    }
+                }
+            }
+        )
     
     @classmethod
     async def get_questions_for_session(cls, db, session_id: str) -> List[Dict]:

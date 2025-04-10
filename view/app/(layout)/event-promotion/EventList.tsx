@@ -32,7 +32,8 @@ export default function EventList({ onSelectEvent }: EventListProps) {
       });
 
       const data = await res.json();
-      setEvents(data);
+      console.log("Fetched:", data);
+      setEvents(data.events || []); // ✅ FIXED
     };
 
     fetchOrganizerEvents();
